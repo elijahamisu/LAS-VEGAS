@@ -22,6 +22,7 @@ export default defineConfig({
         gift_code: resolve(__dirname, 'gift-code.html'),
         notifications: resolve(__dirname, 'notifications.html'),
         profile: resolve(__dirname, 'profile.html'),
+        support: resolve(__dirname, 'support.html'),
       }
     }
   }
