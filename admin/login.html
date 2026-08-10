@@ -1,0 +1,257 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Admin Login | LAS VEGAS Control Center</title>
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display&family=Quicksand:wght@400;500;600;700&display=swap" rel="stylesheet">
+    
+    <style>
+        :root {
+            --primary-magenta: #FF007F;
+            --primary-magenta-dark: #E60072;
+            --secondary-green: #006400;
+            --bg-soft-white: #FFF5F7;
+            --card-white: #FFFFFF;
+            --text-main: #1A1A1A;
+            --text-muted: #666666;
+            --border-pink: #FFD1E3;
+            --admin-dark: #121212;
+            --shadow-premium: 0 20px 50px rgba(0, 0, 0, 0.1);
+            --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+        
+        body {
+            margin: 0; padding: 0;
+            font-family: 'Quicksand', sans-serif;
+            background-color: var(--admin-dark);
+            background-image: radial-gradient(rgba(255, 0, 127, 0.1) 1px, transparent 1px);
+            background-size: 40px 40px;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .login-container {
+            width: 100%;
+            max-width: 420px;
+            perspective: 1000px;
+        }
+
+        .login-card {
+            background: var(--card-white);
+            border-radius: 30px;
+            padding: 45px 35px;
+            box-shadow: var(--shadow-premium);
+            border: 1px solid var(--border-pink);
+            position: relative;
+            overflow: hidden;
+            animation: cardIn 0.8s ease-out;
+        }
+
+        @keyframes cardIn {
+            from { opacity: 0; transform: translateY(30px) rotateX(-5deg); }
+            to { opacity: 1; transform: translateY(0) rotateX(0); }
+        }
+
+        /* --- LOGO --- */
+        .admin-brand { text-align: center; margin-bottom: 35px; }
+        .logo-mark {
+            width: 50px; height: 50px; margin: 0 auto 15px; position: relative;
+            display: flex; align-items: center; justify-content: center;
+        }
+        .swoosh { position: absolute; border-radius: 40% 60% 70% 30% / 40% 50% 60% 50%; }
+        .s-m { width: 100%; height: 100%; border: 4px solid var(--primary-magenta); transform: rotate(-15deg); }
+        .s-g { width: 75%; height: 75%; border: 3px solid var(--secondary-green); transform: rotate(20deg); }
+        
+        .brand-name { font-family: 'DM Serif Display', serif; font-size: 26px; color: var(--text-main); margin: 0; letter-spacing: 1px; }
+        .brand-tag { font-size: 10px; text-transform: uppercase; letter-spacing: 4px; color: var(--primary-magenta); font-weight: 800; margin-top: 5px; display: block; }
+
+        /* --- FORM --- */
+        .form-group { margin-bottom: 22px; }
+        .label { display: block; font-size: 12px; font-weight: 800; color: var(--text-muted); text-transform: uppercase; margin-bottom: 8px; letter-spacing: 1px; }
+        
+        .input-field {
+            width: 100%; padding: 16px 20px; border-radius: 15px;
+            border: 1px solid var(--border-pink); font-family: inherit;
+            font-size: 15px; font-weight: 600; background: #FFF9FB;
+            outline: none; transition: var(--transition);
+        }
+        .input-field:focus { border-color: var(--primary-magenta); background: white; box-shadow: 0 0 0 5px rgba(255, 0, 127, 0.05); }
+
+        .btn-signin {
+            width: 100%; padding: 18px; border-radius: 50px;
+            background: var(--admin-dark); color: white; border: none;
+            font-size: 15px; font-weight: 700; cursor: pointer;
+            transition: var(--transition); margin-top: 10px;
+            letter-spacing: 1px;
+        }
+        .btn-signin:hover { background: var(--primary-magenta); transform: translateY(-2px); box-shadow: 0 10px 20px rgba(255, 0, 127, 0.2); }
+        .btn-signin:disabled { background: #ccc; cursor: not-allowed; transform: none; box-shadow: none; }
+
+        /* --- STATUS --- */
+        .security-badge {
+            display: flex; align-items: center; justify-content: center; gap: 8px;
+            font-size: 10px; font-weight: 800; color: var(--secondary-green);
+            margin-top: 30px; text-transform: uppercase; opacity: 0.8;
+        }
+        .dot { width: 6px; height: 6px; background: var(--secondary-green); border-radius: 50%; animation: pulse 2s infinite; }
+        @keyframes pulse { 0% { opacity: 1; } 50% { opacity: 0.3; } 100% { opacity: 1; } }
+
+        .error-box {
+            background: #FFF0F0; color: #D00000; padding: 15px; border-radius: 12px;
+            font-size: 13px; font-weight: 600; margin-bottom: 20px; border: 1px solid #FFCACA;
+            display: none; text-align: center; animation: shake 0.4s ease-in-out;
+        }
+        @keyframes shake { 0%, 100% { transform: translateX(0); } 25% { transform: translateX(-5px); } 75% { transform: translateX(5px); } }
+
+        /* --- ACCESS DENIED --- */
+        #denied-screen { display: none; text-align: center; }
+        .denied-icon { font-size: 50px; margin-bottom: 20px; display: block; }
+    </style>
+</head>
+<body>
+
+    <div class="login-container">
+        <!-- Main Login Card -->
+        <main class="login-card" id="login-card">
+            <div class="admin-brand">
+                <div class="logo-mark">
+                    <div class="swoosh s-m"></div>
+                    <div class="swoosh s-g"></div>
+                </div>
+                <h1 class="brand-name">LAS VEGAS</h1>
+                <span class="brand-tag">Admin Control Center</span>
+            </div>
+
+            <div id="error-msg" class="error-box"></div>
+
+            <form id="admin-login-form">
+                <div class="form-group">
+                    <label class="label">Admin Email</label>
+                    <input type="email" id="email" class="input-field" placeholder="admin@lasvegas.com" required autocomplete="email">
+                </div>
+                <div class="form-group">
+                    <label class="label">Secure Password</label>
+                    <input type="password" id="password" class="input-field" placeholder="••••••••" required autocomplete="current-password">
+                </div>
+                <button type="submit" id="submit-btn" class="btn-signin">SIGN IN TO PANEL</button>
+            </form>
+
+            <div class="security-badge">
+                <div class="dot"></div>
+                Secure Administrator Access
+            </div>
+        </main>
+
+        <!-- Access Denied Screen -->
+        <main class="login-card" id="denied-screen">
+            <span class="denied-icon">🚫</span>
+            <h2 class="brand-name" style="color: #D00000;">Access Denied</h2>
+            <p style="color: var(--text-muted); font-size: 14px; line-height: 1.6; margin: 15px 0 25px 0;">
+                Your account does not have administrator privileges. This attempt has been logged for security.
+            </p>
+            <button class="btn-signin" onclick="window.location.reload()">RETURN TO LOGIN</button>
+        </main>
+    </div>
+
+    <script type="module">
+        import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm'
+
+        const supabase = createClient(import.meta.env.VITE_SUPABASE_URL, import.meta.env.VITE_SUPABASE_ANON_KEY);
+
+        const AdminLogin = {
+            async init() {
+                // Check if already logged in as admin
+                const { data: { session } } = await supabase.auth.getSession();
+                if (session) {
+                    const isAdmin = await this.checkAdminRole(session.user.id);
+                    if (isAdmin) window.location.href = 'index.html';
+                }
+
+                this.setupForm();
+            },
+
+            setupForm() {
+                const form = document.getElementById('admin-login-form');
+                form.onsubmit = (e) => {
+                    e.preventDefault();
+                    this.handleLogin();
+                };
+            },
+
+            async handleLogin() {
+                const email = document.getElementById('email').value.trim();
+                const password = document.getElementById('password').value;
+                const btn = document.getElementById('submit-btn');
+                const errorEl = document.getElementById('error-msg');
+
+                btn.disabled = true;
+                btn.innerText = "VERIFYING...";
+                errorEl.style.display = 'none';
+
+                try {
+                    // 1. Auth check
+                    const { data, error } = await supabase.auth.signInWithPassword({ email, password });
+                    if (error) throw new Error("Invalid administrator credentials.");
+
+                    // 2. Authorization check (Is the user actually an admin?)
+                    const isAdmin = await this.checkAdminRole(data.user.id);
+
+                    if (!isAdmin) {
+                        // Log unauthorized attempt and sign out
+                        await supabase.from('admin_audit_logs').insert({
+                            admin_id: data.user.id,
+                            action: 'UNAUTHORIZED_LOGIN_ATTEMPT',
+                            details: { email: email }
+                        });
+                        await supabase.auth.signOut();
+                        this.showDenied();
+                        return;
+                    }
+
+                    // 3. Success - Log and Redirect
+                    await supabase.from('admin_audit_logs').insert({
+                        admin_id: data.user.id,
+                        action: 'ADMIN_LOGIN_SUCCESS'
+                    });
+
+                    btn.innerText = "ACCESS GRANTED...";
+                    setTimeout(() => window.location.href = 'index.html', 800);
+
+                } catch (e) {
+                    errorEl.innerText = e.message;
+                    errorEl.style.display = 'block';
+                    btn.disabled = false;
+                    btn.innerText = "SIGN IN TO PANEL";
+                }
+            },
+
+            async checkAdminRole(userId) {
+                const { data, error } = await supabase
+                    .from('profiles')
+                    .select('is_admin')
+                    .eq('id', userId)
+                    .single();
+
+                if (error || !data) return false;
+                return data.is_admin === true;
+            },
+
+            showDenied() {
+                document.getElementById('login-card').style.display = 'none';
+                document.getElementById('denied-screen').style.display = 'block';
+            }
+        };
+
+        document.addEventListener('DOMContentLoaded', () => AdminLogin.init());
+    </script>
+</body>
+</html>
