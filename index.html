@@ -1,0 +1,408 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>LAS VEGAS | Premium Investment & Rewards</title>
+    <!-- Fonts: Serif for Brand, Rounded Sans for UI -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display&family=Quicksand:wght@400;500;600;700&display=swap" rel="stylesheet">
+    
+    <style>
+        /* 
+        LAS VEGAS GLOBAL DESIGN TOKENS
+        */
+        :root {
+            --primary-magenta: #FF007F;
+            --primary-magenta-dark: #E60072;
+            --secondary-green: #006400;
+            --secondary-green-light: #008000;
+            --bg-soft-white: #FFF5F7;
+            --card-white: #FFFFFF;
+            --text-main: #1A1A1A;
+            --text-muted: #666666;
+            --border-pink: #FFD1E3;
+            --shadow-soft: 0 4px 20px rgba(255, 0, 127, 0.08);
+            --transition: all 0.3s ease;
+        }
+
+        * {
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: 'Quicksand', sans-serif;
+            background-color: var(--bg-soft-white);
+            color: var(--text-main);
+            background-image: radial-gradient(var(--border-pink) 0.5px, transparent 0.5px);
+            background-size: 20px 20px; /* Subtle dot pattern */
+            line-height: 1.6;
+            overflow-x: hidden;
+        }
+
+        h1, h2, h3, .brand-font {
+            font-family: 'DM Serif Display', serif;
+            font-weight: 400;
+        }
+
+        /* 
+        LOGO SYSTEM
+        */
+        .logo-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .logo-mark {
+            position: relative;
+            width: 50px;
+            height: 50px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .swoosh-magenta {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            border: 4px solid var(--primary-magenta);
+            border-radius: 40% 60% 70% 30% / 40% 50% 60% 50%;
+            transform: rotate(-15deg);
+        }
+
+        .swoosh-green {
+            position: absolute;
+            width: 80%;
+            height: 80%;
+            border: 3px solid var(--secondary-green);
+            border-radius: 60% 40% 30% 70% / 50% 60% 40% 50%;
+            transform: rotate(20deg);
+        }
+
+        .star-accent {
+            color: var(--primary-magenta);
+            font-size: 14px;
+            position: absolute;
+            top: -5px;
+            right: -5px;
+            animation: twinkle 2s infinite ease-in-out;
+        }
+
+        @keyframes twinkle {
+            0%, 100% { opacity: 1; transform: scale(1); }
+            50% { opacity: 0.5; transform: scale(0.8); }
+        }
+
+        .brand-title {
+            font-size: 28px;
+            color: var(--primary-magenta);
+            letter-spacing: 1px;
+            margin: 5px 0 0 0;
+            text-transform: uppercase;
+        }
+
+        .brand-tagline {
+            font-size: 10px;
+            text-transform: uppercase;
+            letter-spacing: 4px;
+            color: var(--secondary-green);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-weight: 700;
+        }
+
+        .brand-tagline::before, .brand-tagline::after {
+            content: "";
+            height: 1px;
+            width: 20px;
+            background-color: var(--secondary-green);
+            opacity: 0.3;
+        }
+
+        /* 
+        BUTTON SYSTEM
+        */
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            padding: 14px 28px;
+            border-radius: 50px;
+            font-weight: 700;
+            font-size: 16px;
+            cursor: pointer;
+            transition: var(--transition);
+            border: none;
+            width: 100%;
+            max-width: 320px;
+            text-decoration: none;
+            gap: 8px;
+        }
+
+        .btn-primary {
+            background-color: var(--primary-magenta);
+            color: white;
+            box-shadow: 0 4px 15px rgba(255, 0, 127, 0.2);
+        }
+
+        .btn-primary:active {
+            transform: scale(0.97);
+            background-color: var(--primary-magenta-dark);
+        }
+
+        .btn-secondary {
+            background-color: transparent;
+            color: var(--secondary-green);
+            border: 2px solid var(--secondary-green);
+        }
+
+        .btn:disabled {
+            background-color: #e0e0e0;
+            color: #999;
+            cursor: not-allowed;
+            box-shadow: none;
+        }
+
+        /* 
+        CARD SYSTEM
+        */
+        .card {
+            background: var(--card-white);
+            border: 1px solid var(--border-pink);
+            border-radius: 20px;
+            padding: 24px;
+            box-shadow: var(--shadow-soft);
+            margin-bottom: 20px;
+        }
+
+        /* 
+        FINANCIAL SUMMARY BANNERS
+        */
+        .stat-banner {
+            display: flex;
+            align-items: center;
+            padding: 16px;
+            background: var(--card-white);
+            border-radius: 100px;
+            border: 1px solid var(--border-pink);
+            margin-bottom: 12px;
+            gap: 15px;
+        }
+
+        .stat-icon {
+            width: 45px;
+            height: 45px;
+            background: var(--bg-soft-white);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--primary-magenta);
+        }
+
+        .stat-content {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .stat-label {
+            font-size: 10px;
+            text-transform: uppercase;
+            font-weight: 700;
+            color: var(--text-muted);
+            letter-spacing: 0.5px;
+        }
+
+        .stat-value {
+            font-size: 20px;
+            font-weight: 700;
+            color: var(--secondary-green);
+        }
+
+        /* 
+        TABLE SYSTEM
+        */
+        .table-container {
+            width: 100%;
+            overflow-x: auto;
+            border-radius: 15px;
+            border: 1px solid var(--border-pink);
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            background: white;
+            min-width: 500px;
+        }
+
+        thead {
+            background-color: var(--primary-magenta);
+            color: white;
+        }
+
+        th {
+            padding: 15px;
+            text-align: left;
+            font-size: 12px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        td {
+            padding: 15px;
+            border-bottom: 1px solid var(--bg-soft-white);
+            font-size: 14px;
+        }
+
+        tr:nth-child(even) {
+            background-color: #FFF9FB;
+        }
+
+        .val-positive {
+            color: var(--secondary-green);
+            font-weight: 700;
+        }
+
+        /* 
+        MOBILE-FIRST UTILITIES
+        */
+        .container {
+            width: 100%;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .flex-center {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+        }
+
+        @media (min-width: 768px) {
+            .btn { width: auto; }
+            .stats-grid {
+                display: grid;
+                grid-template-columns: repeat(2, 1fr);
+                gap: 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <!-- Logo Section -->
+        <header class="flex-center" style="margin-top: 40px; margin-bottom: 60px;">
+            <div class="logo-container">
+                <div class="logo-mark">
+                    <div class="swoosh-magenta"></div>
+                    <div class="swoosh-green"></div>
+                    <div class="star-accent">✦</div>
+                </div>
+                <h1 class="brand-title">LAS VEGAS</h1>
+                <div class="brand-tagline">Premium Rewards</div>
+            </div>
+        </header>
+
+        <!-- UI Showcase (The Design System) -->
+        <section>
+            <h2 class="brand-font" style="color: var(--primary-magenta); text-align: center; margin-bottom: 30px;">Foundation Components</h2>
+
+            <!-- Stats Showcase -->
+            <div class="stats-grid">
+                <div class="stat-banner">
+                    <div class="stat-icon">₦</div>
+                    <div class="stat-content">
+                        <span class="stat-label">Available Balance</span>
+                        <span class="stat-value">₦1,250,000.00</span>
+                    </div>
+                </div>
+                <div class="stat-banner">
+                    <div class="stat-icon">✦</div>
+                    <div class="stat-content">
+                        <span class="stat-label">Total Earnings</span>
+                        <span class="stat-value">₦450,200.00</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Card Showcase -->
+            <div class="card">
+                <h3 class="brand-font" style="margin-top: 0; color: var(--primary-magenta);">Investment Opportunity</h3>
+                <p style="color: var(--text-muted); font-size: 14px;">Start growing your wealth today with our premium low-risk plans designed for the Nigerian market.</p>
+                <div style="margin-top: 25px; display: flex; flex-direction: column; gap: 10px;">
+                    <button class="btn btn-primary" onclick="location.href='register.html'">Create Free Account</button>
+                    <button class="btn btn-secondary" onclick="location.href='login.html'">Member Login</button>
+                </div>
+            </div>
+
+            <!-- Table Showcase -->
+            <div class="table-container" style="margin-top: 30px;">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Transaction</th>
+                            <th>Date</th>
+                            <th>Amount</th>
+                            <th>Status</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td style="font-weight: 600;">Daily Reward</td>
+                            <td>Oct 24, 2024</td>
+                            <td class="val-positive">+₦500.00</td>
+                            <td style="color: var(--primary-magenta); font-weight: 700;">Success</td>
+                        </tr>
+                        <tr>
+                            <td style="font-weight: 600;">Investment Payout</td>
+                            <td>Oct 23, 2024</td>
+                            <td class="val-positive">+₦12,500.00</td>
+                            <td style="color: var(--primary-magenta); font-weight: 700;">Success</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </section>
+    </div>
+
+    <script type="module">
+        // Initializing Supabase Connection Foundation
+        import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm'
+
+        const supabaseUrl = import.meta.env.VITE_SUPABASE_URL
+        const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY
+
+        // Global Las Vegas App State
+        const LasVegas = {
+            supabase: (supabaseUrl && supabaseAnonKey) ? createClient(supabaseUrl, supabaseAnonKey) : null,
+            
+            init() {
+                console.log("🎰 LAS VEGAS Foundation Initialized");
+                this.checkSession();
+            },
+
+            async checkSession() {
+                if (!this.supabase) return;
+                const { data: { session } } = await this.supabase.auth.getSession();
+                if (session) {
+                    console.log("User is authenticated");
+                }
+            }
+        };
+
+        document.addEventListener('DOMContentLoaded', () => LasVegas.init());
+    </script>
+</body>
+</html>
