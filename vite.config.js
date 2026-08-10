@@ -11,6 +11,7 @@ export default defineConfig({
         register: resolve(__dirname, 'register.html'),
         dashboard: resolve(__dirname, 'dashboard.html'),
         plans: resolve(__dirname, 'plans.html'),
+        investment: resolve(__dirname, 'investment.html'),
       }
     }
   }
