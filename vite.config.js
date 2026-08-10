@@ -19,6 +19,7 @@ export default defineConfig({
         daily_checkin: resolve(__dirname, 'daily-checkin.html'),
         transactions: resolve(__dirname, 'transactions.html'),
         referrals: resolve(__dirname, 'referrals.html'),
+        gift_code: resolve(__dirname, 'gift-code.html'),
       }
     }
   }
