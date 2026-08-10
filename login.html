@@ -1,0 +1,299 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Login | LAS VEGAS Premium Rewards</title>
+    
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display&family=Quicksand:wght@400;500;600;700&display=swap" rel="stylesheet">
+    
+    <style>
+        :root {
+            --primary-magenta: #FF007F;
+            --primary-magenta-dark: #E60072;
+            --secondary-green: #006400;
+            --secondary-green-light: #008000;
+            --bg-soft-white: #FFF5F7;
+            --card-white: #FFFFFF;
+            --text-main: #1A1A1A;
+            --text-muted: #666666;
+            --border-pink: #FFD1E3;
+            --shadow-soft: 0 10px 40px rgba(255, 0, 127, 0.08);
+            --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+        
+        body {
+            margin: 0; padding: 0;
+            font-family: 'Quicksand', sans-serif;
+            background-color: var(--bg-soft-white);
+            color: var(--text-main);
+            background-image: radial-gradient(var(--border-pink) 0.8px, transparent 0.8px);
+            background-size: 24px 24px;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        /* --- LOGO SYSTEM --- */
+        .brand-header {
+            text-align: center;
+            margin-bottom: 30px;
+            animation: fadeInDown 0.6s ease-out;
+        }
+        .logo-mark {
+            position: relative; width: 50px; height: 50px; margin: 0 auto 10px;
+            display: flex; align-items: center; justify-content: center;
+        }
+        .swoosh-m { position: absolute; width: 100%; height: 100%; border: 4px solid var(--primary-magenta); border-radius: 40% 60% 70% 30% / 40% 50% 60% 50%; transform: rotate(-15deg); }
+        .swoosh-g { position: absolute; width: 70%; height: 70%; border: 3px solid var(--secondary-green); border-radius: 60% 40% 30% 70% / 50% 60% 40% 50%; transform: rotate(20deg); }
+        .star { position: absolute; top: -5px; right: -5px; color: var(--primary-magenta); font-size: 16px; animation: twinkle 2s infinite; }
+        
+        .brand-title { font-family: 'DM Serif Display', serif; font-size: 28px; color: var(--primary-magenta); margin: 0; letter-spacing: 1px; }
+        .brand-tagline { font-size: 10px; text-transform: uppercase; letter-spacing: 3px; color: var(--secondary-green); font-weight: 700; display: flex; align-items: center; justify-content: center; gap: 8px; }
+        .brand-tagline::before, .brand-tagline::after { content: ""; height: 1px; width: 15px; background: var(--secondary-green); opacity: 0.3; }
+
+        /* --- LOGIN CARD --- */
+        .login-card {
+            background: var(--card-white);
+            width: 100%;
+            max-width: 420px;
+            padding: 40px 30px;
+            border-radius: 30px;
+            border: 1px solid var(--border-pink);
+            box-shadow: var(--shadow-soft);
+            animation: fadeInUp 0.6s ease-out;
+        }
+
+        .card-header { text-align: center; margin-bottom: 30px; }
+        .card-header h2 { font-family: 'DM Serif Display', serif; font-size: 24px; margin: 0 0 8px 0; color: var(--text-main); }
+        .card-header p { font-size: 14px; color: var(--text-muted); margin: 0; }
+
+        /* --- FORM ELEMENTS --- */
+        .form-group { margin-bottom: 20px; position: relative; }
+        .form-label { display: block; font-size: 13px; font-weight: 700; color: var(--primary-magenta); margin-bottom: 8px; text-transform: uppercase; letter-spacing: 0.5px; }
+        
+        .input-wrapper { position: relative; }
+        .form-input {
+            width: 100%;
+            padding: 14px 18px;
+            border-radius: 12px;
+            border: 1px solid var(--border-pink);
+            background: #FFF9FB;
+            font-family: 'Quicksand', sans-serif;
+            font-size: 15px;
+            font-weight: 500;
+            transition: var(--transition);
+            outline: none;
+        }
+        .form-input:focus { border-color: var(--primary-magenta); box-shadow: 0 0 0 4px rgba(255, 0, 127, 0.05); background: white; }
+        
+        .password-toggle {
+            position: absolute; right: 14px; top: 50%; transform: translateY(-50%);
+            background: none; border: none; cursor: pointer; color: var(--text-muted); padding: 5px;
+            display: flex; align-items: center; justify-content: center;
+        }
+
+        /* --- BUTTONS --- */
+        .btn-login {
+            width: 100%;
+            padding: 16px;
+            background: var(--primary-magenta);
+            color: white;
+            border: none;
+            border-radius: 50px;
+            font-size: 16px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: var(--transition);
+            margin-top: 10px;
+            box-shadow: 0 4px 15px rgba(255, 0, 127, 0.2);
+        }
+        .btn-login:hover { background: var(--primary-magenta-dark); transform: translateY(-1px); }
+        .btn-login:active { transform: translateY(0); }
+        .btn-login:disabled { background: #ccc; cursor: not-allowed; box-shadow: none; }
+
+        /* --- STATUS MESSAGES --- */
+        #error-msg {
+            background: #FFF0F0;
+            color: #D00000;
+            padding: 12px;
+            border-radius: 10px;
+            font-size: 13px;
+            margin-bottom: 20px;
+            display: none;
+            align-items: center;
+            gap: 8px;
+            border: 1px solid #FFCACA;
+            animation: shake 0.4s ease-in-out;
+        }
+
+        /* --- FOOTER LINKS --- */
+        .auth-footer { text-align: center; margin-top: 25px; font-size: 14px; }
+        .auth-footer a { color: var(--primary-magenta); font-weight: 700; text-decoration: none; }
+        .back-home { margin-top: 30px; text-align: center; }
+        .back-home a { color: var(--text-muted); text-decoration: none; font-size: 13px; font-weight: 600; display: flex; align-items: center; justify-content: center; gap: 6px; transition: var(--transition); }
+        .back-home a:hover { color: var(--primary-magenta); }
+
+        /* --- ANIMATIONS --- */
+        @keyframes fadeInUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+        @keyframes fadeInDown { from { opacity: 0; transform: translateY(-20px); } to { opacity: 1; transform: translateY(0); } }
+        @keyframes twinkle { 0%, 100% { opacity: 1; transform: scale(1); } 50% { opacity: 0.5; transform: scale(0.8); } }
+        @keyframes shake { 0%, 100% { transform: translateX(0); } 25% { transform: translateX(-5px); } 75% { transform: translateX(5px); } }
+
+        /* --- DESKTOP ENHANCEMENT --- */
+        @media (min-width: 1024px) {
+            body { flex-direction: row; gap: 100px; justify-content: center; }
+            .brand-header { text-align: left; margin-bottom: 0; max-width: 350px; }
+            .brand-tagline { justify-content: flex-start; }
+            .desktop-info { display: block; margin-top: 30px; color: var(--text-muted); font-size: 16px; }
+        }
+        @media (max-width: 1023px) { .desktop-info { display: none; } }
+    </style>
+</head>
+<body>
+
+    <header class="brand-header">
+        <a href="index.html" style="text-decoration: none;">
+            <div class="logo-mark">
+                <div class="swoosh-m"></div>
+                <div class="swoosh-g"></div>
+                <div class="star">✦</div>
+            </div>
+            <h1 class="brand-title">LAS VEGAS</h1>
+            <div class="brand-tagline">Premium Rewards</div>
+        </a>
+        <div class="desktop-info">
+            <h2 class="brand-font" style="color: var(--text-main); font-size: 32px; margin-bottom: 15px;">Smart Investing. Daily Rewards.</h2>
+            <p>Access your dashboard to track your investments, claim daily rewards, and manage your wallet seamlessly.</p>
+        </div>
+    </header>
+
+    <main class="login-card">
+        <div class="card-header">
+            <h2>Welcome Back</h2>
+            <p>Sign in to continue to your account</p>
+        </div>
+
+        <div id="error-msg" aria-live="polite"></div>
+
+        <form id="login-form">
+            <div class="form-group">
+                <label class="form-label" for="email">Email Address</label>
+                <div class="input-wrapper">
+                    <input class="form-input" type="email" id="email" placeholder="Enter your email" required autocomplete="email">
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label class="form-label" for="password">Password</label>
+                <div class="input-wrapper">
+                    <input class="form-input" type="password" id="password" placeholder="••••••••" required autocomplete="current-password">
+                    <button type="button" class="password-toggle" id="eye-toggle" aria-label="Toggle password visibility">
+                        <svg id="eye-icon" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+                    </button>
+                </div>
+            </div>
+
+            <button type="submit" class="btn-login" id="submit-btn">LOGIN</button>
+        </form>
+
+        <div class="auth-footer">
+            Don't have an account? <a href="register.html">Create Account</a>
+        </div>
+
+        <div class="back-home">
+            <a href="index.html">← Back to LAS VEGAS</a>
+        </div>
+    </main>
+
+    <script type="module">
+        import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm'
+
+        // Configuration
+        const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
+        const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
+        const supabase = createClient(supabaseUrl, supabaseAnonKey);
+
+        // DOM Elements
+        const loginForm = document.getElementById('login-form');
+        const emailInput = document.getElementById('email');
+        const passwordInput = document.getElementById('password');
+        const submitBtn = document.getElementById('submit-btn');
+        const errorMsg = document.getElementById('error-msg');
+        const eyeToggle = document.getElementById('eye-toggle');
+        const eyeIcon = document.getElementById('eye-icon');
+
+        // Initial Auth Check
+        async function checkSession() {
+            const { data: { session } } = await supabase.auth.getSession();
+            if (session) {
+                window.location.href = 'dashboard.html';
+            }
+        }
+
+        // Password Visibility Toggle
+        eyeToggle.addEventListener('click', () => {
+            const type = passwordInput.getAttribute('type') === 'password' ? 'text' : 'password';
+            passwordInput.setAttribute('type', type);
+            
+            // Toggle icon visual state
+            if (type === 'text') {
+                eyeIcon.innerHTML = '<path d="M17.94 17.94A10.07 10.07 0 0112 20c-7 0-11-8-11-8a18.45 18.45 0 015.06-5.94M9.9 4.24A9.12 9.12 0 0112 4c7 0 11 8 11 8a18.5 18.5 0 01-2.16 3.19m-6.72-1.07a3 3 0 11-4.24-4.24"></path><line x1="1" y1="1" x2="23" y2="23"></line>';
+            } else {
+                eyeIcon.innerHTML = '<path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/>';
+            }
+        });
+
+        // Login Handler
+        loginForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const email = emailInput.value.trim();
+            const password = passwordInput.value;
+
+            // Reset UI
+            errorMsg.style.display = 'none';
+            submitBtn.disabled = true;
+            submitBtn.innerText = 'Signing in...';
+
+            try {
+                const { data, error } = await supabase.auth.signInWithPassword({
+                    email,
+                    password
+                });
+
+                if (error) throw error;
+
+                if (data.session) {
+                    submitBtn.innerText = 'Success! Redirecting...';
+                    window.location.href = 'dashboard.html';
+                }
+
+            } catch (err) {
+                console.error('Login error:', err.message);
+                errorMsg.style.display = 'flex';
+                errorMsg.innerText = getFriendlyErrorMessage(err.message);
+                submitBtn.disabled = false;
+                submitBtn.innerText = 'LOGIN';
+            }
+        });
+
+        function getFriendlyErrorMessage(msg) {
+            if (msg.includes('Invalid login credentials')) return 'Invalid email or password.';
+            if (msg.includes('Email not confirmed')) return 'Please verify your email address.';
+            return msg;
+        }
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', checkSession);
+    </script>
+</body>
+</html>
