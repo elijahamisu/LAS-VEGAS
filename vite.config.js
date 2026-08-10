@@ -25,6 +25,8 @@ export default defineConfig({
         support: resolve(__dirname, 'support.html'),
         // Admin Entry
         admin_login: resolve(__dirname, 'admin/login.html'),
+        admin_dashboard: resolve(__dirname, 'admin/index.html'),
+        admin_users: resolve(__dirname, 'admin/users.html'),
       }
     }
   }
