@@ -12,6 +12,7 @@ export default defineConfig({
         dashboard: resolve(__dirname, 'dashboard.html'),
         plans: resolve(__dirname, 'plans.html'),
         investment: resolve(__dirname, 'investment.html'),
+        wallet: resolve(__dirname, 'wallet.html'),
       }
     }
   }
