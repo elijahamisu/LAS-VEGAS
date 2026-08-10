@@ -1,0 +1,324 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Investment Plans | LAS VEGAS</title>
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display&family=Quicksand:wght@400;500;600;700&display=swap" rel="stylesheet">
+    
+    <style>
+        :root {
+            --primary-magenta: #FF007F;
+            --primary-magenta-dark: #E60072;
+            --secondary-green: #006400;
+            --secondary-green-light: #008000;
+            --bg-soft-white: #FFF5F7;
+            --card-white: #FFFFFF;
+            --text-main: #1A1A1A;
+            --text-muted: #666666;
+            --border-pink: #FFD1E3;
+            --nav-black: #121212;
+            --shadow-soft: 0 4px 20px rgba(255, 0, 127, 0.06);
+            --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+        
+        body {
+            margin: 0; padding: 0;
+            font-family: 'Quicksand', sans-serif;
+            background-color: var(--bg-soft-white);
+            color: var(--text-main);
+            background-image: radial-gradient(var(--border-pink) 0.5px, transparent 0.5px);
+            background-size: 30px 30px;
+            min-height: 100vh;
+            padding-bottom: 100px;
+        }
+
+        /* --- LAYOUT --- */
+        .plans-container { max-width: 1200px; margin: 0 auto; padding: 20px; }
+        
+        /* --- HEADER & TITLES --- */
+        .page-header { margin-bottom: 30px; padding-top: 20px; }
+        .page-header h1 { font-family: 'DM Serif Display', serif; font-size: 28px; margin: 0; color: var(--text-main); }
+        .page-header p { font-size: 15px; color: var(--text-muted); margin: 8px 0 0 0; max-width: 500px; }
+        .brand-accent { color: var(--primary-magenta); font-size: 14px; margin-left: 5px; }
+
+        /* --- PLAN GRID --- */
+        .plan-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 20px; }
+
+        /* --- PLAN CARD --- */
+        .plan-card {
+            background: var(--card-white);
+            border-radius: 25px; border: 1px solid var(--border-pink);
+            padding: 25px; box-shadow: var(--shadow-soft);
+            transition: var(--transition); display: flex; flex-direction: column;
+            position: relative; overflow: hidden;
+        }
+        .plan-card:hover { transform: translateY(-5px); border-color: var(--primary-magenta); }
+        .plan-card::before { content: "★"; position: absolute; right: -10px; top: -10px; font-size: 60px; color: var(--primary-magenta); opacity: 0.05; }
+
+        .plan-title { font-family: 'DM Serif Display', serif; font-size: 20px; color: var(--primary-magenta); margin: 0 0 20px 0; display: flex; align-items: center; gap: 8px; }
+        .plan-stat { display: flex; justify-content: space-between; align-items: center; padding: 12px 0; border-bottom: 1px dashed var(--border-pink); }
+        .plan-stat:last-of-type { border-bottom: none; margin-bottom: 15px; }
+        .stat-label { font-size: 13px; font-weight: 700; color: var(--text-muted); }
+        .stat-value { font-size: 15px; font-weight: 700; color: var(--secondary-green); }
+
+        /* --- BUTTONS --- */
+        .btn-group { display: grid; grid-template-columns: 1fr 1.2fr; gap: 10px; margin-top: auto; }
+        .btn { padding: 14px; border-radius: 12px; font-weight: 700; font-size: 13px; cursor: pointer; border: none; transition: var(--transition); text-decoration: none; text-align: center; }
+        .btn-outline { background: white; color: var(--primary-magenta); border: 1px solid var(--primary-magenta); }
+        .btn-primary { background: var(--primary-magenta); color: white; box-shadow: 0 4px 12px rgba(255, 0, 127, 0.2); }
+        .btn:active { transform: scale(0.98); }
+        .btn-locked { background: #f0f0f0; color: #999; cursor: not-allowed; border: none; box-shadow: none; }
+
+        /* --- TABLE SYSTEM --- */
+        .table-section { margin-top: 50px; }
+        .table-container { width: 100%; overflow-x: auto; border-radius: 20px; border: 1px solid var(--border-pink); background: white; box-shadow: var(--shadow-soft); }
+        table { width: 100%; border-collapse: collapse; min-width: 700px; }
+        thead { background: var(--primary-magenta); color: white; }
+        th { padding: 15px 20px; text-align: left; font-size: 12px; text-transform: uppercase; letter-spacing: 1px; }
+        td { padding: 18px 20px; font-size: 14px; border-bottom: 1px solid var(--bg-soft-white); }
+        tr:nth-child(even) { background: #FFF9FB; }
+        .badge-circle { width: 30px; height: 30px; background: white; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; color: var(--primary-magenta); font-weight: 800; margin-right: 10px; }
+
+        /* --- MODAL --- */
+        .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); backdrop-filter: blur(5px); z-index: 3000; display: none; align-items: center; justify-content: center; padding: 20px; }
+        .modal-card { background: white; width: 100%; max-width: 500px; border-radius: 30px; padding: 30px; position: relative; animation: modalIn 0.3s ease-out; }
+        .modal-close { position: absolute; top: 20px; right: 20px; font-size: 24px; cursor: pointer; color: var(--text-muted); }
+        @keyframes modalIn { from { opacity: 0; transform: translateY(30px); } to { opacity: 1; transform: translateY(0); } }
+
+        /* --- SIDEBAR & NAV --- */
+        .sidebar { position: fixed; top: 0; left: -100%; width: 280px; height: 100%; background: white; z-index: 2500; transition: var(--transition); padding: 30px; box-shadow: 10px 0 40px rgba(0,0,0,0.1); }
+        .sidebar.active { left: 0; }
+        .sidebar-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 2400; display: none; }
+        .nav-island { position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%); background: var(--nav-black); height: 65px; width: 90%; max-width: 400px; border-radius: 100px; display: flex; justify-content: space-around; align-items: center; z-index: 2000; }
+        .nav-item { color: #666; text-decoration: none; font-size: 10px; font-weight: 700; text-align: center; }
+        .nav-item.active { color: var(--primary-magenta); }
+
+        /* --- SKELETON --- */
+        .skeleton { background: linear-gradient(90deg, #f0f0f0 25%, #f8f8f8 50%, #f0f0f0 75%); background-size: 200% 100%; animation: loading 1.5s infinite; border-radius: 10px; }
+        @keyframes loading { from { background-position: 200% 0; } to { background-position: -200% 0; } }
+
+        @media (max-width: 600px) {
+            .btn-group { grid-template-columns: 1fr; }
+            .plan-grid { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="sidebar-overlay" id="overlay"></div>
+    
+    <aside class="sidebar" id="sidebar">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 40px;">
+            <span class="brand-font" style="color: var(--primary-magenta); font-size: 22px;">LAS VEGAS</span>
+            <button id="close-sb" style="background: none; border: none; font-size: 24px;">✕</button>
+        </div>
+        <nav style="display: flex; flex-direction: column; gap: 15px;">
+            <a href="dashboard.html" style="text-decoration: none; color: var(--text-main); font-weight: 600;">🏠 Dashboard</a>
+            <a href="plans.html" style="text-decoration: none; color: var(--primary-magenta); font-weight: 700;">📈 Investment Plans</a>
+            <a href="investment.html" style="text-decoration: none; color: var(--text-main); font-weight: 600;">💰 My Investments</a>
+            <a href="wallet.html" style="text-decoration: none; color: var(--text-main); font-weight: 600;">👛 Wallet</a>
+            <a href="referrals.html" style="text-decoration: none; color: var(--text-main); font-weight: 600;">👥 Referrals</a>
+            <button id="logout-btn" style="margin-top: 20px; border: none; background: none; color: #d00000; font-weight: 700; cursor: pointer; text-align: left; padding: 0;">🚪 Logout</button>
+        </nav>
+    </aside>
+
+    <div class="plans-container">
+        <header class="page-header">
+            <div style="display: flex; justify-content: space-between; align-items: flex-start;">
+                <div>
+                    <h1>Investment Plans <span class="brand-accent">✦</span></h1>
+                    <p>Choose an available plan that matches your goals. High-yield opportunities updated daily.</p>
+                </div>
+                <button id="open-sb" style="width: 45px; height: 45px; border-radius: 50%; border: 1px solid var(--border-pink); background: white; color: var(--primary-magenta); cursor: pointer;">☰</button>
+            </div>
+        </header>
+
+        <!-- Plans Grid -->
+        <div class="plan-grid" id="plans-wrapper">
+            <!-- Skeletons -->
+            <div class="plan-card" style="height: 350px;"><div class="skeleton" style="height: 100%;"></div></div>
+            <div class="plan-card" style="height: 350px;"><div class="skeleton" style="height: 100%;"></div></div>
+            <div class="plan-card" style="height: 350px;"><div class="skeleton" style="height: 100%;"></div></div>
+        </div>
+
+        <!-- Comparison Table -->
+        <section class="table-section">
+            <div class="page-header">
+                <h2>Plan Comparison</h2>
+            </div>
+            <div class="table-container">
+                <table id="plans-table">
+                    <thead>
+                        <tr>
+                            <th>Plan Name</th>
+                            <th>Min. Invest</th>
+                            <th>Daily Profit</th>
+                            <th>Duration</th>
+                            <th>Total Return</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody id="table-body">
+                        <tr><td colspan="6" style="text-align: center; padding: 40px; color: #999;">Loading comparison data...</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </section>
+    </div>
+
+    <!-- Details Modal -->
+    <div class="modal-overlay" id="modal">
+        <div class="modal-card">
+            <span class="modal-close" id="modal-close">✕</span>
+            <h2 id="modal-title" class="plan-title">Plan Details</h2>
+            <p id="modal-desc" style="color: var(--text-muted); font-size: 14px; line-height: 1.6; margin-bottom: 25px;"></p>
+            <div id="modal-stats"></div>
+            <div style="margin-top: 30px;">
+                <button class="btn btn-primary" id="modal-invest-btn" style="width: 100%;">INVEST IN THIS PLAN</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Mobile Nav Island -->
+    <nav class="nav-island">
+        <a href="dashboard.html" class="nav-item"><div>🏠</div><span>Home</span></a>
+        <a href="plans.html" class="nav-item active"><div>📈</div><span>Plans</span></a>
+        <a href="wallet.html" class="nav-item"><div>👛</div><span>Wallet</span></a>
+        <a href="profile.html" class="nav-item"><div>👤</div><span>Profile</span></a>
+    </nav>
+
+    <script type="module">
+        import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm'
+
+        const supabase = createClient(import.meta.env.VITE_SUPABASE_URL, import.meta.env.VITE_SUPABASE_ANON_KEY);
+
+        const PlansApp = {
+            plans: [],
+            
+            async init() {
+                const { data: { session } } = await supabase.auth.getSession();
+                if (!session) return window.location.href = 'login.html';
+
+                this.setupNavigation();
+                await this.fetchPlans();
+            },
+
+            setupNavigation() {
+                const sidebar = document.getElementById('sidebar');
+                const overlay = document.getElementById('overlay');
+                
+                document.getElementById('open-sb').onclick = () => { sidebar.classList.add('active'); overlay.style.display = 'block'; };
+                document.getElementById('close-sb').onclick = () => { sidebar.classList.remove('active'); overlay.style.display = 'none'; };
+                overlay.onclick = () => { sidebar.classList.remove('active'); overlay.style.display = 'none'; };
+                
+                document.getElementById('logout-btn').onclick = async () => {
+                    await supabase.auth.signOut();
+                    window.location.href = 'index.html';
+                };
+
+                document.getElementById('modal-close').onclick = () => document.getElementById('modal').style.display = 'none';
+            },
+
+            async fetchPlans() {
+                try {
+                    const { data, error } = await supabase
+                        .from('plans')
+                        .select('*')
+                        .eq('is_active', true)
+                        .order('min_amount', { ascending: true });
+
+                    if (error) throw error;
+                    this.plans = data || [];
+                    this.renderUI();
+                } catch (e) {
+                    document.getElementById('plans-wrapper').innerHTML = `<div style="grid-column: 1/-1; text-align: center; padding: 40px;">Unable to load plans. Please try again.</div>`;
+                }
+            },
+
+            formatNGN(amt) {
+                return new Intl.NumberFormat('en-NG', { style: 'currency', currency: 'NGN' }).format(amt);
+            },
+
+            renderUI() {
+                const wrapper = document.getElementById('plans-wrapper');
+                const tbody = document.getElementById('table-body');
+
+                if (this.plans.length === 0) {
+                    wrapper.innerHTML = '<div style="grid-column: 1/-1; text-align: center; padding: 60px;">No active plans available right now.</div>';
+                    tbody.innerHTML = '<tr><td colspan="6" style="text-align: center; padding: 20px;">No data.</td></tr>';
+                    return;
+                }
+
+                // Render Cards
+                wrapper.innerHTML = this.plans.map(plan => `
+                    <div class="plan-card">
+                        <h3 class="plan-title"><span>✦</span> ${plan.name}</h3>
+                        <div class="plan-stat">
+                            <span class="stat-label">Min. Investment</span>
+                            <span class="stat-value">${this.formatNGN(plan.min_amount)}</span>
+                        </div>
+                        <div class="plan-stat">
+                            <span class="stat-label">Daily Profit</span>
+                            <span class="stat-value">${plan.daily_percent}%</span>
+                        </div>
+                        <div class="plan-stat">
+                            <span class="stat-label">Duration</span>
+                            <span class="stat-value">${plan.duration_days} Days</span>
+                        </div>
+                        <div class="plan-stat">
+                            <span class="stat-label">Total Return</span>
+                            <span class="stat-value">${plan.daily_percent * plan.duration_days}%</span>
+                        </div>
+                        <div class="btn-group">
+                            <button class="btn btn-outline" onclick="window.PlansApp.showDetails('${plan.id}')">DETAILS</button>
+                            <button class="btn btn-primary" onclick="window.PlansApp.invest('${plan.id}')">INVEST NOW</button>
+                        </div>
+                    </div>
+                `).join('');
+
+                // Render Table
+                tbody.innerHTML = this.plans.map(plan => `
+                    <tr>
+                        <td style="font-weight: 700; color: var(--primary-magenta);"><span class="badge-circle">P</span> ${plan.name}</td>
+                        <td style="font-weight: 700; color: var(--secondary-green);">${this.formatNGN(plan.min_amount)}</td>
+                        <td>${plan.daily_percent}%</td>
+                        <td>${plan.duration_days} Days</td>
+                        <td style="font-weight: 700; color: var(--secondary-green);">${this.formatNGN(plan.min_amount * (1 + (plan.daily_percent * plan.duration_days / 100)))}</td>
+                        <td><button class="btn btn-primary" style="padding: 8px 15px;" onclick="window.PlansApp.invest('${plan.id}')">INVEST</button></td>
+                    </tr>
+                `).join('');
+            },
+
+            showDetails(id) {
+                const plan = this.plans.find(p => p.id === id);
+                if (!plan) return;
+
+                document.getElementById('modal-title').innerText = plan.name;
+                document.getElementById('modal-desc').innerText = plan.description || `Premium high-yield investment plan with ${plan.daily_percent}% daily returns over ${plan.duration_days} days. Secure your financial future with LAS VEGAS.`;
+                
+                document.getElementById('modal-stats').innerHTML = `
+                    <div class="plan-stat"><span class="stat-label">Min. Investment</span><span class="stat-value">${this.formatNGN(plan.min_amount)}</span></div>
+                    <div class="plan-stat"><span class="stat-label">Daily Return</span><span class="stat-value">${plan.daily_percent}%</span></div>
+                    <div class="plan-stat"><span class="stat-label">Duration</span><span class="stat-value">${plan.duration_days} Days</span></div>
+                `;
+
+                document.getElementById('modal-invest-btn').onclick = () => this.invest(plan.id);
+                document.getElementById('modal').style.display = 'flex';
+            },
+
+            invest(id) {
+                window.location.href = `investment.html?plan=${id}`;
+            }
+        };
+
+        window.PlansApp = PlansApp;
+        document.addEventListener('DOMContentLoaded', () => PlansApp.init());
+    </script>
+</body>
+</html>
