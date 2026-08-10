@@ -1,0 +1,391 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Transactions | LAS VEGAS</title>
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display&family=Quicksand:wght@400;500;600;700&display=swap" rel="stylesheet">
+    
+    <style>
+        :root {
+            --primary-magenta: #FF007F;
+            --primary-magenta-dark: #E60072;
+            --secondary-green: #006400;
+            --secondary-green-light: #008000;
+            --bg-soft-white: #FFF5F7;
+            --card-white: #FFFFFF;
+            --text-main: #1A1A1A;
+            --text-muted: #666666;
+            --border-pink: #FFD1E3;
+            --nav-black: #121212;
+            --shadow-soft: 0 4px 20px rgba(255, 0, 127, 0.06);
+            --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+        
+        body {
+            margin: 0; padding: 0;
+            font-family: 'Quicksand', sans-serif;
+            background-color: var(--bg-soft-white);
+            color: var(--text-main);
+            background-image: radial-gradient(var(--border-pink) 0.5px, transparent 0.5px);
+            background-size: 30px 30px;
+            min-height: 100vh;
+            padding-bottom: 110px;
+        }
+
+        .container { max-width: 1200px; margin: 0 auto; padding: 20px; }
+
+        /* --- HEADER --- */
+        .page-header { margin-bottom: 25px; padding-top: 10px; display: flex; justify-content: space-between; align-items: flex-start; }
+        .page-header h1 { font-family: 'DM Serif Display', serif; font-size: 28px; margin: 0; color: var(--text-main); }
+        .page-header p { font-size: 14px; color: var(--text-muted); margin: 5px 0 0 0; }
+
+        /* --- SUMMARY CARDS --- */
+        .summary-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px; margin-bottom: 25px; }
+        @media (min-width: 768px) { .summary-grid { grid-template-columns: repeat(4, 1fr); } }
+        .summary-card { background: white; padding: 20px; border-radius: 20px; border: 1px solid var(--border-pink); box-shadow: var(--shadow-soft); }
+        .summary-card span { font-size: 10px; text-transform: uppercase; font-weight: 700; color: var(--text-muted); display: block; margin-bottom: 5px; }
+        .summary-card b { font-size: 18px; color: var(--secondary-green); display: block; }
+        .summary-card.primary b { color: var(--primary-magenta); }
+
+        /* --- FILTERS & SEARCH --- */
+        .filter-section { background: white; padding: 20px; border-radius: 25px; border: 1px solid var(--border-pink); margin-bottom: 25px; display: grid; gap: 15px; }
+        .search-box { position: relative; }
+        .search-input { width: 100%; padding: 12px 15px 12px 40px; border-radius: 12px; border: 1px solid var(--border-pink); font-family: inherit; font-size: 14px; outline: none; }
+        .search-icon { position: absolute; left: 15px; top: 50%; transform: translateY(-50%); color: var(--text-muted); }
+        
+        .filter-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+        .filter-select { padding: 12px; border-radius: 12px; border: 1px solid var(--border-pink); font-family: inherit; font-size: 14px; background: white; outline: none; }
+        @media (min-width: 768px) {
+            .filter-section { grid-template-columns: 2fr 1fr 1fr; }
+            .filter-grid { display: contents; }
+        }
+
+        /* --- TRANSACTION TABLE (Desktop) --- */
+        .table-container { background: white; border-radius: 25px; border: 1px solid var(--border-pink); overflow: hidden; box-shadow: var(--shadow-soft); display: none; }
+        table { width: 100%; border-collapse: collapse; }
+        thead { background: var(--primary-magenta); color: white; }
+        th { padding: 15px 20px; text-align: left; font-size: 12px; text-transform: uppercase; letter-spacing: 1px; }
+        td { padding: 18px 20px; font-size: 14px; border-bottom: 1px solid var(--bg-soft-white); }
+        tr:nth-child(even) { background: #FFF9FB; }
+        @media (min-width: 768px) { .table-container { display: block; } }
+
+        /* --- TRANSACTION CARDS (Mobile) --- */
+        .mobile-list { display: grid; gap: 12px; }
+        @media (min-width: 768px) { .mobile-list { display: none; } }
+        .tx-card { background: white; padding: 20px; border-radius: 20px; border: 1px solid var(--border-pink); box-shadow: var(--shadow-soft); display: flex; justify-content: space-between; align-items: center; }
+        .tx-left h4 { margin: 0; font-size: 15px; font-weight: 700; color: var(--text-main); }
+        .tx-left span { font-size: 11px; color: var(--text-muted); display: block; margin-top: 4px; }
+        .tx-right { text-align: right; }
+        .tx-amount { font-weight: 700; font-size: 16px; }
+        .status-pill { font-size: 9px; font-weight: 800; padding: 3px 8px; border-radius: 50px; text-transform: uppercase; margin-top: 5px; display: inline-block; }
+
+        /* --- UTILS --- */
+        .pos { color: var(--secondary-green); }
+        .neg { color: var(--primary-magenta); }
+        .status-SUCCESS, .status-COMPLETED, .status-CREDITED { background: #F0FFF4; color: var(--secondary-green); }
+        .status-PENDING, .status-PROCESSING { background: #FFF9E6; color: #D4A017; }
+        .status-FAILED, .status-REJECTED { background: #FFF0F0; color: #D00000; }
+
+        /* --- MODAL --- */
+        .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); backdrop-filter: blur(5px); z-index: 3000; display: none; align-items: center; justify-content: center; padding: 20px; }
+        .modal-card { background: white; width: 100%; max-width: 450px; border-radius: 30px; padding: 30px; animation: modalIn 0.3s ease-out; }
+        @keyframes modalIn { from { opacity: 0; transform: scale(0.95); } to { opacity: 1; transform: scale(1); } }
+        .modal-row { display: flex; justify-content: space-between; margin-bottom: 15px; font-size: 14px; border-bottom: 1px solid #f9f9f9; padding-bottom: 10px; }
+        .modal-label { color: var(--text-muted); font-weight: 600; }
+        .modal-val { font-weight: 700; text-align: right; }
+        .copy-trigger { color: var(--primary-magenta); cursor: pointer; margin-left: 8px; font-size: 12px; }
+
+        /* --- NAV --- */
+        .nav-island { position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%); background: var(--nav-black); height: 65px; width: 92%; max-width: 400px; border-radius: 100px; display: flex; justify-content: space-around; align-items: center; z-index: 1000; }
+        .nav-item { color: #666; text-decoration: none; font-size: 10px; font-weight: 700; display: flex; flex-direction: column; align-items: center; gap: 4px; }
+        .nav-item.active { color: var(--primary-magenta); }
+
+        .sidebar { position: fixed; top: 0; left: -100%; width: 280px; height: 100%; background: white; z-index: 2000; transition: var(--transition); padding: 30px; }
+        .sidebar.active { left: 0; }
+        .sb-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 1500; display: none; }
+
+        .skeleton-row { height: 60px; background: #f0f0f0; margin-bottom: 10px; border-radius: 15px; animation: pulse 1.5s infinite; }
+        @keyframes pulse { 0% { opacity: 0.6; } 50% { opacity: 1; } 100% { opacity: 0.6; } }
+    </style>
+</head>
+<body>
+
+    <div class="sb-overlay" id="overlay"></div>
+    <aside class="sidebar" id="sidebar">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 40px;">
+            <span class="brand-font" style="color: var(--primary-magenta); font-size: 24px;">LAS VEGAS</span>
+            <button id="close-sb" style="background: none; border: none; font-size: 24px;">✕</button>
+        </div>
+        <nav style="display: flex; flex-direction: column; gap: 15px;">
+            <a href="dashboard.html" style="text-decoration: none; color: var(--text-main); font-weight: 600;">🏠 Dashboard</a>
+            <a href="wallet.html" style="text-decoration: none; color: var(--text-main); font-weight: 600;">👛 Wallet</a>
+            <a href="transactions.html" style="text-decoration: none; color: var(--primary-magenta); font-weight: 700;">📜 Transactions</a>
+            <a href="plans.html" style="text-decoration: none; color: var(--text-main); font-weight: 600;">📈 Plans</a>
+            <button id="logout-btn" style="margin-top: 30px; text-align: left; border: none; background: none; color: #d00000; font-weight: 700; cursor: pointer;">🚪 Logout</button>
+        </nav>
+    </aside>
+
+    <div class="container">
+        <header class="page-header">
+            <div>
+                <h1>Transactions</h1>
+                <p>Comprehensive history of your wallet activity.</p>
+            </div>
+            <button id="open-sb" style="width:45px; height:45px; border-radius:50%; border:1px solid var(--border-pink); background:white; color:var(--primary-magenta);">☰</button>
+        </header>
+
+        <!-- Summary -->
+        <div class="summary-grid">
+            <div class="summary-card primary">
+                <span>Available</span>
+                <b id="sum-balance">₦0.00</b>
+            </div>
+            <div class="summary-card">
+                <span>Deposits</span>
+                <b id="sum-deposits">₦0.00</b>
+            </div>
+            <div class="summary-card">
+                <span>Withdrawals</span>
+                <b id="sum-withdraws">₦0.00</b>
+            </div>
+            <div class="summary-card">
+                <span>Total Earned</span>
+                <b id="sum-earned">₦0.00</b>
+            </div>
+        </div>
+
+        <!-- Filters -->
+        <div class="filter-section">
+            <div class="search-box">
+                <span class="search-icon">🔍</span>
+                <input type="text" id="search-input" class="search-input" placeholder="Search reference or type...">
+            </div>
+            <div class="filter-grid">
+                <select id="filter-type" class="filter-select">
+                    <option value="ALL">All Types</option>
+                    <option value="DEPOSIT">Deposits</option>
+                    <option value="WITHDRAWAL">Withdrawals</option>
+                    <option value="INVESTMENT">Investments</option>
+                    <option value="EARNING">Earnings</option>
+                    <option value="CHECKIN">Daily Check-in</option>
+                </select>
+                <select id="filter-status" class="filter-select">
+                    <option value="ALL">All Status</option>
+                    <option value="SUCCESS">Success</option>
+                    <option value="PENDING">Pending</option>
+                    <option value="FAILED">Failed</option>
+                </select>
+            </div>
+        </div>
+
+        <!-- Desktop Table -->
+        <div class="table-container">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Date</th>
+                        <th>Reference</th>
+                        <th>Type</th>
+                        <th>Amount</th>
+                        <th>Status</th>
+                    </tr>
+                </thead>
+                <tbody id="table-body">
+                    <!-- JS generated -->
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Mobile List -->
+        <div class="mobile-list" id="mobile-list">
+            <!-- JS generated -->
+        </div>
+
+        <!-- Pagination -->
+        <div style="margin-top: 30px; display: flex; justify-content: center; gap: 10px;">
+            <button class="filter-select" id="prev-page" style="cursor:pointer;">Previous</button>
+            <button class="filter-select" id="next-page" style="cursor:pointer;">Next</button>
+        </div>
+    </div>
+
+    <!-- Modal Detail -->
+    <div class="modal-overlay" id="detail-modal">
+        <div class="modal-card">
+            <h3 class="brand-font" style="color:var(--primary-magenta); margin-top:0;">Transaction Details</h3>
+            <div id="modal-content"></div>
+            <button class="btn-submit" style="width:100%; padding:15px; border-radius:50px; background:var(--primary-magenta); color:white; border:none; font-weight:700; margin-top:20px; cursor:pointer;" onclick="document.getElementById('detail-modal').style.display='none'">CLOSE</button>
+        </div>
+    </div>
+
+    <!-- Nav Island -->
+    <nav class="nav-island">
+        <a href="dashboard.html" class="nav-item"><span>🏠</span><span>Home</span></a>
+        <a href="plans.html" class="nav-item"><span>📈</span><span>Plans</span></a>
+        <a href="wallet.html" class="nav-item"><span>👛</span><span>Wallet</span></a>
+        <a href="transactions.html" class="nav-item active"><span>📜</span><span>Ledger</span></a>
+    </nav>
+
+    <script type="module">
+        import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm'
+
+        const supabase = createClient(import.meta.env.VITE_SUPABASE_URL, import.meta.env.VITE_SUPABASE_ANON_KEY);
+
+        const LedgerApp = {
+            user: null,
+            page: 0,
+            pageSize: 10,
+            filters: { type: 'ALL', status: 'ALL', search: '' },
+
+            async init() {
+                const { data: { session } } = await supabase.auth.getSession();
+                if (!session) return window.location.href = 'login.html';
+                this.user = session.user;
+
+                this.setupUI();
+                await this.loadSummary();
+                await this.fetchTransactions();
+            },
+
+            setupUI() {
+                const sb = document.getElementById('sidebar');
+                const ov = document.getElementById('overlay');
+                document.getElementById('open-sb').onclick = () => { sb.classList.add('active'); ov.style.display = 'block'; };
+                document.getElementById('close-sb').onclick = () => { sb.classList.remove('active'); ov.style.display = 'none'; };
+                ov.onclick = () => { sb.classList.remove('active'); ov.style.display = 'none'; };
+                
+                document.getElementById('logout-btn').onclick = async () => {
+                    await supabase.auth.signOut();
+                    window.location.href = 'index.html';
+                };
+
+                // Filter events
+                document.getElementById('filter-type').onchange = (e) => { this.filters.type = e.target.value; this.page = 0; this.fetchTransactions(); };
+                document.getElementById('filter-status').onchange = (e) => { this.filters.status = e.target.value; this.page = 0; this.fetchTransactions(); };
+                document.getElementById('search-input').oninput = (e) => { this.filters.search = e.target.value; this.page = 0; this.fetchTransactions(); };
+                
+                document.getElementById('next-page').onclick = () => { this.page++; this.fetchTransactions(); };
+                document.getElementById('prev-page').onclick = () => { if(this.page > 0) { this.page--; this.fetchTransactions(); } };
+            },
+
+            async loadSummary() {
+                const { data: wallet } = await supabase.from('wallets').select('*').eq('user_id', this.user.id).single();
+                if (wallet) {
+                    document.getElementById('sum-balance').innerText = this.formatCurrency(wallet.balance);
+                    document.getElementById('sum-deposits').innerText = this.formatCurrency(wallet.total_deposited);
+                    document.getElementById('sum-withdraws').innerText = this.formatCurrency(wallet.total_withdrawn);
+                    document.getElementById('sum-earned').innerText = this.formatCurrency(wallet.total_earned);
+                }
+            },
+
+            async fetchTransactions() {
+                this.renderLoading();
+                
+                let query = supabase.from('transactions').select('*', { count: 'exact' }).eq('user_id', this.user.id);
+
+                if (this.filters.type !== 'ALL') query = query.eq('type', this.filters.type);
+                if (this.filters.status !== 'ALL') query = query.eq('status', this.filters.status);
+                if (this.filters.search) query = query.or(`description.ilike.%${this.filters.search}%,type.ilike.%${this.filters.search}%`);
+
+                const { data, count, error } = await query
+                    .order('created_at', { ascending: false })
+                    .range(this.page * this.pageSize, (this.page + 1) * this.pageSize - 1);
+
+                if (error) {
+                    console.error(error);
+                    return;
+                }
+
+                this.renderData(data);
+                
+                document.getElementById('prev-page').disabled = this.page === 0;
+                document.getElementById('next-page').disabled = (this.page + 1) * this.pageSize >= count;
+            },
+
+            renderLoading() {
+                const loader = '<div class="skeleton-row"></div>'.repeat(5);
+                document.getElementById('table-body').innerHTML = loader;
+                document.getElementById('mobile-list').innerHTML = loader;
+            },
+
+            renderData(data) {
+                const tbody = document.getElementById('table-body');
+                const mList = document.getElementById('mobile-list');
+
+                if (!data || data.length === 0) {
+                    const empty = '<div style="text-align:center; padding:40px; color:#999;">No matching transactions found.</div>';
+                    tbody.innerHTML = `<tr><td colspan="5">${empty}</td></tr>`;
+                    mList.innerHTML = empty;
+                    return;
+                }
+
+                const rows = data.map(tx => {
+                    const isPos = tx.amount > 0;
+                    const date = new Date(tx.created_at).toLocaleDateString();
+                    const ref = `LV-${tx.id.split('-')[0].toUpperCase()}`;
+                    
+                    return {
+                        html: `
+                            <tr onclick="window.LedgerApp.showDetails('${tx.id}')" style="cursor:pointer;">
+                                <td>${date}</td>
+                                <td style="font-family:monospace; font-weight:700;">${ref}</td>
+                                <td style="font-weight:700; color:var(--primary-magenta);">${tx.type}</td>
+                                <td class="${isPos ? 'pos' : 'neg'}" style="font-weight:700;">${isPos ? '+' : ''}${this.formatCurrency(tx.amount)}</td>
+                                <td><span class="status-pill status-${tx.status}">${tx.status}</span></td>
+                            </tr>
+                        `,
+                        mobile: `
+                            <div class="tx-card" onclick="window.LedgerApp.showDetails('${tx.id}')">
+                                <div class="tx-left">
+                                    <h4>${tx.type.replace('_', ' ')}</h4>
+                                    <span>${date} • Ref: ${ref}</span>
+                                </div>
+                                <div class="tx-right">
+                                    <span class="tx-amount ${isPos ? 'pos' : 'neg'}">${isPos ? '+' : ''}${this.formatCurrency(tx.amount)}</span>
+                                    <br><span class="status-pill status-${tx.status}">${tx.status}</span>
+                                </div>
+                            </div>
+                        `,
+                        raw: tx,
+                        ref: ref
+                    };
+                });
+
+                tbody.innerHTML = rows.map(r => r.html).join('');
+                mList.innerHTML = rows.map(r => r.mobile).join('');
+                this.cachedData = rows;
+            },
+
+            showDetails(id) {
+                const tx = this.cachedData.find(r => r.raw.id === id);
+                if (!tx) return;
+                
+                const data = tx.raw;
+                const isPos = data.amount > 0;
+
+                document.getElementById('modal-content').innerHTML = `
+                    <div class="modal-row"><span class="modal-label">Reference</span><span class="modal-val">${tx.ref} <span class="copy-trigger" onclick="navigator.clipboard.writeText('${tx.ref}'); alert('Copied!')">📋</span></span></div>
+                    <div class="modal-row"><span class="modal-label">Type</span><span class="modal-val">${data.type}</span></div>
+                    <div class="modal-row"><span class="modal-label">Amount</span><span class="modal-val ${isPos ? 'pos' : 'neg'}">${isPos ? '+' : ''}${this.formatCurrency(data.amount)}</span></div>
+                    <div class="modal-row"><span class="modal-label">Status</span><span class="modal-val status-pill status-${data.status}" style="display:inline-block">${data.status}</span></div>
+                    <div class="modal-row"><span class="modal-label">Description</span><span class="modal-val">${data.description || 'No description available'}</span></div>
+                    <div class="modal-row"><span class="modal-label">Date</span><span class="modal-val">${new Date(data.created_at).toLocaleString()}</span></div>
+                `;
+                document.getElementById('detail-modal').style.display = 'flex';
+            },
+
+            formatCurrency(val) {
+                return new Intl.NumberFormat('en-NG', { style: 'currency', currency: 'NGN' }).format(val);
+            }
+        };
+
+        window.LedgerApp = LedgerApp;
+        document.addEventListener('DOMContentLoaded', () => LedgerApp.init());
+    </script>
+</body>
+</html>
