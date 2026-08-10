@@ -1,0 +1,394 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Withdraw Funds | LAS VEGAS</title>
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display&family=Quicksand:wght@400;500;600;700&display=swap" rel="stylesheet">
+    
+    <style>
+        :root {
+            --primary-magenta: #FF007F;
+            --primary-magenta-dark: #E60072;
+            --secondary-green: #006400;
+            --secondary-green-light: #008000;
+            --bg-soft-white: #FFF5F7;
+            --card-white: #FFFFFF;
+            --text-main: #1A1A1A;
+            --text-muted: #666666;
+            --border-pink: #FFD1E3;
+            --nav-black: #121212;
+            --shadow-soft: 0 4px 20px rgba(255, 0, 127, 0.06);
+            --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+        
+        body {
+            margin: 0; padding: 0;
+            font-family: 'Quicksand', sans-serif;
+            background-color: var(--bg-soft-white);
+            color: var(--text-main);
+            background-image: radial-gradient(var(--border-pink) 0.5px, transparent 0.5px);
+            background-size: 30px 30px;
+            min-height: 100vh;
+            padding-bottom: 110px;
+        }
+
+        .container { max-width: 1200px; margin: 0 auto; padding: 20px; }
+
+        /* --- HEADER --- */
+        .page-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 25px; padding-top: 10px; }
+        .page-header h1 { font-family: 'DM Serif Display', serif; font-size: 28px; margin: 0; color: var(--text-main); }
+        .page-header p { font-size: 14px; color: var(--text-muted); margin: 5px 0 0 0; }
+        .secure-indicator { display: inline-flex; align-items: center; gap: 6px; font-size: 11px; font-weight: 700; color: var(--secondary-green); background: #F0FFF4; padding: 5px 12px; border-radius: 50px; margin-top: 10px; }
+
+        /* --- LAYOUT --- */
+        .withdraw-grid { display: grid; grid-template-columns: 1fr; gap: 20px; }
+        @media (min-width: 1024px) { .withdraw-grid { grid-template-columns: 1.5fr 1fr; } }
+
+        /* --- CARDS --- */
+        .card { background: white; border-radius: 25px; border: 1px solid var(--border-pink); padding: 25px; box-shadow: var(--shadow-soft); }
+        .card-title { font-family: 'DM Serif Display', serif; font-size: 18px; color: var(--primary-magenta); margin: 0 0 20px 0; border-bottom: 1px solid var(--bg-soft-white); padding-bottom: 10px; }
+
+        /* --- BALANCE CARD --- */
+        .balance-hero { background: #1a000d; color: white; padding: 25px; border-radius: 25px; margin-bottom: 25px; display: flex; justify-content: space-between; align-items: center; }
+        .balance-hero span { font-size: 11px; text-transform: uppercase; letter-spacing: 1.5px; opacity: 0.7; font-weight: 700; }
+        .balance-hero h2 { margin: 5px 0 0 0; font-size: 28px; color: var(--primary-magenta); }
+
+        /* --- FORM --- */
+        .form-group { margin-bottom: 20px; }
+        .input-label { display: block; font-size: 12px; font-weight: 700; color: var(--text-main); margin-bottom: 8px; text-transform: uppercase; }
+        .amount-wrapper { position: relative; display: flex; align-items: center; }
+        .currency { position: absolute; left: 15px; font-weight: 700; font-size: 18px; }
+        .amount-input { width: 100%; padding: 16px 16px 16px 40px; border-radius: 15px; border: 1px solid var(--border-pink); font-family: inherit; font-size: 20px; font-weight: 700; background: #FFF9FB; outline: none; transition: var(--transition); }
+        .amount-input:focus { border-color: var(--primary-magenta); background: white; }
+
+        /* --- SUMMARY --- */
+        .summary-box { background: #FFF9FB; border-radius: 20px; padding: 20px; border: 1px dashed var(--border-pink); margin: 20px 0; }
+        .summary-item { display: flex; justify-content: space-between; margin-bottom: 10px; font-size: 14px; }
+        .summary-item.total { border-top: 1px solid var(--border-pink); margin-top: 10px; padding-top: 10px; font-weight: 700; font-size: 16px; color: var(--secondary-green); }
+
+        /* --- ACCOUNT SELECTION --- */
+        .account-box { border: 1px solid var(--border-pink); border-radius: 15px; padding: 15px; display: flex; align-items: center; gap: 15px; margin-bottom: 15px; cursor: pointer; transition: var(--transition); }
+        .account-box.active { border-color: var(--primary-magenta); background: #FFF9FB; }
+        .account-icon { width: 40px; height: 40px; background: white; border-radius: 10px; border: 1px solid var(--border-pink); display: flex; align-items: center; justify-content: center; font-size: 18px; }
+        .account-info h4 { margin: 0; font-size: 14px; }
+        .account-info p { margin: 2px 0 0 0; font-size: 12px; color: var(--text-muted); }
+
+        /* --- BUTTONS --- */
+        .btn-submit { width: 100%; padding: 18px; border-radius: 50px; background: var(--primary-magenta); color: white; border: none; font-size: 16px; font-weight: 700; cursor: pointer; transition: var(--transition); box-shadow: 0 4px 15px rgba(255, 0, 127, 0.2); }
+        .btn-submit:disabled { background: #ccc; cursor: not-allowed; box-shadow: none; }
+
+        /* --- HISTORY --- */
+        .tx-item { display: flex; justify-content: space-between; align-items: center; padding: 15px 0; border-bottom: 1px solid #f0f0f0; }
+        .status-badge { font-size: 10px; font-weight: 800; padding: 4px 10px; border-radius: 50px; text-transform: uppercase; }
+        .status-PENDING { background: #FFF9E6; color: #D4A017; }
+        .status-COMPLETED { background: #F0FFF4; color: var(--secondary-green); }
+        .status-REJECTED { background: #FFF0F0; color: #D00000; }
+
+        /* --- MOBILE NAV --- */
+        .nav-island { position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%); background: var(--nav-black); height: 65px; width: 92%; max-width: 400px; border-radius: 100px; display: flex; justify-content: space-around; align-items: center; z-index: 1000; }
+        .nav-item { color: #666; text-decoration: none; font-size: 10px; font-weight: 700; text-align: center; }
+        .nav-item.active { color: var(--primary-magenta); }
+
+        .sidebar { position: fixed; top: 0; left: -100%; width: 280px; height: 100%; background: white; z-index: 2000; transition: var(--transition); padding: 30px; }
+        .sidebar.active { left: 0; }
+        .sb-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 1500; display: none; }
+
+        #loader { position: fixed; top:0; left:0; width:100%; height:100%; background:rgba(255,255,255,0.9); display:none; flex-direction:column; align-items:center; justify-content:center; z-index:3000; }
+        .spinner { width: 40px; height: 40px; border: 4px solid var(--border-pink); border-top-color: var(--primary-magenta); border-radius: 50%; animation: spin 1s linear infinite; }
+        @keyframes spin { to { transform: rotate(360deg); } }
+    </style>
+</head>
+<body>
+
+    <div id="loader">
+        <div class="spinner"></div>
+        <p style="margin-top:20px; font-weight:700; color:var(--primary-magenta);">Processing Request...</p>
+    </div>
+
+    <div class="sb-overlay" id="overlay"></div>
+    <aside class="sidebar" id="sidebar">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 40px;">
+            <span class="brand-font" style="color: var(--primary-magenta); font-size: 24px;">LAS VEGAS</span>
+            <button id="close-sb" style="background: none; border: none; font-size: 24px;">✕</button>
+        </div>
+        <nav style="display: flex; flex-direction: column; gap: 15px;">
+            <a href="dashboard.html" style="text-decoration: none; color: var(--text-main); font-weight: 600;">🏠 Dashboard</a>
+            <a href="wallet.html" style="text-decoration: none; color: var(--text-main); font-weight: 600;">👛 Wallet</a>
+            <a href="withdraw.html" style="text-decoration: none; color: var(--primary-magenta); font-weight: 700;">📤 Withdraw Funds</a>
+            <button id="logout-btn" style="margin-top: 30px; text-align: left; border: none; background: none; color: #d00000; font-weight: 700; cursor: pointer;">🚪 Logout</button>
+        </nav>
+    </aside>
+
+    <div class="container">
+        <header class="page-header">
+            <div>
+                <h1>Withdraw Funds</h1>
+                <p>Request a payout to your Nigerian bank account.</p>
+                <div class="secure-indicator">🔒 Admin Review Required before Disbursement</div>
+            </div>
+            <button id="open-sb" style="width:45px; height:45px; border-radius:50%; border:1px solid var(--border-pink); background:white; color:var(--primary-magenta);">☰</button>
+        </header>
+
+        <div class="balance-hero">
+            <div class="bal-text">
+                <span>Available Balance</span>
+                <h2 id="disp-balance">₦0.00</h2>
+            </div>
+            <div style="font-size: 30px;">💰</div>
+        </div>
+
+        <div class="withdraw-grid">
+            <div class="card">
+                <h3 class="card-title">Withdrawal Details</h3>
+                
+                <div class="form-group">
+                    <label class="input-label">Amount to Withdraw</label>
+                    <div class="amount-wrapper">
+                        <span class="currency">₦</span>
+                        <input type="number" id="withdraw-amount" class="amount-input" placeholder="0.00">
+                    </div>
+                    <p id="min-label" style="font-size:12px; color:var(--text-muted); margin-top:8px;">Minimum: ₦600</p>
+                </div>
+
+                <div class="summary-box">
+                    <div class="summary-item">
+                        <span>Withdrawal Amount</span>
+                        <span id="sum-amount">₦0.00</span>
+                    </div>
+                    <div class="summary-item">
+                        <span>Charge (15%)</span>
+                        <span id="sum-fee">-₦0.00</span>
+                    </div>
+                    <div class="summary-item total">
+                        <span>You will receive</span>
+                        <span id="sum-net">₦0.00</span>
+                    </div>
+                </div>
+
+                <h3 class="card-title" style="margin-top: 30px;">Select Bank Account</h3>
+                <div id="account-list">
+                    <!-- Dynamic Accounts -->
+                    <p style="font-size:13px; color:var(--text-muted);">Fetching saved accounts...</p>
+                </div>
+                <button id="add-account" style="background:none; border:none; color:var(--primary-magenta); font-weight:700; font-size:13px; cursor:pointer; margin-top:10px;">+ Add New Bank Account</button>
+
+                <div style="margin-top: 30px;">
+                    <label style="display:flex; gap:10px; font-size:12px; color:var(--text-muted); margin-bottom:20px; cursor:pointer;">
+                        <input type="checkbox" id="confirm-check">
+                        <span>I confirm that the details are correct and I accept the 15% charge.</span>
+                    </label>
+                    <button class="btn-submit" id="btn-request" disabled>REQUEST WITHDRAWAL</button>
+                </div>
+            </div>
+
+            <div class="card">
+                <h3 class="card-title">Withdrawal History</h3>
+                <div id="history-list">
+                    <p style="text-align:center; color:#999; padding:20px;">No requests found.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Mobile Nav -->
+    <nav class="nav-island">
+        <a href="dashboard.html" class="nav-item"><div>🏠</div><span>Home</span></a>
+        <a href="plans.html" class="nav-item"><div>📈</div><span>Plans</span></a>
+        <a href="wallet.html" class="nav-item active"><div>👛</div><span>Wallet</span></a>
+        <a href="profile.html" class="nav-item"><div>👤</div><span>Profile</span></a>
+    </nav>
+
+    <script type="module">
+        import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm'
+
+        const supabase = createClient(import.meta.env.VITE_SUPABASE_URL, import.meta.env.VITE_SUPABASE_ANON_KEY);
+
+        const WithdrawApp = {
+            user: null,
+            wallet: null,
+            config: { min: 600, fee: 15 },
+            selectedAccountId: null,
+
+            async init() {
+                const { data: { session } } = await supabase.auth.getSession();
+                if (!session) return window.location.href = 'login.html';
+                this.user = session.user;
+
+                this.setupNavigation();
+                await this.loadConfig();
+                await this.loadData();
+            },
+
+            setupNavigation() {
+                const sb = document.getElementById('sidebar');
+                const ov = document.getElementById('overlay');
+                document.getElementById('open-sb').onclick = () => { sb.classList.add('active'); ov.style.display = 'block'; };
+                document.getElementById('close-sb').onclick = () => { sb.classList.remove('active'); ov.style.display = 'none'; };
+                ov.onclick = () => { sb.classList.remove('active'); ov.style.display = 'none'; };
+                
+                document.getElementById('logout-btn').onclick = async () => {
+                    await supabase.auth.signOut();
+                    window.location.href = 'index.html';
+                };
+
+                const amountIn = document.getElementById('withdraw-amount');
+                const confirmCheck = document.getElementById('confirm-check');
+                const requestBtn = document.getElementById('btn-request');
+
+                const validate = () => {
+                    const amt = parseFloat(amountIn.value);
+                    const isValid = amt >= this.config.min && amt <= (this.wallet?.balance || 0) && this.selectedAccountId && confirmCheck.checked;
+                    requestBtn.disabled = !isValid;
+                    this.updateSummary(amt);
+                };
+
+                amountIn.oninput = validate;
+                confirmCheck.onchange = validate;
+                requestBtn.onclick = () => this.handleRequest();
+            },
+
+            async loadConfig() {
+                const { data } = await supabase.from('settings').select('*');
+                if (data) {
+                    const minSet = data.find(s => s.key === 'minimum_withdrawal');
+                    const feeSet = data.find(s => s.key === 'withdrawal_fee_percent');
+                    if (minSet) this.config.min = parseFloat(minSet.value);
+                    if (feeSet) this.config.fee = parseFloat(feeSet.value);
+                    
+                    document.getElementById('min-label').innerText = `Minimum: ₦${this.config.min.toLocaleString()}`;
+                }
+            },
+
+            async loadData() {
+                // 1. Wallet
+                const { data: wallet } = await supabase.from('wallets').select('*').eq('user_id', this.user.id).single();
+                this.wallet = wallet;
+                if (wallet) document.getElementById('disp-balance').innerText = `₦${Number(wallet.balance).toLocaleString()}`;
+
+                // 2. Accounts
+                const { data: accounts } = await supabase.from('withdrawal_accounts').select('*').eq('user_id', this.user.id);
+                this.renderAccounts(accounts);
+
+                // 3. History
+                const { data: history } = await supabase.from('withdrawals').select('*').eq('user_id', this.user.id).order('created_at', { ascending: false });
+                this.renderHistory(history);
+            },
+
+            renderAccounts(accounts) {
+                const list = document.getElementById('account-list');
+                if (!accounts || accounts.length === 0) {
+                    list.innerHTML = `<p style="font-size:13px; color:#d00000;">No bank accounts added. Add one to withdraw.</p>`;
+                    return;
+                }
+                list.innerHTML = accounts.map(acc => `
+                    <div class="account-box ${acc.is_default ? 'active' : ''}" onclick="window.WithdrawApp.selectAccount('${acc.id}')" id="acc-${acc.id}">
+                        <div class="account-icon">🏦</div>
+                        <div class="account-info">
+                            <h4>${acc.provider_name}</h4>
+                            <p>${acc.account_name} • ${acc.account_number.slice(-4).padStart(10, '*')}</p>
+                        </div>
+                    </div>
+                `).join('');
+                if (accounts.length > 0) this.selectAccount(accounts[0].id);
+            },
+
+            selectAccount(id) {
+                document.querySelectorAll('.account-box').forEach(b => b.classList.remove('active'));
+                const el = document.getElementById(`acc-${id}`);
+                if (el) el.classList.add('active');
+                this.selectedAccountId = id;
+            },
+
+            updateSummary(amt) {
+                if (isNaN(amt) || amt <= 0) amt = 0;
+                const fee = amt * (this.config.fee / 100);
+                const net = amt - fee;
+                document.getElementById('sum-amount').innerText = `₦${amt.toLocaleString()}`;
+                document.getElementById('sum-fee').innerText = `-₦${fee.toLocaleString()}`;
+                document.getElementById('sum-net').innerText = `₦${net.toLocaleString()}`;
+            },
+
+            renderHistory(data) {
+                const list = document.getElementById('history-list');
+                if (!data || data.length === 0) return;
+                list.innerHTML = data.map(item => `
+                    <div class="tx-item">
+                        <div>
+                            <h4 style="font-size:14px;">${this.formatCurrency(item.amount)}</h4>
+                            <span style="font-size:11px; color:#999;">${new Date(item.created_at).toLocaleDateString()}</span>
+                        </div>
+                        <div style="text-align:right;">
+                            <span class="status-badge status-${item.status}">${item.status}</span>
+                            <span style="display:block; font-size:11px; font-weight:700; color:var(--secondary-green);">Net: ${this.formatCurrency(item.net_amount)}</span>
+                        </div>
+                    </div>
+                `).join('');
+            },
+
+            async handleRequest() {
+                const amount = parseFloat(document.getElementById('withdraw-amount').value);
+                const loader = document.getElementById('loader');
+                loader.style.display = 'flex';
+
+                try {
+                    // Security Check
+                    if (amount < this.config.min) throw new Error("Below minimum withdrawal.");
+                    if (amount > this.wallet.balance) throw new Error("Insufficient balance.");
+
+                    const fee = amount * (this.config.fee / 100);
+                    const net = amount - fee;
+                    const ref = 'WD-' + Math.random().toString(36).substring(2, 10).toUpperCase();
+
+                    // Transactional Block
+                    // 1. Reserve Funds (Deduct from available)
+                    const { error: wErr } = await supabase.from('wallets')
+                        .update({ balance: this.wallet.balance - amount })
+                        .eq('user_id', this.user.id);
+                    if (wErr) throw wErr;
+
+                    // 2. Create Withdrawal Record
+                    const { error: wdErr } = await supabase.from('withdrawals').insert({
+                        user_id: this.user.id,
+                        reference: ref,
+                        amount: amount,
+                        fee: fee,
+                        net_amount: net,
+                        withdrawal_account_id: this.selectedAccountId,
+                        status: 'PENDING'
+                    });
+                    if (wdErr) throw wdErr;
+
+                    // 3. Log Transaction
+                    await supabase.from('transactions').insert({
+                        user_id: this.user.id,
+                        amount: -amount,
+                        type: 'WITHDRAWAL',
+                        status: 'PENDING',
+                        description: `Withdrawal request ${ref}`
+                    });
+
+                    alert("Withdrawal request submitted for admin review.");
+                    window.location.reload();
+
+                } catch (e) {
+                    alert(e.message);
+                    loader.style.display = 'none';
+                }
+            },
+
+            formatCurrency(val) {
+                return new Intl.NumberFormat('en-NG', { style: 'currency', currency: 'NGN' }).format(val);
+            }
+        };
+
+        window.WithdrawApp = WithdrawApp;
+        document.addEventListener('DOMContentLoaded', () => WithdrawApp.init());
+    </script>
+</body>
+</html>
