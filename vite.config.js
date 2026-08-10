@@ -17,6 +17,7 @@ export default defineConfig({
         withdraw: resolve(__dirname, 'withdraw.html'),
         earnings: resolve(__dirname, 'earnings.html'),
         daily_checkin: resolve(__dirname, 'daily-checkin.html'),
+        transactions: resolve(__dirname, 'transactions.html'),
       }
     }
   }
