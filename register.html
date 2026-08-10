@@ -1,0 +1,324 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Create Account | LAS VEGAS</title>
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display&family=Quicksand:wght@400;500;600;700&display=swap" rel="stylesheet">
+    
+    <style>
+        :root {
+            --primary-magenta: #FF007F;
+            --primary-magenta-dark: #E60072;
+            --secondary-green: #006400;
+            --secondary-green-light: #008000;
+            --bg-soft-white: #FFF5F7;
+            --card-white: #FFFFFF;
+            --text-main: #1A1A1A;
+            --text-muted: #666666;
+            --border-pink: #FFD1E3;
+            --shadow-soft: 0 10px 40px rgba(255, 0, 127, 0.08);
+            --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+        
+        body {
+            margin: 0; padding: 0;
+            font-family: 'Quicksand', sans-serif;
+            background-color: var(--bg-soft-white);
+            color: var(--text-main);
+            background-image: radial-gradient(var(--border-pink) 0.8px, transparent 0.8px);
+            background-size: 24px 24px;
+            min-height: 100vh;
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
+            padding: 40px 20px;
+        }
+
+        /* --- LOGO --- */
+        .brand-header { text-align: center; margin-bottom: 25px; }
+        .logo-mark {
+            position: relative; width: 45px; height: 45px; margin: 0 auto 10px;
+            display: flex; align-items: center; justify-content: center;
+        }
+        .swoosh-m { position: absolute; width: 100%; height: 100%; border: 3.5px solid var(--primary-magenta); border-radius: 40% 60% 70% 30% / 40% 50% 60% 50%; transform: rotate(-15deg); }
+        .swoosh-g { position: absolute; width: 70%; height: 70%; border: 2.5px solid var(--secondary-green); border-radius: 60% 40% 30% 70% / 50% 60% 40% 50%; transform: rotate(20deg); }
+        .brand-title { font-family: 'DM Serif Display', serif; font-size: 24px; color: var(--primary-magenta); margin: 0; letter-spacing: 1px; }
+        .brand-tagline { font-size: 9px; text-transform: uppercase; letter-spacing: 3px; color: var(--secondary-green); font-weight: 700; }
+
+        /* --- CARD --- */
+        .auth-card {
+            background: var(--card-white);
+            width: 100%; max-width: 480px;
+            padding: 35px; border-radius: 30px;
+            border: 1px solid var(--border-pink);
+            box-shadow: var(--shadow-soft);
+        }
+        .card-header { text-align: center; margin-bottom: 25px; }
+        .card-header h2 { font-family: 'DM Serif Display', serif; font-size: 22px; margin: 0 0 5px 0; }
+        .card-header p { font-size: 14px; color: var(--text-muted); margin: 0; }
+
+        /* --- FORMS --- */
+        .form-grid { display: grid; grid-template-columns: 1fr; gap: 15px; }
+        .form-group { position: relative; }
+        .form-label { display: block; font-size: 12px; font-weight: 700; color: var(--primary-magenta); margin-bottom: 6px; text-transform: uppercase; letter-spacing: 0.5px; }
+        .form-input {
+            width: 100%; padding: 12px 16px; border-radius: 12px;
+            border: 1px solid var(--border-pink); background: #FFF9FB;
+            font-family: inherit; font-size: 14px; outline: none; transition: var(--transition);
+        }
+        .form-input:focus { border-color: var(--primary-magenta); background: white; box-shadow: 0 0 0 4px rgba(255, 0, 127, 0.05); }
+        
+        .password-wrapper { position: relative; }
+        .eye-btn {
+            position: absolute; right: 12px; top: 50%; transform: translateY(-50%);
+            background: none; border: none; cursor: pointer; color: var(--text-muted);
+        }
+
+        /* --- PASSWORD STRENGTH --- */
+        .strength-meter { margin-top: 8px; display: flex; gap: 4px; align-items: center; }
+        .strength-dot { height: 4px; flex: 1; border-radius: 2px; background: #eee; transition: var(--transition); }
+        .strength-text { font-size: 11px; font-weight: 700; color: var(--text-muted); text-transform: uppercase; margin-left: 8px; }
+
+        /* --- TERMS --- */
+        .terms-row { display: flex; align-items: flex-start; gap: 10px; margin-top: 10px; font-size: 13px; color: var(--text-muted); cursor: pointer; }
+        .terms-row input { margin-top: 3px; accent-color: var(--primary-magenta); }
+        .terms-row a { color: var(--primary-magenta); font-weight: 700; text-decoration: none; }
+
+        /* --- BUTTONS --- */
+        .btn-submit {
+            width: 100%; padding: 16px; background: var(--primary-magenta); color: white;
+            border: none; border-radius: 50px; font-size: 15px; font-weight: 700;
+            cursor: pointer; transition: var(--transition); margin-top: 20px;
+            box-shadow: 0 4px 15px rgba(255, 0, 127, 0.2);
+        }
+        .btn-submit:disabled { background: #ccc; cursor: not-allowed; box-shadow: none; }
+        
+        .msg-box {
+            padding: 12px; border-radius: 10px; font-size: 13px; margin-bottom: 20px;
+            display: none; align-items: center; gap: 8px; border: 1px solid transparent;
+        }
+        .msg-error { background: #FFF0F0; color: #D00000; border-color: #FFCACA; }
+        .msg-success { background: #F0FFF4; color: var(--secondary-green); border-color: #C6F6D5; }
+
+        .auth-footer { text-align: center; margin-top: 25px; font-size: 14px; }
+        .auth-footer a { color: var(--primary-magenta); font-weight: 700; text-decoration: none; }
+        
+        @media (min-width: 768px) {
+            .form-grid { grid-template-columns: 1fr 1fr; }
+            .full-width { grid-column: span 2; }
+        }
+    </style>
+</head>
+<body>
+
+    <header class="brand-header">
+        <div class="logo-mark">
+            <div class="swoosh-m"></div>
+            <div class="swoosh-g"></div>
+        </div>
+        <h1 class="brand-title">LAS VEGAS</h1>
+        <div class="brand-tagline">Premium Rewards</div>
+    </header>
+
+    <main class="auth-card">
+        <div class="card-header">
+            <h2>Create Your Account</h2>
+            <p>Join LAS VEGAS and claim your ₦1,000 bonus</p>
+        </div>
+
+        <div id="status-msg" class="msg-box"></div>
+
+        <form id="register-form" class="form-grid">
+            <div class="form-group full-width">
+                <label class="form-label">Full Name</label>
+                <input type="text" id="fullname" class="form-input" placeholder="Enter your full name" required>
+            </div>
+
+            <div class="form-group full-width">
+                <label class="form-label">Email Address</label>
+                <input type="email" id="email" class="form-input" placeholder="name@example.com" required>
+            </div>
+
+            <div class="form-group">
+                <label class="form-label">Password</label>
+                <div class="password-wrapper">
+                    <input type="password" id="password" class="form-input" placeholder="••••••••" required>
+                    <button type="button" class="eye-btn" data-target="password">👁</button>
+                </div>
+                <div class="strength-meter">
+                    <div class="strength-dot" id="dot-1"></div>
+                    <div class="strength-dot" id="dot-2"></div>
+                    <div class="strength-dot" id="dot-3"></div>
+                    <span class="strength-text" id="strength-label">Weak</span>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label class="form-label">Confirm Password</label>
+                <div class="password-wrapper">
+                    <input type="password" id="confirm_password" class="form-input" placeholder="••••••••" required>
+                    <button type="button" class="eye-btn" data-target="confirm_password">👁</button>
+                </div>
+            </div>
+
+            <div class="form-group full-width">
+                <label class="form-label">Referral Code (Optional)</label>
+                <input type="text" id="referral_code" class="form-input" placeholder="Enter code if any">
+            </div>
+
+            <div class="full-width">
+                <label class="terms-row">
+                    <input type="checkbox" id="terms" required>
+                    <span>I agree to the <a href="terms.html">Terms & Conditions</a></span>
+                </label>
+            </div>
+
+            <button type="submit" class="btn-submit full-width" id="submit-btn">CREATE ACCOUNT</button>
+        </form>
+
+        <div class="auth-footer">
+            Already have an account? <a href="login.html">Login</a>
+        </div>
+    </main>
+
+    <script type="module">
+        import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm'
+
+        const supabase = createClient(import.meta.env.VITE_SUPABASE_URL, import.meta.env.VITE_SUPABASE_ANON_KEY);
+
+        // State & DOM
+        const form = document.getElementById('register-form');
+        const submitBtn = document.getElementById('submit-btn');
+        const statusMsg = document.getElementById('status-msg');
+        const passInput = document.getElementById('password');
+        const refInput = document.getElementById('referral_code');
+
+        // 1. Referral Capture from URL
+        const urlParams = new URLSearchParams(window.location.search);
+        const code = urlParams.get('code') || urlParams.get('ref');
+        if (code) refInput.value = code.toUpperCase();
+
+        // 2. Password Strength Logic
+        passInput.addEventListener('input', () => {
+            const val = passInput.value;
+            let score = 0;
+            if (val.length >= 6) score++;
+            if (/[A-Z]/.test(val) && /[0-9]/.test(val)) score++;
+            if (/[^A-Za-z0-9]/.test(val)) score++;
+
+            const label = document.getElementById('strength-label');
+            const dots = [document.getElementById('dot-1'), document.getElementById('dot-2'), document.getElementById('dot-3')];
+            
+            dots.forEach(d => d.style.background = '#eee');
+            if (score >= 1) { dots[0].style.background = '#ff4d4d'; label.innerText = 'Weak'; }
+            if (score >= 2) { dots[0].style.background = '#ffa500'; dots[1].style.background = '#ffa500'; label.innerText = 'Fair'; }
+            if (score >= 3) { dots.forEach(d => d.style.background = 'var(--secondary-green)'); label.innerText = 'Strong'; }
+        });
+
+        // 3. Eye Toggle
+        document.querySelectorAll('.eye-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                const input = document.getElementById(btn.dataset.target);
+                input.type = input.type === 'password' ? 'text' : 'password';
+            });
+        });
+
+        // 4. Registration Flow
+        form.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const fullname = document.getElementById('fullname').value.trim();
+            const email = document.getElementById('email').value.trim();
+            const password = passInput.value;
+            const confirm = document.getElementById('confirm_password').value;
+            const referralCode = refInput.value.trim().toUpperCase();
+
+            // Client Validation
+            if (password !== confirm) return showMsg('Passwords do not match.', 'error');
+            if (password.length < 6) return showMsg('Password must be at least 6 characters.', 'error');
+
+            setLoading(true);
+
+            try {
+                // Step A: Supabase Auth Signup
+                const { data: authData, error: authError } = await supabase.auth.signUp({ 
+                    email, 
+                    password,
+                    options: { data: { full_name: fullname } }
+                });
+
+                if (authError) throw authError;
+                const user = authData.user;
+
+                // Step B: Resolve Referrer (if code provided)
+                let referredById = null;
+                if (referralCode) {
+                    const { data: refUser } = await supabase
+                        .from('profiles')
+                        .select('id')
+                        .eq('referral_code', referralCode)
+                        .single();
+                    referredById = refUser?.id || null;
+                }
+
+                // Step C: Initialize Profile & Wallet via Database
+                // In a production env, use a Database Trigger or Edge Function to ensure atomicity.
+                // Here we perform sequential inserts for the demo foundation.
+                
+                const myRefCode = Math.random().toString(36).substring(2, 8).toUpperCase();
+
+                const { error: profileErr } = await supabase.from('profiles').insert({
+                    id: user.id,
+                    full_name: fullname,
+                    email: email,
+                    referral_code: myRefCode,
+                    referred_by: referredById
+                });
+
+                if (profileErr) throw profileErr;
+
+                // Create Wallet + Welcome Bonus (₦1,000)
+                const { error: walletErr } = await supabase.from('wallets').insert({
+                    user_id: user.id,
+                    balance: 1000.00,
+                    total_earned: 1000.00
+                });
+
+                if (walletErr) throw walletErr;
+
+                // Record Welcome Bonus Transaction
+                await supabase.from('transactions').insert({
+                    user_id: user.id,
+                    amount: 1000.00,
+                    type: 'WELCOME_BONUS',
+                    status: 'SUCCESS',
+                    description: 'Platform welcome reward'
+                });
+
+                showMsg('Account created successfully! Redirecting...', 'success');
+                setTimeout(() => window.location.href = 'dashboard.html', 1500);
+
+            } catch (err) {
+                showMsg(err.message, 'error');
+                setLoading(false);
+            }
+        });
+
+        function showMsg(text, type) {
+            statusMsg.innerText = text;
+            statusMsg.className = `msg-box msg-${type}`;
+            statusMsg.style.display = 'flex';
+            window.scrollTo(0, 0);
+        }
+
+        function setLoading(state) {
+            submitBtn.disabled = state;
+            submitBtn.innerText = state ? 'CREATING ACCOUNT...' : 'CREATE ACCOUNT';
+        }
+    </script>
+</body>
+</html>
