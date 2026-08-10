@@ -1,0 +1,312 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Referral Center | LAS VEGAS</title>
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display&family=Quicksand:wght@400;500;600;700&display=swap" rel="stylesheet">
+    
+    <style>
+        :root {
+            --primary-magenta: #FF007F;
+            --primary-magenta-dark: #E60072;
+            --secondary-green: #006400;
+            --secondary-green-light: #008000;
+            --bg-soft-white: #FFF5F7;
+            --card-white: #FFFFFF;
+            --text-main: #1A1A1A;
+            --text-muted: #666666;
+            --border-pink: #FFD1E3;
+            --nav-black: #121212;
+            --shadow-soft: 0 4px 20px rgba(255, 0, 127, 0.06);
+            --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+        
+        body {
+            margin: 0; padding: 0;
+            font-family: 'Quicksand', sans-serif;
+            background-color: var(--bg-soft-white);
+            color: var(--text-main);
+            background-image: radial-gradient(var(--border-pink) 0.5px, transparent 0.5px);
+            background-size: 30px 30px;
+            min-height: 100vh;
+            padding-bottom: 110px;
+        }
+
+        .container { max-width: 1200px; margin: 0 auto; padding: 20px; }
+
+        /* --- HEADER --- */
+        .page-header { margin-bottom: 25px; padding-top: 10px; display: flex; justify-content: space-between; align-items: flex-start; }
+        .page-header h1 { font-family: 'DM Serif Display', serif; font-size: 28px; margin: 0; color: var(--text-main); }
+        .page-header p { font-size: 14px; color: var(--text-muted); margin: 5px 0 0 0; }
+
+        /* --- HERO --- */
+        .refer-hero {
+            background: linear-gradient(135deg, var(--primary-magenta), #ff4d94);
+            border-radius: 30px; padding: 30px; color: white; margin-bottom: 25px;
+            box-shadow: 0 10px 25px rgba(255, 0, 127, 0.15);
+            text-align: center;
+        }
+        .refer-hero h2 { font-family: 'DM Serif Display', serif; font-size: 24px; margin: 0 0 10px 0; }
+        .refer-hero p { font-size: 14px; opacity: 0.9; margin-bottom: 25px; }
+        .level-pills { display: flex; justify-content: center; gap: 15px; }
+        .pill { background: rgba(255,255,255,0.2); border: 1px solid rgba(255,255,255,0.4); padding: 8px 15px; border-radius: 50px; font-weight: 700; font-size: 13px; }
+
+        /* --- LINK BOX --- */
+        .link-card { background: white; border: 1px solid var(--border-pink); padding: 25px; border-radius: 25px; margin-bottom: 25px; box-shadow: var(--shadow-soft); }
+        .link-label { font-size: 12px; font-weight: 700; color: var(--primary-magenta); text-transform: uppercase; margin-bottom: 12px; display: block; }
+        .link-box { background: var(--bg-soft-white); padding: 15px; border-radius: 15px; border: 1px dashed var(--border-pink); display: flex; justify-content: space-between; align-items: center; gap: 10px; }
+        .link-text { font-size: 13px; font-weight: 600; color: var(--text-main); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .copy-btn { background: var(--primary-magenta); color: white; border: none; padding: 8px 15px; border-radius: 10px; font-size: 12px; font-weight: 700; cursor: pointer; flex-shrink: 0; }
+
+        /* --- STATS GRID --- */
+        .stats-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px; margin-bottom: 25px; }
+        .stat-card { background: white; padding: 20px; border-radius: 20px; border: 1px solid var(--border-pink); box-shadow: var(--shadow-soft); }
+        .stat-card .label { font-size: 10px; font-weight: 700; color: var(--text-muted); text-transform: uppercase; margin-bottom: 5px; display: block; }
+        .stat-card .value { font-size: 18px; font-weight: 700; color: var(--secondary-green); }
+
+        /* --- LEVEL SECTION --- */
+        .level-grid { display: grid; grid-template-columns: 1fr; gap: 20px; margin-bottom: 30px; }
+        @media (min-width: 768px) { .level-grid { grid-template-columns: 1fr 1fr; } }
+        .level-card { background: white; border: 1px solid var(--border-pink); border-radius: 25px; padding: 20px; position: relative; overflow: hidden; }
+        .level-card.l1 { border-left: 5px solid var(--primary-magenta); }
+        .level-card.l2 { border-left: 5px solid var(--secondary-green); }
+        .level-card h3 { margin: 0 0 15px 0; font-family: 'DM Serif Display', serif; font-size: 20px; }
+        .level-row { display: flex; justify-content: space-between; margin-bottom: 8px; font-size: 14px; }
+        .level-row b { color: var(--secondary-green); }
+
+        /* --- HISTORY --- */
+        .sec-title { font-family: 'DM Serif Display', serif; font-size: 20px; margin-bottom: 15px; }
+        .history-card { background: white; border-radius: 25px; border: 1px solid var(--border-pink); overflow: hidden; box-shadow: var(--shadow-soft); }
+        .tx-row { display: flex; justify-content: space-between; align-items: center; padding: 15px 20px; border-bottom: 1px solid var(--bg-soft-white); }
+        .tx-row:last-child { border-bottom: none; }
+        .tx-info h4 { margin: 0; font-size: 14px; font-weight: 700; }
+        .tx-info span { font-size: 11px; color: var(--text-muted); }
+        .tx-amt { text-align: right; font-weight: 700; color: var(--secondary-green); font-size: 14px; }
+
+        /* --- NAV ISLAND --- */
+        .nav-island { position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%); background: var(--nav-black); height: 65px; width: 92%; max-width: 400px; border-radius: 100px; display: flex; justify-content: space-around; align-items: center; z-index: 1000; box-shadow: 0 10px 30px rgba(0,0,0,0.3); }
+        .nav-item { color: #666; text-decoration: none; font-size: 10px; font-weight: 700; display: flex; flex-direction: column; align-items: center; gap: 4px; }
+        .nav-item.active { color: var(--primary-magenta); }
+
+        .sidebar { position: fixed; top: 0; left: -100%; width: 280px; height: 100%; background: white; z-index: 2000; transition: var(--transition); padding: 30px; }
+        .sidebar.active { left: 0; }
+        .sb-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 1500; display: none; }
+
+        .skeleton { background: linear-gradient(90deg, #f0f0f0 25%, #f8f8f8 50%, #f0f0f0 75%); background-size: 200% 100%; animation: loading 1.5s infinite; border-radius: 10px; height: 20px; }
+        @keyframes loading { from { background-position: 200% 0; } to { background-position: -200% 0; } }
+    </style>
+</head>
+<body>
+
+    <div class="sb-overlay" id="overlay"></div>
+    <aside class="sidebar" id="sidebar">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 40px;">
+            <span class="brand-font" style="color: var(--primary-magenta); font-size: 24px;">LAS VEGAS</span>
+            <button id="close-sb" style="background: none; border: none; font-size: 24px; cursor: pointer;">✕</button>
+        </div>
+        <nav style="display: flex; flex-direction: column; gap: 15px;">
+            <a href="dashboard.html" style="text-decoration: none; color: var(--text-main); font-weight: 600;">🏠 Dashboard</a>
+            <a href="referrals.html" style="text-decoration: none; color: var(--primary-magenta); font-weight: 700;">👥 Referrals</a>
+            <a href="earnings.html" style="text-decoration: none; color: var(--text-main); font-weight: 600;">💰 My Earnings</a>
+            <a href="plans.html" style="text-decoration: none; color: var(--text-main); font-weight: 600;">📈 Plans</a>
+            <button id="logout-btn" style="margin-top: 30px; text-align: left; border: none; background: none; color: #d00000; font-weight: 700; cursor: pointer;">🚪 Logout</button>
+        </nav>
+    </aside>
+
+    <div class="container">
+        <header class="page-header">
+            <div>
+                <h1>Referral Center</h1>
+                <p>Build your network and earn commissions.</p>
+            </div>
+            <button id="open-sb" style="width:45px; height:45px; border-radius:50%; border:1px solid var(--border-pink); background:white; color:var(--primary-magenta);">☰</button>
+        </header>
+
+        <!-- Hero -->
+        <div class="refer-hero">
+            <h2>Refer & Earn</h2>
+            <p>Invite friends to LAS VEGAS and earn from their activities.</p>
+            <div class="level-pills">
+                <div class="pill">Level 1: 20%</div>
+                <div class="pill">Level 2: 5%</div>
+            </div>
+        </div>
+
+        <!-- Link Card -->
+        <div class="link-card">
+            <span class="link-label">Your Referral Link</span>
+            <div class="link-box">
+                <span class="link-text" id="ref-url">Loading link...</span>
+                <button class="copy-btn" id="copy-btn">COPY</button>
+            </div>
+        </div>
+
+        <!-- Stats -->
+        <div class="stats-grid">
+            <div class="stat-card">
+                <span class="label">Total Network</span>
+                <div class="value" id="stat-total-network">0</div>
+            </div>
+            <div class="stat-card">
+                <span class="label">Total Earned</span>
+                <div class="value" id="stat-total-earned">₦0.00</div>
+            </div>
+        </div>
+
+        <!-- Level Split -->
+        <div class="level-grid">
+            <div class="level-card l1">
+                <h3>Level 1 (Direct)</h3>
+                <div class="level-row"><span>Members</span> <b id="l1-members">0</b></div>
+                <div class="level-row"><span>Commission</span> <b>20%</b></div>
+                <div class="level-row"><span>Earnings</span> <b id="l1-earned">₦0.00</b></div>
+            </div>
+            <div class="level-card l2">
+                <h3>Level 2 (Indirect)</h3>
+                <div class="level-row"><span>Members</span> <b id="l2-members">0</b></div>
+                <div class="level-row"><span>Commission</span> <b>5%</b></div>
+                <div class="level-row"><span>Earnings</span> <b id="l2-earned">₦0.00</b></div>
+            </div>
+        </div>
+
+        <!-- Recent Commissions -->
+        <h3 class="sec-title">Referral Activity</h3>
+        <div class="history-card" id="activity-list">
+            <div style="padding: 30px; text-align: center; color: #999;">Loading activity...</div>
+        </div>
+    </div>
+
+    <!-- Mobile Nav -->
+    <nav class="nav-island">
+        <a href="dashboard.html" class="nav-item"><span>🏠</span><span>Home</span></a>
+        <a href="plans.html" class="nav-item"><span>📈</span><span>Plans</span></a>
+        <a href="wallet.html" class="nav-item"><span>👛</span><span>Wallet</span></a>
+        <a href="referrals.html" class="nav-item active"><span>👥</span><span>Refer</span></a>
+    </nav>
+
+    <script type="module">
+        import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm'
+
+        const supabase = createClient(import.meta.env.VITE_SUPABASE_URL, import.meta.env.VITE_SUPABASE_ANON_KEY);
+
+        const ReferralApp = {
+            user: null,
+            profile: null,
+
+            async init() {
+                const { data: { session } } = await supabase.auth.getSession();
+                if (!session) return window.location.href = 'login.html';
+                this.user = session.user;
+
+                this.setupUI();
+                await this.loadProfile();
+                await this.loadNetworkStats();
+                await this.loadCommissions();
+            },
+
+            setupUI() {
+                const sb = document.getElementById('sidebar');
+                const ov = document.getElementById('overlay');
+                document.getElementById('open-sb').onclick = () => { sb.classList.add('active'); ov.style.display = 'block'; };
+                document.getElementById('close-sb').onclick = () => { sb.classList.remove('active'); ov.style.display = 'none'; };
+                ov.onclick = () => { sb.classList.remove('active'); ov.style.display = 'none'; };
+                
+                document.getElementById('logout-btn').onclick = async () => {
+                    await supabase.auth.signOut();
+                    window.location.href = 'index.html';
+                };
+
+                document.getElementById('copy-btn').onclick = () => {
+                    const url = document.getElementById('ref-url').innerText;
+                    navigator.clipboard.writeText(url);
+                    const btn = document.getElementById('copy-btn');
+                    btn.innerText = "COPIED!";
+                    setTimeout(() => btn.innerText = "COPY", 2000);
+                };
+            },
+
+            async loadProfile() {
+                const { data } = await supabase.from('profiles').select('*').eq('id', this.user.id).single();
+                this.profile = data;
+                if (data) {
+                    const baseUrl = window.location.origin;
+                    document.getElementById('ref-url').innerText = `${baseUrl}/register.html?code=${data.referral_code}`;
+                }
+            },
+
+            async loadNetworkStats() {
+                // 1. Level 1 Members
+                const { count: l1Count } = await supabase.from('profiles').select('*', { count: 'exact', head: true }).eq('referred_by', this.user.id);
+                
+                // 2. Level 2 Members (Requires a complex query or multiple calls)
+                // For the foundation, we fetch L1 IDs first
+                const { data: l1Users } = await supabase.from('profiles').select('id').eq('referred_by', this.user.id);
+                const l1Ids = l1Users.map(u => u.id);
+                
+                let l2Count = 0;
+                if (l1Ids.length > 0) {
+                    const { count } = await supabase.from('profiles').select('*', { count: 'exact', head: true }).in('referred_by', l1Ids);
+                    l2Count = count;
+                }
+
+                document.getElementById('l1-members').innerText = l1Count || 0;
+                document.getElementById('l2-members').innerText = l2Count || 0;
+                document.getElementById('stat-total-network').innerText = (l1Count || 0) + (l2Count || 0);
+            },
+
+            async loadCommissions() {
+                const { data, error } = await supabase.from('referral_commissions')
+                    .select('*')
+                    .eq('user_id', this.user.id)
+                    .order('created_at', { ascending: false });
+
+                if (!data) return;
+
+                let l1Earned = 0;
+                let l2Earned = 0;
+
+                data.forEach(c => {
+                    if (c.level === 1) l1Earned += Number(c.commission_amount);
+                    if (c.level === 2) l2Earned += Number(c.commission_amount);
+                });
+
+                document.getElementById('l1-earned').innerText = this.formatCurrency(l1Earned);
+                document.getElementById('l2-earned').innerText = this.formatCurrency(l2Earned);
+                document.getElementById('stat-total-earned').innerText = this.formatCurrency(l1Earned + l2Earned);
+
+                this.renderActivity(data.slice(0, 5));
+            },
+
+            renderActivity(data) {
+                const list = document.getElementById('activity-list');
+                if (!data || data.length === 0) {
+                    list.innerHTML = '<div style="padding: 30px; text-align: center; color: #999;">No referral earnings yet.</div>';
+                    return;
+                }
+
+                list.innerHTML = data.map(item => `
+                    <div class="tx-row">
+                        <div class="tx-info">
+                            <h4>Level ${item.level} Commission</h4>
+                            <span>${new Date(item.created_at).toLocaleDateString()}</span>
+                        </div>
+                        <div class="tx-amt">+${this.formatCurrency(item.commission_amount)}</div>
+                    </div>
+                `).join('');
+            },
+
+            formatCurrency(val) {
+                return new Intl.NumberFormat('en-NG', { style: 'currency', currency: 'NGN' }).format(val);
+            }
+        };
+
+        document.addEventListener('DOMContentLoaded', () => ReferralApp.init());
+    </script>
+</body>
+</html>
