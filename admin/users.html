@@ -1,0 +1,398 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>User Management | LAS VEGAS Admin</title>
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display&family=Quicksand:wght@400;500;600;700&display=swap" rel="stylesheet">
+    
+    <style>
+        :root {
+            --primary-magenta: #FF007F;
+            --secondary-green: #006400;
+            --admin-bg: #F8F9FB;
+            --sidebar-dark: #121212;
+            --card-white: #FFFFFF;
+            --text-main: #1A1A1A;
+            --text-muted: #666666;
+            --border-pink: #FFD1E3;
+            --shadow-sm: 0 2px 10px rgba(0,0,0,0.05);
+            --transition: all 0.3s ease;
+        }
+
+        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+        body { margin: 0; font-family: 'Quicksand', sans-serif; background: var(--admin-bg); color: var(--text-main); overflow-x: hidden; }
+
+        /* --- LAYOUT --- */
+        .admin-wrapper { display: flex; min-height: 100vh; }
+        
+        /* --- SIDEBAR --- */
+        .sidebar { 
+            width: 260px; background: var(--sidebar-dark); color: white; 
+            display: flex; flex-direction: column; position: fixed; 
+            height: 100vh; z-index: 1000; transition: var(--transition);
+        }
+        .sidebar-header { padding: 30px 20px; border-bottom: 1px solid rgba(255,255,255,0.1); text-align: center; }
+        .logo-text { font-family: 'DM Serif Display', serif; color: var(--primary-magenta); font-size: 22px; }
+        
+        .nav-list { flex: 1; overflow-y: auto; padding: 20px 0; }
+        .nav-item { 
+            display: flex; align-items: center; padding: 12px 25px; 
+            color: rgba(255,255,255,0.6); text-decoration: none; 
+            font-size: 14px; font-weight: 600; transition: var(--transition);
+        }
+        .nav-item:hover, .nav-item.active { color: white; background: rgba(255, 0, 127, 0.1); border-left: 4px solid var(--primary-magenta); }
+
+        /* --- MAIN CONTENT --- */
+        .main-content { flex: 1; margin-left: 260px; padding: 30px; transition: var(--transition); width: calc(100% - 260px); }
+        
+        .top-bar { 
+            display: flex; justify-content: space-between; align-items: center; 
+            margin-bottom: 30px; background: white; padding: 15px 25px; 
+            border-radius: 15px; border: 1px solid var(--border-pink); box-shadow: var(--shadow-sm);
+        }
+
+        /* --- SUMMARY STATS --- */
+        .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 15px; margin-bottom: 25px; }
+        .stat-card { background: white; padding: 20px; border-radius: 15px; border: 1px solid var(--border-pink); }
+        .stat-label { font-size: 11px; font-weight: 800; color: var(--text-muted); text-transform: uppercase; display: block; }
+        .stat-value { font-size: 22px; font-weight: 700; color: var(--text-main); margin-top: 5px; display: block; }
+
+        /* --- FILTERS & SEARCH --- */
+        .controls-card { background: white; padding: 20px; border-radius: 20px; border: 1px solid var(--border-pink); margin-bottom: 25px; }
+        .search-row { display: grid; grid-template-columns: 1fr; gap: 15px; margin-bottom: 15px; }
+        @media (min-width: 768px) { .search-row { grid-template-columns: 2fr 1fr 1fr; } }
+        
+        .input-group { position: relative; }
+        .input-field { width: 100%; padding: 12px 15px; border-radius: 10px; border: 1px solid var(--border-pink); font-family: inherit; font-size: 14px; outline: none; }
+        .input-field:focus { border-color: var(--primary-magenta); }
+
+        /* --- TABLE --- */
+        .table-container { background: white; border-radius: 15px; border: 1px solid var(--border-pink); overflow-x: auto; display: none; }
+        @media (min-width: 1024px) { .table-container { display: block; } }
+        
+        table { width: 100%; border-collapse: collapse; min-width: 800px; }
+        th { text-align: left; padding: 15px 20px; background: #FFF9FB; border-bottom: 2px solid var(--border-pink); font-size: 11px; text-transform: uppercase; color: var(--text-muted); letter-spacing: 1px; }
+        td { padding: 15px 20px; border-bottom: 1px solid var(--admin-bg); font-size: 14px; }
+        
+        .user-cell { display: flex; align-items: center; gap: 10px; }
+        .avatar { width: 32px; height: 32px; background: var(--border-pink); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 700; color: var(--primary-magenta); }
+        .balance-cell { font-weight: 700; color: var(--secondary-green); }
+        .status-pill { padding: 4px 10px; border-radius: 50px; font-size: 10px; font-weight: 800; text-transform: uppercase; }
+        .status-active { background: #F0FFF4; color: var(--secondary-green); }
+        .status-suspended { background: #FFF0F0; color: #D00000; }
+
+        /* --- MOBILE CARDS --- */
+        .mobile-list { display: grid; gap: 15px; }
+        @media (min-width: 1024px) { .mobile-list { display: none; } }
+        .user-card { background: white; border: 1px solid var(--border-pink); border-radius: 15px; padding: 20px; }
+        .card-row { display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid #f9f9f9; font-size: 13px; }
+        .card-row:last-child { border: none; }
+
+        /* --- BUTTONS --- */
+        .btn-view { background: var(--primary-magenta); color: white; border: none; padding: 8px 15px; border-radius: 8px; font-size: 12px; font-weight: 700; cursor: pointer; text-decoration: none; display: inline-block; }
+        .btn-refresh { background: none; border: 1px solid var(--border-pink); padding: 8px 15px; border-radius: 8px; font-size: 12px; cursor: pointer; font-weight: 600; }
+
+        /* --- PAGINATION --- */
+        .pagination { display: flex; justify-content: space-between; align-items: center; margin-top: 25px; padding: 10px; }
+        .page-btn { padding: 8px 15px; border: 1px solid var(--border-pink); background: white; border-radius: 8px; cursor: pointer; font-weight: 600; }
+        .page-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+
+        /* --- MOBILE TOGGLE --- */
+        .mobile-toggle { display: none; background: none; border: none; font-size: 24px; cursor: pointer; }
+        @media (max-width: 1024px) {
+            .sidebar { left: -260px; }
+            .sidebar.active { left: 0; }
+            .main-content { margin-left: 0; width: 100%; }
+            .mobile-toggle { display: block; }
+        }
+
+        .skeleton { height: 20px; background: #eee; border-radius: 5px; animation: pulse 1.5s infinite; }
+        @keyframes pulse { 0% { opacity: 0.6; } 50% { opacity: 1; } 100% { opacity: 0.6; } }
+    </style>
+</head>
+<body>
+
+    <div class="admin-wrapper">
+        <aside class="sidebar" id="adminSidebar">
+            <div class="sidebar-header">
+                <div class="logo-text">LAS VEGAS ADMIN</div>
+            </div>
+            <nav class="nav-list">
+                <a href="index.html" class="nav-item">📊 Dashboard</a>
+                <a href="users.html" class="nav-item active">👥 Users</a>
+                <a href="plans.html" class="nav-item">📈 Plans</a>
+                <a href="investments.html" class="nav-item">💰 Investments</a>
+                <a href="earnings.html" class="nav-item">💸 Earnings</a>
+                <a href="deposits.html" class="nav-item">📥 Deposits</a>
+                <a href="withdrawals.html" class="nav-item">📤 Withdrawals</a>
+                <a href="transactions.html" class="nav-item">📜 Transactions</a>
+                <a href="daily-checkins.html" class="nav-item">📅 Daily Check-ins</a>
+                <a href="referrals.html" class="nav-item">🔗 Referrals</a>
+                <a href="gift-codes.html" class="nav-item">🎁 Gift Codes</a>
+                <a href="notifications.html" class="nav-item">🔔 Notifications</a>
+                <a href="nekpay.html" class="nav-item">💳 Nekpay</a>
+                <a href="payout-accounts.html" class="nav-item">🏦 Payout Accounts</a>
+                <a href="reports.html" class="nav-item">📈 Reports</a>
+                <a href="settings.html" class="nav-item">⚙️ Settings</a>
+                <a href="#" id="logoutBtn" class="nav-item" style="margin-top: 20px; color: #ff4d4d;">🚪 Logout</a>
+            </nav>
+        </aside>
+
+        <main class="main-content">
+            <header class="top-bar">
+                <button class="mobile-toggle" id="menuBtn">☰</button>
+                <h2 style="margin: 0; font-family: 'DM Serif Display', serif;">User Directory</h2>
+                <button class="btn-refresh" onclick="location.reload()">🔄 Refresh</button>
+            </header>
+
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <span class="stat-label">Total Members</span>
+                    <span class="stat-value" id="stat-total">---</span>
+                </div>
+                <div class="stat-card">
+                    <span class="stat-label">Active Users</span>
+                    <span class="stat-value" id="stat-active" style="color: var(--secondary-green);">---</span>
+                </div>
+                <div class="stat-card">
+                    <span class="stat-label">Suspended</span>
+                    <span class="stat-value" id="stat-suspended" style="color: #D00000;">---</span>
+                </div>
+                <div class="stat-card">
+                    <span class="stat-label">New Today</span>
+                    <span class="stat-value" id="stat-today">---</span>
+                </div>
+            </div>
+
+            <div class="controls-card">
+                <div class="search-row">
+                    <input type="text" id="searchInput" class="input-field" placeholder="Search by name, email, or ID...">
+                    <select id="filterStatus" class="input-field">
+                        <option value="ALL">All Statuses</option>
+                        <option value="ACTIVE">Active</option>
+                        <option value="SUSPENDED">Suspended</option>
+                    </select>
+                    <select id="sortBy" class="input-field">
+                        <option value="newest">Newest First</option>
+                        <option value="oldest">Oldest First</option>
+                        <option value="balance-high">Highest Balance</option>
+                        <option value="balance-low">Lowest Balance</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="table-container" id="desktopView">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>User</th>
+                            <th>Member ID</th>
+                            <th>Balance</th>
+                            <th>Status</th>
+                            <th>Joined</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody id="userTableBody">
+                        <tr><td colspan="6"><div class="skeleton"></div></td></tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="mobile-list" id="mobileView">
+                <!-- User cards generated here -->
+            </div>
+
+            <div class="pagination">
+                <span id="pageInfo" style="font-size: 13px; color: var(--text-muted);">Showing ...</span>
+                <div style="display: flex; gap: 10px;">
+                    <button class="page-btn" id="prevBtn" disabled>Previous</button>
+                    <button class="page-btn" id="nextBtn">Next</button>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script type="module">
+        import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm'
+
+        const supabase = createClient(import.meta.env.VITE_SUPABASE_URL, import.meta.env.VITE_SUPABASE_ANON_KEY);
+
+        const AdminUsers = {
+            currentPage: 0,
+            pageSize: 20,
+            totalCount: 0,
+
+            async init() {
+                // Admin session guard
+                const { data: { session } } = await supabase.auth.getSession();
+                if (!session) return window.location.href = 'login.html';
+
+                const { data: profile } = await supabase.from('profiles').select('is_admin').eq('id', session.user.id).single();
+                if (!profile || !profile.is_admin) return window.location.href = 'login.html';
+
+                this.setupUI();
+                await this.fetchStats();
+                await this.fetchUsers();
+            },
+
+            setupUI() {
+                document.getElementById('menuBtn').onclick = () => document.getElementById('adminSidebar').classList.toggle('active');
+                document.getElementById('logoutBtn').onclick = () => supabase.auth.signOut().then(() => window.location.href = 'login.html');
+
+                // Search & Filter listeners
+                const reload = () => { this.currentPage = 0; this.fetchUsers(); };
+                document.getElementById('searchInput').oninput = this.debounce(reload, 500);
+                document.getElementById('filterStatus').onchange = reload;
+                document.getElementById('sortBy').onchange = reload;
+
+                document.getElementById('nextBtn').onclick = () => { this.currentPage++; this.fetchUsers(); };
+                document.getElementById('prevBtn').onclick = () => { this.currentPage--; this.fetchUsers(); };
+            },
+
+            async fetchStats() {
+                const today = new Date().toISOString().split('T')[0];
+                const [
+                    { count: total },
+                    { count: active },
+                    { count: suspended },
+                    { count: todayCount }
+                ] = await Promise.all([
+                    supabase.from('profiles').select('*', { count: 'exact', head: true }),
+                    supabase.from('profiles').select('*', { count: 'exact', head: true }).eq('is_admin', false).eq('status', 'ACTIVE'),
+                    supabase.from('profiles').select('*', { count: 'exact', head: true }).eq('status', 'SUSPENDED'),
+                    supabase.from('profiles').select('*', { count: 'exact', head: true }).gte('created_at', today)
+                ]);
+
+                document.getElementById('stat-total').innerText = total || 0;
+                document.getElementById('stat-active').innerText = active || 0;
+                document.getElementById('stat-suspended').innerText = suspended || 0;
+                document.getElementById('stat-today').innerText = todayCount || 0;
+            },
+
+            async fetchUsers() {
+                const search = document.getElementById('searchInput').value.trim();
+                const status = document.getElementById('filterStatus').value;
+                const sort = document.getElementById('sortBy').value;
+
+                // Build query with join on wallet
+                let query = supabase
+                    .from('profiles')
+                    .select('*, wallets(balance)', { count: 'exact' });
+
+                // Search
+                if (search) {
+                    query = query.or(`full_name.ilike.%${search}%,email.ilike.%${search}%,referral_code.ilike.%${search}%`);
+                }
+
+                // Filter
+                if (status !== 'ALL') {
+                    query = query.eq('status', status);
+                }
+
+                // Sort
+                if (sort === 'newest') query = query.order('created_at', { ascending: false });
+                else if (sort === 'oldest') query = query.order('created_at', { ascending: true });
+                else if (sort === 'balance-high') query = query.order('wallets(balance)', { ascending: false });
+                else if (sort === 'balance-low') query = query.order('wallets(balance)', { ascending: true });
+
+                const from = this.currentPage * this.pageSize;
+                const to = from + this.pageSize - 1;
+
+                const { data, count, error } = await query.range(from, to);
+
+                if (!error) {
+                    this.totalCount = count;
+                    this.renderUsers(data);
+                    this.updatePagination();
+                }
+            },
+
+            renderUsers(users) {
+                const tbody = document.getElementById('userTableBody');
+                const mList = document.getElementById('mobileView');
+
+                if (!users || users.length === 0) {
+                    const empty = '<div style="padding:40px; text-align:center; color:#999;">No users found matching your criteria.</div>';
+                    tbody.innerHTML = `<tr><td colspan="6">${empty}</td></tr>`;
+                    mList.innerHTML = empty;
+                    return;
+                }
+
+                const rows = users.map(user => {
+                    const balance = user.wallets?.[0]?.balance || 0;
+                    const initials = user.full_name.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase();
+                    const memberId = `LV-${user.id.substring(0, 6).toUpperCase()}`;
+                    const date = new Date(user.created_at).toLocaleDateString();
+                    const statusClass = `status-${user.status?.toLowerCase() || 'active'}`;
+
+                    return {
+                        desktop: `
+                            <tr>
+                                <td>
+                                    <div class="user-cell">
+                                        <div class="avatar">${initials}</div>
+                                        <div>
+                                            <div style="font-weight:700;">${user.full_name}</div>
+                                            <div style="font-size:11px; color:#999;">${user.email}</div>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td style="font-family:monospace; font-weight:700;">${memberId}</td>
+                                <td class="balance-cell">${this.formatCurrency(balance)}</td>
+                                <td><span class="status-pill ${statusClass}">${user.status || 'ACTIVE'}</span></td>
+                                <td style="color:var(--text-muted);">${date}</td>
+                                <td><a href="user-details.html?id=${user.id}" class="btn-view">VIEW</a></td>
+                            </tr>
+                        `,
+                        mobile: `
+                            <div class="user-card">
+                                <div class="user-cell" style="margin-bottom:15px;">
+                                    <div class="avatar">${initials}</div>
+                                    <div>
+                                        <div style="font-weight:700;">${user.full_name}</div>
+                                        <div style="font-size:11px; color:#999;">${memberId}</div>
+                                    </div>
+                                </div>
+                                <div class="card-row"><span>Balance</span> <b class="balance-cell">${this.formatCurrency(balance)}</b></div>
+                                <div class="card-row"><span>Status</span> <span class="status-pill ${statusClass}">${user.status || 'ACTIVE'}</span></div>
+                                <div class="card-row"><span>Joined</span> <span>${date}</span></div>
+                                <a href="user-details.html?id=${user.id}" class="btn-view" style="width:100%; text-align:center; margin-top:15px;">VIEW PROFILE</a>
+                            </div>
+                        `
+                    };
+                });
+
+                tbody.innerHTML = rows.map(r => r.desktop).join('');
+                mList.innerHTML = rows.map(r => r.mobile).join('');
+            },
+
+            updatePagination() {
+                const from = this.currentPage * this.pageSize + 1;
+                const to = Math.min((this.currentPage + 1) * this.pageSize, this.totalCount);
+                document.getElementById('pageInfo').innerText = `Showing ${from}-${to} of ${this.totalCount}`;
+                document.getElementById('prevBtn').disabled = this.currentPage === 0;
+                document.getElementById('nextBtn').disabled = to >= this.totalCount;
+            },
+
+            formatCurrency(val) {
+                return new Intl.NumberFormat('en-NG', { style: 'currency', currency: 'NGN' }).format(val);
+            },
+
+            debounce(func, wait) {
+                let timeout;
+                return function(...args) {
+                    clearTimeout(timeout);
+                    timeout = setTimeout(() => func.apply(this, args), wait);
+                };
+            }
+        };
+
+        document.addEventListener('DOMContentLoaded', () => AdminUsers.init());
+    </script>
+</body>
+</html>
