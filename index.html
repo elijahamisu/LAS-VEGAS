@@ -4,15 +4,13 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>LAS VEGAS | Premium Investment & Rewards</title>
-    <!-- Fonts: Serif for Brand, Rounded Sans for UI -->
+    
+    <!-- Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display&family=Quicksand:wght@400;500;600;700&display=swap" rel="stylesheet">
     
     <style>
-        /* 
-        LAS VEGAS GLOBAL DESIGN TOKENS
-        */
         :root {
             --primary-magenta: #FF007F;
             --primary-magenta-dark: #E60072;
@@ -23,386 +21,475 @@
             --text-main: #1A1A1A;
             --text-muted: #666666;
             --border-pink: #FFD1E3;
-            --shadow-soft: 0 4px 20px rgba(255, 0, 127, 0.08);
-            --transition: all 0.3s ease;
+            --shadow-soft: 0 10px 30px rgba(255, 0, 127, 0.05);
+            --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
         }
 
-        * {
-            box-sizing: border-box;
-            -webkit-tap-highlight-color: transparent;
-        }
-
+        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
         body {
-            margin: 0;
-            padding: 0;
+            margin: 0; padding: 0;
             font-family: 'Quicksand', sans-serif;
             background-color: var(--bg-soft-white);
             color: var(--text-main);
             background-image: radial-gradient(var(--border-pink) 0.5px, transparent 0.5px);
-            background-size: 20px 20px; /* Subtle dot pattern */
-            line-height: 1.6;
+            background-size: 30px 30px;
             overflow-x: hidden;
+            scroll-behavior: smooth;
         }
 
-        h1, h2, h3, .brand-font {
-            font-family: 'DM Serif Display', serif;
-            font-weight: 400;
-        }
+        h1, h2, h3, .brand-font { font-family: 'DM Serif Display', serif; font-weight: 400; line-height: 1.2; }
+        a { text-decoration: none; color: inherit; }
+        ul { list-style: none; padding: 0; margin: 0; }
 
-        /* 
-        LOGO SYSTEM
-        */
-        .logo-container {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-        }
-
+        /* --- LOGO COMPONENT --- */
+        .logo-group { display: flex; align-items: center; gap: 12px; }
         .logo-mark {
-            position: relative;
-            width: 50px;
-            height: 50px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
+            position: relative; width: 40px; height: 40px;
+            display: flex; align-items: center; justify-content: center;
         }
+        .swoosh-m { position: absolute; width: 100%; height: 100%; border: 3px solid var(--primary-magenta); border-radius: 40% 60% 70% 30% / 40% 50% 60% 50%; transform: rotate(-15deg); }
+        .swoosh-g { position: absolute; width: 70%; height: 70%; border: 2.5px solid var(--secondary-green); border-radius: 60% 40% 30% 70% / 50% 60% 40% 50%; transform: rotate(20deg); }
+        .logo-text { display: flex; flex-direction: column; }
+        .logo-title { font-size: 20px; color: var(--primary-magenta); letter-spacing: 1px; text-transform: uppercase; margin: 0; font-family: 'DM Serif Display', serif; }
+        .logo-tag { font-size: 8px; text-transform: uppercase; letter-spacing: 2px; color: var(--secondary-green); font-weight: 700; margin-top: -2px; }
 
-        .swoosh-magenta {
-            position: absolute;
-            width: 100%;
-            height: 100%;
-            border: 4px solid var(--primary-magenta);
-            border-radius: 40% 60% 70% 30% / 40% 50% 60% 50%;
-            transform: rotate(-15deg);
+        /* --- HEADER & NAV --- */
+        header {
+            position: fixed; top: 0; width: 100%; z-index: 1000;
+            background: rgba(255, 245, 247, 0.95);
+            backdrop-filter: blur(10px);
+            border-bottom: 1px solid var(--border-pink);
+            padding: 15px 0;
         }
-
-        .swoosh-green {
-            position: absolute;
-            width: 80%;
-            height: 80%;
-            border: 3px solid var(--secondary-green);
-            border-radius: 60% 40% 30% 70% / 50% 60% 40% 50%;
-            transform: rotate(20deg);
+        .nav-container {
+            max-width: 1200px; margin: 0 auto; padding: 0 20px;
+            display: flex; justify-content: space-between; align-items: center;
         }
+        .nav-links { display: none; gap: 30px; align-items: center; }
+        .nav-links a { font-weight: 600; font-size: 14px; transition: var(--transition); }
+        .nav-links a:hover { color: var(--primary-magenta); }
+        .nav-auth { display: flex; gap: 12px; }
 
-        .star-accent {
-            color: var(--primary-magenta);
-            font-size: 14px;
-            position: absolute;
-            top: -5px;
-            right: -5px;
-            animation: twinkle 2s infinite ease-in-out;
-        }
-
-        @keyframes twinkle {
-            0%, 100% { opacity: 1; transform: scale(1); }
-            50% { opacity: 0.5; transform: scale(0.8); }
-        }
-
-        .brand-title {
-            font-size: 28px;
-            color: var(--primary-magenta);
-            letter-spacing: 1px;
-            margin: 5px 0 0 0;
-            text-transform: uppercase;
-        }
-
-        .brand-tagline {
-            font-size: 10px;
-            text-transform: uppercase;
-            letter-spacing: 4px;
-            color: var(--secondary-green);
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            font-weight: 700;
-        }
-
-        .brand-tagline::before, .brand-tagline::after {
-            content: "";
-            height: 1px;
-            width: 20px;
-            background-color: var(--secondary-green);
-            opacity: 0.3;
-        }
-
-        /* 
-        BUTTON SYSTEM
-        */
+        /* --- BUTTONS --- */
         .btn {
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            padding: 14px 28px;
-            border-radius: 50px;
-            font-weight: 700;
-            font-size: 16px;
-            cursor: pointer;
-            transition: var(--transition);
-            border: none;
-            width: 100%;
-            max-width: 320px;
-            text-decoration: none;
-            gap: 8px;
+            padding: 12px 24px; border-radius: 50px; font-weight: 700; font-size: 14px;
+            cursor: pointer; transition: var(--transition); border: none;
+            display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+        }
+        .btn-primary { background: var(--primary-magenta); color: white; box-shadow: 0 4px 15px rgba(255, 0, 127, 0.2); }
+        .btn-primary:hover { background: var(--primary-magenta-dark); transform: translateY(-2px); }
+        .btn-secondary { background: white; color: var(--secondary-green); border: 2px solid var(--secondary-green); }
+        .btn-sm { padding: 8px 18px; font-size: 13px; }
+
+        /* --- HERO SECTION --- */
+        .hero { padding: 140px 20px 60px; max-width: 1200px; margin: 0 auto; display: grid; grid-template-columns: 1fr; gap: 40px; align-items: center; }
+        .hero-badge {
+            display: inline-block; padding: 6px 16px; background: white; border: 1px solid var(--border-pink);
+            border-radius: 50px; color: var(--primary-magenta); font-size: 11px; font-weight: 800;
+            letter-spacing: 2px; margin-bottom: 20px;
+        }
+        .hero-title { font-size: clamp(36px, 8vw, 60px); margin: 0 0 20px; color: var(--text-main); }
+        .hero-title span { color: var(--primary-magenta); }
+        .hero-desc { font-size: 18px; color: var(--text-muted); max-width: 500px; margin-bottom: 35px; }
+
+        /* --- HIGHLIGHT CARDS --- */
+        .highlight-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px; margin-top: 40px; }
+        .h-card { background: white; padding: 20px; border-radius: 20px; border: 1px solid var(--border-pink); box-shadow: var(--shadow-soft); text-align: center; }
+        .h-val { display: block; font-size: 22px; font-weight: 700; color: var(--secondary-green); margin-bottom: 4px; }
+        .h-label { display: block; font-size: 10px; font-weight: 700; color: var(--primary-magenta); text-transform: uppercase; letter-spacing: 1px; }
+
+        /* --- SECTIONS --- */
+        section { padding: 80px 20px; max-width: 1200px; margin: 0 auto; }
+        .section-header { text-align: center; margin-bottom: 50px; }
+        .section-header h2 { font-size: 32px; color: var(--text-main); margin-bottom: 15px; }
+        
+        /* --- HOW IT WORKS --- */
+        .steps-grid { display: grid; grid-template-columns: 1fr; gap: 30px; position: relative; }
+        .step-item { background: white; padding: 30px; border-radius: 24px; border: 1px solid var(--border-pink); position: relative; }
+        .step-num { 
+            width: 40px; height: 40px; background: var(--primary-magenta); color: white; 
+            border-radius: 50%; display: flex; align-items: center; justify-content: center;
+            font-weight: 700; margin-bottom: 20px;
         }
 
-        .btn-primary {
-            background-color: var(--primary-magenta);
-            color: white;
-            box-shadow: 0 4px 15px rgba(255, 0, 127, 0.2);
+        /* --- REWARD BANNER --- */
+        .reward-banner {
+            background: linear-gradient(135deg, var(--primary-magenta), #ff4d94);
+            border-radius: 30px; padding: 40px; color: white; text-align: center;
+            position: relative; overflow: hidden;
         }
+        .reward-banner h2 { color: white; margin-bottom: 10px; }
+        .reward-grid { display: flex; justify-content: center; gap: 40px; margin: 30px 0; flex-wrap: wrap; }
+        .reward-item { display: flex; flex-direction: column; align-items: center; }
+        .reward-amt { font-size: 32px; font-weight: 700; }
+        .reward-tag { font-size: 12px; text-transform: uppercase; opacity: 0.9; font-weight: 600; }
 
-        .btn-primary:active {
-            transform: scale(0.97);
-            background-color: var(--primary-magenta-dark);
+        /* --- FAQ --- */
+        .faq-item { background: white; border: 1px solid var(--border-pink); border-radius: 15px; margin-bottom: 12px; overflow: hidden; transition: var(--transition); }
+        .faq-trigger { width: 100%; padding: 20px; display: flex; justify-content: space-between; align-items: center; cursor: pointer; background: none; border: none; font-family: inherit; text-align: left; font-weight: 600; font-size: 15px; }
+        .faq-content { max-height: 0; padding: 0 20px; transition: var(--transition); color: var(--text-muted); font-size: 14px; overflow: hidden; }
+        .faq-item.active .faq-content { max-height: 200px; padding-bottom: 20px; }
+        .faq-item.active .faq-trigger { color: var(--primary-magenta); }
+
+        /* --- FOOTER --- */
+        footer { background: #1a000d; color: white; padding: 60px 20px 20px; }
+        .footer-grid { max-width: 1200px; margin: 0 auto; display: grid; grid-template-columns: 1fr; gap: 40px; }
+        .footer-bottom { margin-top: 60px; padding-top: 20px; border-top: 1px solid rgba(255,255,255,0.1); text-align: center; font-size: 12px; color: rgba(255,255,255,0.5); }
+
+        /* --- MOBILE MENU --- */
+        .mobile-toggle { display: block; font-size: 24px; cursor: pointer; color: var(--primary-magenta); }
+        .mobile-nav {
+            position: fixed; top: 0; right: -100%; width: 80%; height: 100%;
+            background: white; z-index: 2000; padding: 40px; transition: var(--transition);
+            box-shadow: -10px 0 30px rgba(0,0,0,0.1);
         }
+        .mobile-nav.active { right: 0; }
+        .overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); display: none; z-index: 1500; }
 
-        .btn-secondary {
-            background-color: transparent;
-            color: var(--secondary-green);
-            border: 2px solid var(--secondary-green);
-        }
-
-        .btn:disabled {
-            background-color: #e0e0e0;
-            color: #999;
-            cursor: not-allowed;
-            box-shadow: none;
-        }
-
-        /* 
-        CARD SYSTEM
-        */
-        .card {
-            background: var(--card-white);
-            border: 1px solid var(--border-pink);
-            border-radius: 20px;
-            padding: 24px;
-            box-shadow: var(--shadow-soft);
-            margin-bottom: 20px;
-        }
-
-        /* 
-        FINANCIAL SUMMARY BANNERS
-        */
-        .stat-banner {
-            display: flex;
-            align-items: center;
-            padding: 16px;
-            background: var(--card-white);
-            border-radius: 100px;
-            border: 1px solid var(--border-pink);
-            margin-bottom: 12px;
-            gap: 15px;
-        }
-
-        .stat-icon {
-            width: 45px;
-            height: 45px;
-            background: var(--bg-soft-white);
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: var(--primary-magenta);
-        }
-
-        .stat-content {
-            display: flex;
-            flex-direction: column;
-        }
-
-        .stat-label {
-            font-size: 10px;
-            text-transform: uppercase;
-            font-weight: 700;
-            color: var(--text-muted);
-            letter-spacing: 0.5px;
-        }
-
-        .stat-value {
-            font-size: 20px;
-            font-weight: 700;
-            color: var(--secondary-green);
-        }
-
-        /* 
-        TABLE SYSTEM
-        */
-        .table-container {
-            width: 100%;
-            overflow-x: auto;
-            border-radius: 15px;
-            border: 1px solid var(--border-pink);
-        }
-
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            background: white;
-            min-width: 500px;
-        }
-
-        thead {
-            background-color: var(--primary-magenta);
-            color: white;
-        }
-
-        th {
-            padding: 15px;
-            text-align: left;
-            font-size: 12px;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-        }
-
-        td {
-            padding: 15px;
-            border-bottom: 1px solid var(--bg-soft-white);
-            font-size: 14px;
-        }
-
-        tr:nth-child(even) {
-            background-color: #FFF9FB;
-        }
-
-        .val-positive {
-            color: var(--secondary-green);
-            font-weight: 700;
-        }
-
-        /* 
-        MOBILE-FIRST UTILITIES
-        */
-        .container {
-            width: 100%;
-            max-width: 1200px;
-            margin: 0 auto;
-            padding: 20px;
-        }
-
-        .flex-center {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            text-align: center;
-        }
-
+        /* --- RESPONSIVE OVERRIDES --- */
         @media (min-width: 768px) {
-            .btn { width: auto; }
-            .stats-grid {
-                display: grid;
-                grid-template-columns: repeat(2, 1fr);
-                gap: 20px;
-            }
+            .hero { grid-template-columns: 1.2fr 0.8fr; padding: 180px 20px 100px; }
+            .nav-links { display: flex; }
+            .mobile-toggle { display: none; }
+            .steps-grid { grid-template-columns: repeat(4, 1fr); }
+            .footer-grid { grid-template-columns: 2fr 1fr 1fr 1fr; }
+            .highlight-grid { grid-template-columns: repeat(4, 1fr); }
         }
     </style>
 </head>
 <body>
 
-    <div class="container">
-        <!-- Logo Section -->
-        <header class="flex-center" style="margin-top: 40px; margin-bottom: 60px;">
-            <div class="logo-container">
+    <div class="overlay" id="overlay"></div>
+
+    <header>
+        <nav class="nav-container">
+            <a href="index.html" class="logo-group">
                 <div class="logo-mark">
-                    <div class="swoosh-magenta"></div>
-                    <div class="swoosh-green"></div>
-                    <div class="star-accent">✦</div>
+                    <div class="swoosh-m"></div>
+                    <div class="swoosh-g"></div>
                 </div>
-                <h1 class="brand-title">LAS VEGAS</h1>
-                <div class="brand-tagline">Premium Rewards</div>
-            </div>
-        </header>
+                <div class="logo-text">
+                    <span class="logo-title">LAS VEGAS</span>
+                    <span class="logo-tag">Premium Rewards</span>
+                </div>
+            </a>
 
-        <!-- UI Showcase (The Design System) -->
-        <section>
-            <h2 class="brand-font" style="color: var(--primary-magenta); text-align: center; margin-bottom: 30px;">Foundation Components</h2>
+            <ul class="nav-links">
+                <li><a href="#how-it-works">How It Works</a></li>
+                <li><a href="#plans">Plans</a></li>
+                <li><a href="#rewards">Rewards</a></li>
+                <li><a href="#faq">FAQ</a></li>
+            </ul>
 
-            <!-- Stats Showcase -->
-            <div class="stats-grid">
-                <div class="stat-banner">
-                    <div class="stat-icon">₦</div>
-                    <div class="stat-content">
-                        <span class="stat-label">Available Balance</span>
-                        <span class="stat-value">₦1,250,000.00</span>
-                    </div>
-                </div>
-                <div class="stat-banner">
-                    <div class="stat-icon">✦</div>
-                    <div class="stat-content">
-                        <span class="stat-label">Total Earnings</span>
-                        <span class="stat-value">₦450,200.00</span>
-                    </div>
-                </div>
+            <div class="nav-auth" id="auth-nav">
+                <!-- Dynamic Content via JS -->
+                <a href="login.html" class="btn btn-secondary btn-sm">Login</a>
+                <a href="register.html" class="btn btn-primary btn-sm">Get Started</a>
             </div>
 
-            <!-- Card Showcase -->
-            <div class="card">
-                <h3 class="brand-font" style="margin-top: 0; color: var(--primary-magenta);">Investment Opportunity</h3>
-                <p style="color: var(--text-muted); font-size: 14px;">Start growing your wealth today with our premium low-risk plans designed for the Nigerian market.</p>
-                <div style="margin-top: 25px; display: flex; flex-direction: column; gap: 10px;">
-                    <button class="btn btn-primary" onclick="location.href='register.html'">Create Free Account</button>
-                    <button class="btn btn-secondary" onclick="location.href='login.html'">Member Login</button>
-                </div>
-            </div>
+            <div class="mobile-toggle" id="menu-open">☰</div>
+        </nav>
+    </header>
 
-            <!-- Table Showcase -->
-            <div class="table-container" style="margin-top: 30px;">
-                <table>
-                    <thead>
-                        <tr>
-                            <th>Transaction</th>
-                            <th>Date</th>
-                            <th>Amount</th>
-                            <th>Status</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <tr>
-                            <td style="font-weight: 600;">Daily Reward</td>
-                            <td>Oct 24, 2024</td>
-                            <td class="val-positive">+₦500.00</td>
-                            <td style="color: var(--primary-magenta); font-weight: 700;">Success</td>
-                        </tr>
-                        <tr>
-                            <td style="font-weight: 600;">Investment Payout</td>
-                            <td>Oct 23, 2024</td>
-                            <td class="val-positive">+₦12,500.00</td>
-                            <td style="color: var(--primary-magenta); font-weight: 700;">Success</td>
-                        </tr>
-                    </tbody>
-                </table>
-            </div>
-        </section>
+    <!-- Mobile Nav -->
+    <div class="mobile-nav" id="mobile-nav">
+        <div style="display: flex; justify-content: space-between; margin-bottom: 40px;">
+            <span class="brand-font" style="color: var(--primary-magenta); font-size: 24px;">MENU</span>
+            <span id="menu-close" style="font-size: 24px; cursor: pointer;">✕</span>
+        </div>
+        <ul style="display: flex; flex-direction: column; gap: 20px; font-size: 18px; font-weight: 600;">
+            <li><a href="index.html">Home</a></li>
+            <li><a href="#how-it-works">How It Works</a></li>
+            <li><a href="#plans">Investment Plans</a></li>
+            <li><a href="#faq">FAQ Support</a></li>
+            <hr style="width: 100%; border: 0.5px solid var(--border-pink); margin: 10px 0;">
+            <li><a href="login.html" style="color: var(--primary-magenta);">Login</a></li>
+            <li><a href="register.html" style="color: var(--secondary-green);">Register Account</a></li>
+        </ul>
     </div>
 
+    <main>
+        <!-- Hero Section -->
+        <section class="hero">
+            <div class="hero-content">
+                <span class="hero-badge">SMART • SIMPLE • REWARDING</span>
+                <h1 class="hero-title">Grow Your Money. <span>Enjoy More Rewards.</span></h1>
+                <p class="hero-desc">The premium Nigerian platform where your investments meet daily rewards. Start your journey with a welcome bonus today.</p>
+                <div style="display: flex; gap: 15px; flex-wrap: wrap;">
+                    <a href="register.html" class="btn btn-primary">CREATE ACCOUNT</a>
+                    <a href="#plans" class="btn btn-secondary">VIEW PLANS</a>
+                </div>
+            </div>
+            
+            <div class="highlight-grid">
+                <div class="h-card">
+                    <span class="h-val">₦1,000</span>
+                    <span class="h-label">Welcome Bonus</span>
+                </div>
+                <div class="h-card">
+                    <span class="h-val">₦200</span>
+                    <span class="h-label">Daily Check-in</span>
+                </div>
+                <div class="h-card">
+                    <span class="h-val">20%</span>
+                    <span class="h-label">Level 1 Referral</span>
+                </div>
+                <div class="h-card">
+                    <span class="h-val">5%</span>
+                    <span class="h-label">Level 2 Referral</span>
+                </div>
+            </div>
+        </section>
+
+        <!-- How It Works -->
+        <section id="how-it-works">
+            <div class="section-header">
+                <h2>A Smarter Way to Earn</h2>
+                <p style="color: var(--text-muted);">Four simple steps to start your premium financial experience.</p>
+            </div>
+            <div class="steps-grid">
+                <div class="step-item">
+                    <div class="step-num">01</div>
+                    <h3 class="brand-font">Create Account</h3>
+                    <p style="font-size: 14px; color: var(--text-muted);">Sign up in seconds with your basic details and get your welcome reward.</p>
+                </div>
+                <div class="step-item">
+                    <div class="step-num">02</div>
+                    <h3 class="brand-font">Fund Wallet</h3>
+                    <p style="font-size: 14px; color: var(--text-muted);">Securely add funds using Nekpay to start your investment journey.</p>
+                </div>
+                <div class="step-item">
+                    <div class="step-num">03</div>
+                    <h3 class="brand-font">Choose Plan</h3>
+                    <p style="font-size: 14px; color: var(--text-muted);">Select from our curated investment opportunities tailored for growth.</p>
+                </div>
+                <div class="step-item">
+                    <div class="step-num">04</div>
+                    <h3 class="brand-font">Track & Withdraw</h3>
+                    <p style="font-size: 14px; color: var(--text-muted);">Monitor your daily earnings and withdraw directly to your bank.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Reward Banner -->
+        <section id="rewards">
+            <div class="reward-banner">
+                <h2 class="brand-font">Exclusive Member Rewards</h2>
+                <p>Start with a welcome reward and return daily to claim your check-in bonus.</p>
+                <div class="reward-grid">
+                    <div class="reward-item">
+                        <span class="reward-amt">₦1,000</span>
+                        <span class="reward-tag">Welcome Bonus</span>
+                    </div>
+                    <div class="reward-item">
+                        <span class="reward-amt">₦200</span>
+                        <span class="reward-tag">Daily Check-in</span>
+                    </div>
+                </div>
+                <a href="register.html" class="btn" style="background: white; color: var(--primary-magenta);">CLAIM MY REWARDS</a>
+            </div>
+        </section>
+
+        <!-- Plans Placeholder -->
+        <section id="plans">
+            <div class="section-header">
+                <h2>Investment Opportunities</h2>
+                <p>Transparent, high-yield plans designed for your financial success.</p>
+            </div>
+            <div id="plans-container" style="text-align: center; padding: 40px; background: white; border-radius: 20px; border: 1px dashed var(--border-pink);">
+                <p style="color: var(--text-muted);">Fetching the latest opportunities...</p>
+            </div>
+        </section>
+
+        <!-- FAQ Section -->
+        <section id="faq">
+            <div class="section-header">
+                <h2>Frequently Asked Questions</h2>
+            </div>
+            <div style="max-width: 800px; margin: 0 auto;">
+                <div class="faq-item">
+                    <button class="faq-trigger">What is LAS VEGAS? <span>+</span></button>
+                    <div class="faq-content">
+                        <p>LAS VEGAS is a premium Nigerian fintech platform that combines secure investment opportunities with a robust rewards system, including daily check-ins and referral bonuses.</p>
+                    </div>
+                </div>
+                <div class="faq-item">
+                    <button class="faq-trigger">How do I withdraw my earnings? <span>+</span></button>
+                    <div class="faq-content">
+                        <p>Withdrawals can be requested directly from your wallet to your linked Nigerian bank account. All requests are reviewed by our admin team for security.</p>
+                    </div>
+                </div>
+                <div class="faq-item">
+                    <button class="faq-trigger">What is the referral structure? <span>+</span></button>
+                    <div class="faq-content">
+                        <p>We offer a two-level referral system. You earn 20% from your Level 1 referrals and 5% from your Level 2 referrals when they participate in the platform.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Final CTA -->
+        <section style="padding-bottom: 100px;">
+            <div class="reward-banner" style="background: linear-gradient(135deg, var(--secondary-green), #004d00);">
+                <h2 class="brand-font">Ready to get started?</h2>
+                <p style="margin-bottom: 25px;">Join thousands of users enjoying premium rewards and secure growth.</p>
+                <div style="display: flex; gap: 15px; justify-content: center; flex-wrap: wrap;">
+                    <a href="register.html" class="btn btn-primary">CREATE ACCOUNT</a>
+                    <a href="login.html" class="btn btn-secondary" style="border-color: white; color: white;">MEMBER LOGIN</a>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <footer>
+        <div class="footer-grid">
+            <div>
+                <div class="logo-group" style="margin-bottom: 20px;">
+                    <div class="logo-mark"><div class="swoosh-m"></div></div>
+                    <span class="logo-title" style="color: white;">LAS VEGAS</span>
+                </div>
+                <p style="font-size: 14px; color: rgba(255,255,255,0.6); line-height: 1.6;">A polished fintech experience focused on rewards and secure financial growth for the Nigerian market.</p>
+            </div>
+            <div>
+                <h4 style="color: var(--primary-magenta); margin-bottom: 20px;">Platform</h4>
+                <ul style="display: flex; flex-direction: column; gap: 10px; font-size: 14px; color: rgba(255,255,255,0.8);">
+                    <li><a href="#how-it-works">How it Works</a></li>
+                    <li><a href="#plans">Investment Plans</a></li>
+                    <li><a href="#rewards">Rewards System</a></li>
+                </ul>
+            </div>
+            <div>
+                <h4 style="color: var(--primary-magenta); margin-bottom: 20px;">Support</h4>
+                <ul style="display: flex; flex-direction: column; gap: 10px; font-size: 14px; color: rgba(255,255,255,0.8);">
+                    <li><a href="support.html">Help Center</a></li>
+                    <li><a href="terms.html">Terms of Service</a></li>
+                    <li><a href="terms.html">Privacy Policy</a></li>
+                </ul>
+            </div>
+            <div>
+                <h4 style="color: var(--primary-magenta); margin-bottom: 20px;">Contact</h4>
+                <p style="font-size: 14px; color: rgba(255,255,255,0.8);">Available via in-app support 24/7 for all premium members.</p>
+            </div>
+        </div>
+        <div class="footer-bottom">
+            <p>&copy; 2024 LAS VEGAS Platform. Built for excellence. All rights reserved.</p>
+            <p style="margin-top: 10px; font-size: 10px; opacity: 0.5;">Disclaimer: Investment involves risk. Past performance does not guarantee future results. Please invest responsibly.</p>
+        </div>
+    </footer>
+
     <script type="module">
-        // Initializing Supabase Connection Foundation
         import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm'
 
         const supabaseUrl = import.meta.env.VITE_SUPABASE_URL
         const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY
+        const supabase = (supabaseUrl && supabaseAnonKey) ? createClient(supabaseUrl, supabaseAnonKey) : null;
 
-        // Global Las Vegas App State
-        const LasVegas = {
-            supabase: (supabaseUrl && supabaseAnonKey) ? createClient(supabaseUrl, supabaseAnonKey) : null,
-            
+        const App = {
             init() {
-                console.log("🎰 LAS VEGAS Foundation Initialized");
-                this.checkSession();
+                this.setupFAQ();
+                this.setupMobileMenu();
+                this.checkAuth();
+                this.fetchPlans();
             },
 
-            async checkSession() {
-                if (!this.supabase) return;
-                const { data: { session } } = await this.supabase.auth.getSession();
+            async checkAuth() {
+                if (!supabase) return;
+                const { data: { session } } = await supabase.auth.getSession();
+                const authNav = document.getElementById('auth-nav');
+                
                 if (session) {
-                    console.log("User is authenticated");
+                    authNav.innerHTML = `
+                        <a href="dashboard.html" class="btn btn-primary btn-sm">DASHBOARD</a>
+                    `;
                 }
+            },
+
+            setupFAQ() {
+                document.querySelectorAll('.faq-trigger').forEach(trigger => {
+                    trigger.addEventListener('click', () => {
+                        const item = trigger.parentElement;
+                        const isActive = item.classList.contains('active');
+                        
+                        // Close all
+                        document.querySelectorAll('.faq-item').forEach(i => i.classList.remove('active'));
+                        
+                        if (!isActive) {
+                            item.classList.add('active');
+                            trigger.querySelector('span').innerText = '−';
+                        } else {
+                            trigger.querySelector('span').innerText = '+';
+                        }
+                    });
+                });
+            },
+
+            setupMobileMenu() {
+                const open = document.getElementById('menu-open');
+                const close = document.getElementById('menu-close');
+                const nav = document.getElementById('mobile-nav');
+                const overlay = document.getElementById('overlay');
+
+                const toggle = () => {
+                    nav.classList.toggle('active');
+                    overlay.style.display = nav.classList.contains('active') ? 'block' : 'none';
+                };
+
+                [open, close, overlay].forEach(el => el.addEventListener('click', toggle));
+            },
+
+            async fetchPlans() {
+                const container = document.getElementById('plans-container');
+                if (!supabase) {
+                    this.renderEmptyPlans();
+                    return;
+                }
+
+                try {
+                    const { data, error } = await supabase
+                        .from('plans')
+                        .select('*')
+                        .eq('is_active', true)
+                        .limit(3);
+
+                    if (error || !data || data.length === 0) {
+                        this.renderEmptyPlans();
+                    } else {
+                        container.innerHTML = `<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 20px;">
+                            ${data.map(plan => `
+                                <div class="card" style="background: white; border: 1px solid var(--border-pink); padding: 30px; border-radius: 20px; text-align: left;">
+                                    <h3 class="brand-font" style="color: var(--primary-magenta); margin: 0 0 15px 0;">${plan.name}</h3>
+                                    <div style="margin-bottom: 20px;">
+                                        <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
+                                            <span style="font-size: 13px; color: var(--text-muted);">Min. Investment</span>
+                                            <span style="font-weight: 700; color: var(--secondary-green);">₦${Number(plan.min_amount).toLocaleString()}</span>
+                                        </div>
+                                        <div style="display: flex; justify-content: space-between;">
+                                            <span style="font-size: 13px; color: var(--text-muted);">Daily Return</span>
+                                            <span style="font-weight: 700; color: var(--secondary-green);">${plan.daily_percent}%</span>
+                                        </div>
+                                    </div>
+                                    <a href="login.html" class="btn btn-primary" style="width: 100%;">SELECT PLAN</a>
+                                </div>
+                            `).join('')}
+                        </div>`;
+                    }
+                } catch (e) {
+                    this.renderEmptyPlans();
+                }
+            },
+
+            renderEmptyPlans() {
+                document.getElementById('plans-container').innerHTML = `
+                    <div style="padding: 40px; text-align: center;">
+                        <h3 class="brand-font" style="color: var(--primary-magenta);">New Plans Coming Soon</h3>
+                        <p style="color: var(--text-muted); font-size: 14px;">We are currently updating our investment offerings. Check back shortly.</p>
+                        <a href="register.html" class="btn btn-secondary" style="margin-top: 20px;">GET NOTIFIED</a>
+                    </div>
+                `;
             }
         };
 
-        document.addEventListener('DOMContentLoaded', () => LasVegas.init());
+        document.addEventListener('DOMContentLoaded', () => App.init());
     </script>
 </body>
 </html>
