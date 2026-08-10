@@ -1,0 +1,420 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>My Profile | LAS VEGAS</title>
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display&family=Quicksand:wght@400;500;600;700&display=swap" rel="stylesheet">
+    
+    <style>
+        :root {
+            --primary-magenta: #FF007F;
+            --primary-magenta-dark: #E60072;
+            --secondary-green: #006400;
+            --secondary-green-light: #008000;
+            --bg-soft-white: #FFF5F7;
+            --card-white: #FFFFFF;
+            --text-main: #1A1A1A;
+            --text-muted: #666666;
+            --border-pink: #FFD1E3;
+            --nav-black: #121212;
+            --shadow-soft: 0 4px 20px rgba(255, 0, 127, 0.06);
+            --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+        
+        body {
+            margin: 0; padding: 0;
+            font-family: 'Quicksand', sans-serif;
+            background-color: var(--bg-soft-white);
+            color: var(--text-main);
+            background-image: radial-gradient(var(--border-pink) 0.5px, transparent 0.5px);
+            background-size: 30px 30px;
+            min-height: 100vh;
+            padding-bottom: 110px;
+        }
+
+        .container { max-width: 800px; margin: 0 auto; padding: 20px; }
+
+        /* --- HEADER --- */
+        .page-header { margin-bottom: 25px; padding-top: 10px; display: flex; justify-content: space-between; align-items: center; }
+        .page-header h1 { font-family: 'DM Serif Display', serif; font-size: 28px; margin: 0; }
+        .btn-icon { width: 45px; height: 45px; border-radius: 50%; border: 1px solid var(--border-pink); background: white; color: var(--primary-magenta); cursor: pointer; display: flex; align-items: center; justify-content: center; }
+
+        /* --- PROFILE HERO --- */
+        .profile-hero {
+            background: white; border-radius: 30px; padding: 30px; text-align: center;
+            border: 1px solid var(--border-pink); box-shadow: var(--shadow-soft); margin-bottom: 25px;
+            position: relative; overflow: hidden;
+        }
+        .profile-hero::before { content: ""; position: absolute; top: 0; left: 0; width: 100%; height: 80px; background: linear-gradient(to right, var(--primary-magenta), #ff4d94); opacity: 0.1; }
+        
+        .avatar-circle { width: 80px; height: 80px; background: var(--primary-magenta); color: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 32px; font-weight: 700; margin: 0 auto 15px; position: relative; border: 4px solid white; box-shadow: var(--shadow-soft); }
+        .hero-name { font-family: 'DM Serif Display', serif; font-size: 22px; margin: 0 0 5px 0; }
+        .hero-meta { font-size: 12px; color: var(--text-muted); font-weight: 600; text-transform: uppercase; letter-spacing: 1px; }
+        .status-badge { display: inline-flex; align-items: center; gap: 6px; font-size: 11px; font-weight: 800; color: var(--secondary-green); background: #F0FFF4; padding: 4px 12px; border-radius: 50px; margin-top: 10px; }
+
+        /* --- CARDS --- */
+        .card { background: white; border-radius: 25px; border: 1px solid var(--border-pink); padding: 25px; box-shadow: var(--shadow-soft); margin-bottom: 20px; }
+        .card-title { font-family: 'DM Serif Display', serif; font-size: 18px; color: var(--primary-magenta); margin: 0 0 20px 0; border-bottom: 1px solid var(--bg-soft-white); padding-bottom: 10px; display: flex; justify-content: space-between; align-items: center; }
+        
+        /* --- FORM ELEMENTS --- */
+        .form-group { margin-bottom: 18px; }
+        .label { display: block; font-size: 11px; font-weight: 800; color: var(--text-muted); text-transform: uppercase; margin-bottom: 6px; letter-spacing: 0.5px; }
+        .value-display { font-size: 15px; font-weight: 700; color: var(--text-main); padding: 12px 0; display: block; border-bottom: 1px solid #f9f9f9; }
+        .input-field { width: 100%; padding: 12px 15px; border-radius: 12px; border: 1px solid var(--border-pink); font-family: inherit; font-size: 15px; background: #FFF9FB; outline: none; transition: var(--transition); display: none; }
+        .input-field:focus { border-color: var(--primary-magenta); background: white; }
+        
+        /* --- REFERRAL BOX --- */
+        .ref-box { background: var(--bg-soft-white); padding: 15px; border-radius: 15px; border: 1px dashed var(--border-pink); margin-top: 10px; display: flex; justify-content: space-between; align-items: center; }
+        .ref-text { font-family: monospace; font-size: 16px; font-weight: 700; color: var(--primary-magenta); }
+        .copy-link { color: var(--primary-magenta); font-weight: 700; font-size: 12px; cursor: pointer; text-decoration: underline; }
+
+        /* --- PREFERENCES --- */
+        .pref-row { display: flex; justify-content: space-between; align-items: center; padding: 12px 0; border-bottom: 1px solid #f9f9f9; }
+        .pref-info h4 { margin: 0; font-size: 14px; }
+        .pref-info p { margin: 2px 0 0 0; font-size: 11px; color: var(--text-muted); }
+        .toggle { position: relative; display: inline-block; width: 40px; height: 20px; }
+        .toggle input { opacity: 0; width: 0; height: 0; }
+        .slider { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: #ccc; transition: .4s; border-radius: 20px; }
+        .slider:before { position: absolute; content: ""; height: 16px; width: 16px; left: 2px; bottom: 2px; background-color: white; transition: .4s; border-radius: 50%; }
+        input:checked + .slider { background-color: var(--primary-magenta); }
+        input:checked + .slider:before { transform: translateX(20px); }
+
+        /* --- BUTTONS --- */
+        .btn-edit { background: none; border: none; color: var(--primary-magenta); font-weight: 700; font-size: 13px; cursor: pointer; }
+        .btn-save { width: 100%; padding: 16px; border-radius: 50px; background: var(--primary-magenta); color: white; border: none; font-weight: 700; cursor: pointer; display: none; margin-top: 10px; }
+        .btn-logout { width: 100%; padding: 16px; border-radius: 50px; background: white; color: #d00000; border: 2px solid #d00000; font-weight: 700; cursor: pointer; margin-top: 20px; transition: var(--transition); }
+        .btn-logout:hover { background: #FFF0F0; }
+
+        /* --- NAV ISLAND --- */
+        .nav-island { position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%); background: var(--nav-black); height: 65px; width: 92%; max-width: 400px; border-radius: 100px; display: flex; justify-content: space-around; align-items: center; z-index: 1000; box-shadow: 0 10px 30px rgba(0,0,0,0.3); }
+        .nav-item { color: #666; text-decoration: none; font-size: 10px; font-weight: 700; display: flex; flex-direction: column; align-items: center; gap: 4px; }
+        .nav-item.active { color: var(--primary-magenta); }
+
+        /* --- SIDEBAR --- */
+        .sidebar { position: fixed; top: 0; left: -100%; width: 280px; height: 100%; background: white; z-index: 2000; transition: var(--transition); padding: 30px; }
+        .sidebar.active { left: 0; }
+        .sb-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 1500; display: none; }
+
+        /* --- SKELETON --- */
+        .skeleton { height: 20px; background: #eee; border-radius: 5px; animation: pulse 1.5s infinite; }
+        @keyframes pulse { 0% { opacity: 0.6; } 50% { opacity: 1; } 100% { opacity: 0.6; } }
+
+        /* --- MODAL --- */
+        .modal-overlay { position: fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.7); display:none; align-items:center; justify-content:center; z-index:3000; padding:20px; }
+        .modal-card { background:white; border-radius:30px; padding:30px; text-align:center; max-width:400px; width:100%; }
+    </style>
+</head>
+<body>
+
+    <div class="sb-overlay" id="overlay"></div>
+    <aside class="sidebar" id="sidebar">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 40px;">
+            <span class="brand-font" style="color: var(--primary-magenta); font-size: 24px;">LAS VEGAS</span>
+            <button id="close-sb" style="background: none; border: none; font-size: 24px; cursor: pointer;">✕</button>
+        </div>
+        <nav style="display: flex; flex-direction: column; gap: 15px;">
+            <a href="dashboard.html" style="text-decoration: none; color: var(--text-main); font-weight: 600;">🏠 Dashboard</a>
+            <a href="wallet.html" style="text-decoration: none; color: var(--text-main); font-weight: 600;">👛 Wallet</a>
+            <a href="profile.html" style="text-decoration: none; color: var(--primary-magenta); font-weight: 700;">👤 My Profile</a>
+            <a href="referrals.html" style="text-decoration: none; color: var(--text-main); font-weight: 600;">👥 Referrals</a>
+            <a href="notifications.html" style="text-decoration: none; color: var(--text-main); font-weight: 600;">🔔 Notifications</a>
+        </nav>
+    </aside>
+
+    <div class="container">
+        <header class="page-header">
+            <h1>Settings</h1>
+            <button class="btn-icon" id="open-sb">☰</button>
+        </header>
+
+        <!-- Profile Hero -->
+        <div class="profile-hero">
+            <div class="avatar-circle" id="avatar-initial">U</div>
+            <h2 class="hero-name" id="hero-fullname"><div class="skeleton" style="width:150px; margin:0 auto;"></div></h2>
+            <div class="hero-meta" id="hero-member-since">Member Since ...</div>
+            <div class="status-badge">● Account Active</div>
+        </div>
+
+        <!-- Personal Info -->
+        <div class="card" id="profile-section">
+            <div class="card-title">
+                Personal Information
+                <button class="btn-edit" id="edit-profile-btn">Edit</button>
+            </div>
+            <form id="profile-form">
+                <div class="form-group">
+                    <span class="label">Full Name</span>
+                    <span class="value-display" id="disp-name">Loading...</span>
+                    <input type="text" class="input-field" id="input-name" required>
+                </div>
+                <div class="form-group">
+                    <span class="label">Email Address</span>
+                    <span class="value-display" id="disp-email">---</span>
+                    <p style="font-size:10px; color:var(--text-muted); margin-top:-10px;">Primary account ID (Read-only)</p>
+                </div>
+                <div class="form-group">
+                    <span class="label">Phone Number</span>
+                    <span class="value-display" id="disp-phone">---</span>
+                    <input type="tel" class="input-field" id="input-phone">
+                </div>
+                <button type="submit" class="btn-save" id="save-profile-btn">SAVE CHANGES</button>
+            </form>
+        </div>
+
+        <!-- Payout Info -->
+        <div class="card" id="payout-section">
+            <div class="card-title">
+                Withdrawal Details
+                <button class="btn-edit" id="edit-payout-btn">Update</button>
+            </div>
+            <form id="payout-form">
+                <div class="form-group">
+                    <span class="label">Bank / Provider</span>
+                    <span class="value-display" id="disp-bank">Not set</span>
+                    <input type="text" class="input-field" id="input-bank" placeholder="e.g., OPay, Kuda, GTBank">
+                </div>
+                <div class="form-group">
+                    <span class="label">Account Name</span>
+                    <span class="value-display" id="disp-acc-name">---</span>
+                    <input type="text" class="input-field" id="input-acc-name">
+                </div>
+                <div class="form-group">
+                    <span class="label">Account Number</span>
+                    <span class="value-display" id="disp-acc-num">---</span>
+                    <input type="text" class="input-field" id="input-acc-num" maxlength="10">
+                </div>
+                <button type="submit" class="btn-save" id="save-payout-btn">SAVE PAYOUT DETAILS</button>
+            </form>
+        </div>
+
+        <!-- Referral Info -->
+        <div class="card">
+            <div class="card-title">Referral Program</div>
+            <div class="form-group">
+                <span class="label">Your Referral Code</span>
+                <div class="ref-box">
+                    <span class="ref-text" id="ref-code">------</span>
+                    <span class="copy-link" id="copy-code">Copy Code</span>
+                </div>
+            </div>
+            <div class="form-group">
+                <span class="label">Rates</span>
+                <p style="font-size:13px; font-weight:700; color:var(--secondary-green);">Level 1: 20% • Level 2: 5%</p>
+            </div>
+        </div>
+
+        <!-- Notifications -->
+        <div class="card">
+            <div class="card-title">Preferences</div>
+            <div class="pref-row">
+                <div class="pref-info">
+                    <h4>Account Alerts</h4>
+                    <p>Security and login notifications</p>
+                </div>
+                <label class="toggle">
+                    <input type="checkbox" checked disabled>
+                    <span class="slider"></span>
+                </label>
+            </div>
+            <div class="pref-row">
+                <div class="pref-info">
+                    <h4>Earnings Updates</h4>
+                    <p>Daily profit notifications</p>
+                </div>
+                <label class="toggle">
+                    <input type="checkbox" checked>
+                    <span class="slider"></span>
+                </label>
+            </div>
+        </div>
+
+        <!-- Security -->
+        <div class="card">
+            <div class="card-title">Security & Session</div>
+            <div class="form-group">
+                <span class="label">Current Session</span>
+                <p style="font-size:13px; font-weight:600;">Active now • This Device</p>
+            </div>
+            <button class="btn-logout" id="logout-trigger">LOG OUT OF ACCOUNT</button>
+        </div>
+    </div>
+
+    <!-- Modals -->
+    <div class="modal-overlay" id="logout-modal">
+        <div class="modal-card">
+            <h3 class="brand-font">Sign Out?</h3>
+            <p style="color:var(--text-muted); font-size:14px; margin-bottom:25px;">Are you sure you want to end your current session?</p>
+            <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px;">
+                <button class="btn-logout" style="margin:0; border-color:#ccc; color:#666;" onclick="document.getElementById('logout-modal').style.display='none'">CANCEL</button>
+                <button class="btn-logout" style="margin:0; background:var(--primary-magenta); color:white; border:none;" id="confirm-logout">LOG OUT</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Nav Island -->
+    <nav class="nav-island">
+        <a href="dashboard.html" class="nav-item"><span>🏠</span><span>Home</span></a>
+        <a href="plans.html" class="nav-item"><span>📈</span><span>Plans</span></a>
+        <a href="wallet.html" class="nav-item"><span>👛</span><span>Wallet</span></a>
+        <a href="profile.html" class="nav-item active"><span>👤</span><span>Profile</span></a>
+    </nav>
+
+    <script type="module">
+        import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm'
+
+        const supabase = createClient(import.meta.env.VITE_SUPABASE_URL, import.meta.env.VITE_SUPABASE_ANON_KEY);
+
+        const ProfileApp = {
+            user: null,
+            profile: null,
+            payout: null,
+
+            async init() {
+                const { data: { session } } = await supabase.auth.getSession();
+                if (!session) return window.location.href = 'login.html';
+                this.user = session.user;
+
+                this.setupUI();
+                await this.loadData();
+            },
+
+            setupUI() {
+                const sb = document.getElementById('sidebar');
+                const ov = document.getElementById('overlay');
+                document.getElementById('open-sb').onclick = () => { sb.classList.add('active'); ov.style.display = 'block'; };
+                document.getElementById('close-sb').onclick = () => { sb.classList.remove('active'); ov.style.display = 'none'; };
+                ov.onclick = () => { sb.classList.remove('active'); ov.style.display = 'none'; };
+                
+                // Toggle Edit Modes
+                document.getElementById('edit-profile-btn').onclick = () => this.toggleEdit('profile');
+                document.getElementById('edit-payout-btn').onclick = () => this.toggleEdit('payout');
+
+                // Forms
+                document.getElementById('profile-form').onsubmit = (e) => { e.preventDefault(); this.updateProfile(); };
+                document.getElementById('payout-form').onsubmit = (e) => { e.preventDefault(); this.updatePayout(); };
+
+                // Logout
+                document.getElementById('logout-trigger').onclick = () => document.getElementById('logout-modal').style.display = 'flex';
+                document.getElementById('confirm-logout').onclick = async () => {
+                    await supabase.auth.signOut();
+                    window.location.href = 'index.html';
+                };
+
+                // Copy
+                document.getElementById('copy-code').onclick = () => {
+                    navigator.clipboard.writeText(this.profile.referral_code);
+                    alert("Referral code copied!");
+                };
+            },
+
+            toggleEdit(section) {
+                const isProfile = section === 'profile';
+                const prefix = isProfile ? 'profile' : 'payout';
+                const btn = document.getElementById(`edit-${prefix}-btn`);
+                const saveBtn = document.getElementById(`save-${prefix}-btn`);
+                const inputs = document.querySelectorAll(`#${prefix}-section .input-field`);
+                const displays = document.querySelectorAll(`#${prefix}-section .value-display`);
+
+                if (btn.innerText === 'Edit' || btn.innerText === 'Update') {
+                    btn.innerText = 'Cancel';
+                    saveBtn.style.display = 'block';
+                    inputs.forEach(i => i.style.display = 'block');
+                    displays.forEach(d => { if(d.id !== 'disp-email') d.style.display = 'none'; });
+                } else {
+                    btn.innerText = isProfile ? 'Edit' : 'Update';
+                    saveBtn.style.display = 'none';
+                    inputs.forEach(i => i.style.display = 'none');
+                    displays.forEach(d => d.style.display = 'block');
+                }
+            },
+
+            async loadData() {
+                try {
+                    // 1. Profile
+                    const { data: profile } = await supabase.from('profiles').select('*').eq('id', this.user.id).single();
+                    this.profile = profile;
+                    if (profile) {
+                        document.getElementById('hero-fullname').innerText = profile.full_name;
+                        document.getElementById('avatar-initial').innerText = profile.full_name.charAt(0);
+                        document.getElementById('hero-member-since').innerText = `Member Since ${new Date(profile.created_at).toLocaleDateString()}`;
+                        document.getElementById('disp-name').innerText = profile.full_name;
+                        document.getElementById('disp-email').innerText = this.user.email;
+                        document.getElementById('disp-phone').innerText = profile.phone_number || 'Not set';
+                        document.getElementById('ref-code').innerText = profile.referral_code;
+
+                        document.getElementById('input-name').value = profile.full_name;
+                        document.getElementById('input-phone').value = profile.phone_number || '';
+                    }
+
+                    // 2. Payout Details
+                    const { data: payout } = await supabase.from('withdrawal_accounts').select('*').eq('user_id', this.user.id).eq('is_default', true).maybeSingle();
+                    this.payout = payout;
+                    if (payout) {
+                        document.getElementById('disp-bank').innerText = payout.provider_name;
+                        document.getElementById('disp-acc-name').innerText = payout.account_name;
+                        document.getElementById('disp-acc-num').innerText = `**** ${payout.account_number.slice(-4)}`;
+
+                        document.getElementById('input-bank').value = payout.provider_name;
+                        document.getElementById('input-acc-name').value = payout.account_name;
+                        document.getElementById('input-acc-num').value = payout.account_number;
+                    }
+                } catch (e) {
+                    console.error(e);
+                }
+            },
+
+            async updateProfile() {
+                const name = document.getElementById('input-name').value.trim();
+                const phone = document.getElementById('input-phone').value.trim();
+
+                const { error } = await supabase.from('profiles')
+                    .update({ full_name: name, phone_number: phone })
+                    .eq('id', this.user.id);
+
+                if (!error) {
+                    alert("Profile updated!");
+                    this.loadData();
+                    this.toggleEdit('profile');
+                }
+            },
+
+            async updatePayout() {
+                const bank = document.getElementById('input-bank').value.trim();
+                const name = document.getElementById('input-acc-name').value.trim();
+                const num = document.getElementById('input-acc-num').value.trim();
+
+                if (num.length < 10) return alert("Account number must be at least 10 digits.");
+
+                let error;
+                if (this.payout) {
+                    // Update
+                    const res = await supabase.from('withdrawal_accounts')
+                        .update({ provider_name: bank, account_name: name, account_number: num })
+                        .eq('id', this.payout.id);
+                    error = res.error;
+                } else {
+                    // Insert
+                    const res = await supabase.from('withdrawal_accounts')
+                        .insert({ user_id: this.user.id, provider_name: bank, account_name: name, account_number: num, is_default: true });
+                    error = res.error;
+                }
+
+                if (!error) {
+                    alert("Payout details saved!");
+                    this.loadData();
+                    this.toggleEdit('payout');
+                }
+            }
+        };
+
+        window.ProfileApp = ProfileApp;
+        document.addEventListener('DOMContentLoaded', () => ProfileApp.init());
+    </script>
+</body>
+</html>
