@@ -1,0 +1,418 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Dashboard | LAS VEGAS</title>
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display&family=Quicksand:wght@400;500;600;700&display=swap" rel="stylesheet">
+    
+    <style>
+        :root {
+            --primary-magenta: #FF007F;
+            --primary-magenta-dark: #E60072;
+            --secondary-green: #006400;
+            --secondary-green-light: #008000;
+            --bg-soft-white: #FFF5F7;
+            --card-white: #FFFFFF;
+            --text-main: #1A1A1A;
+            --text-muted: #666666;
+            --border-pink: #FFD1E3;
+            --nav-black: #121212;
+            --shadow-soft: 0 4px 20px rgba(255, 0, 127, 0.06);
+            --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+        
+        body {
+            margin: 0; padding: 0;
+            font-family: 'Quicksand', sans-serif;
+            background-color: var(--bg-soft-white);
+            color: var(--text-main);
+            background-image: radial-gradient(var(--border-pink) 0.5px, transparent 0.5px);
+            background-size: 30px 30px;
+            min-height: 100vh;
+            padding-bottom: 100px; /* Space for mobile nav island */
+        }
+
+        /* --- SKELETON LOADING --- */
+        .skeleton { background: #eee; background: linear-gradient(110deg, #ececec 8%, #f5f5f5 18%, #ececec 33%); border-radius: 5px; background-size: 200% 100%; animation: 1.5s shine linear infinite; }
+        @keyframes shine { to { background-position-x: -200%; } }
+
+        /* --- LAYOUT --- */
+        .dashboard-container { max-width: 1200px; margin: 0 auto; padding: 20px; }
+        
+        /* --- HEADER --- */
+        .top-bar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px; padding: 10px 0; }
+        .user-greeting h1 { font-family: 'DM Serif Display', serif; font-size: 24px; margin: 0; color: var(--text-main); }
+        .user-greeting p { font-size: 14px; color: var(--text-muted); margin: 5px 0 0 0; }
+        .top-icons { display: flex; gap: 15px; }
+        .icon-btn { width: 40px; height: 40px; border-radius: 50%; background: white; border: 1px solid var(--border-pink); display: flex; align-items: center; justify-content: center; color: var(--primary-magenta); cursor: pointer; position: relative; }
+        .badge { position: absolute; top: -2px; right: -2px; width: 8px; height: 8px; background: var(--primary-magenta); border-radius: 50%; border: 2px solid white; }
+
+        /* --- HERO CARD --- */
+        .balance-hero {
+            background: linear-gradient(135deg, var(--primary-magenta), #ff4d94);
+            border-radius: 25px; padding: 30px; color: white; margin-bottom: 25px;
+            box-shadow: 0 10px 25px rgba(255, 0, 127, 0.15);
+            position: relative; overflow: hidden;
+        }
+        .balance-hero::after { content: "✦"; position: absolute; right: 20px; top: 10px; font-size: 80px; opacity: 0.1; }
+        .balance-label { font-size: 12px; text-transform: uppercase; letter-spacing: 2px; font-weight: 700; opacity: 0.9; }
+        .balance-value { font-size: 36px; font-weight: 700; margin: 10px 0 25px 0; }
+        .hero-actions { display: flex; gap: 12px; }
+        .action-btn { flex: 1; padding: 12px; border-radius: 12px; border: none; font-weight: 700; font-size: 13px; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; transition: var(--transition); }
+        .btn-white { background: white; color: var(--primary-magenta); }
+        .btn-outline-white { background: rgba(255,255,255,0.2); color: white; border: 1px solid rgba(255,255,255,0.4); }
+
+        /* --- STATS GRID --- */
+        .stats-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px; margin-bottom: 25px; }
+        .stat-card { background: white; padding: 20px; border-radius: 20px; border: 1px solid var(--border-pink); box-shadow: var(--shadow-soft); }
+        .stat-card .label { font-size: 10px; text-transform: uppercase; font-weight: 700; color: var(--text-muted); display: block; margin-bottom: 5px; }
+        .stat-card .value { font-size: 18px; font-weight: 700; color: var(--secondary-green); }
+
+        /* --- SECTION TITLES --- */
+        .sec-header { display: flex; justify-content: space-between; align-items: center; margin: 30px 0 15px 0; }
+        .sec-header h2 { font-family: 'DM Serif Display', serif; font-size: 20px; margin: 0; }
+        .sec-header a { font-size: 13px; color: var(--primary-magenta); font-weight: 700; text-decoration: none; }
+
+        /* --- QUICK ACTIONS --- */
+        .quick-actions { display: flex; gap: 10px; overflow-x: auto; padding-bottom: 10px; scrollbar-width: none; }
+        .quick-actions::-webkit-scrollbar { display: none; }
+        .qa-item { flex: 0 0 auto; background: white; padding: 12px 20px; border-radius: 100px; border: 1px solid var(--border-pink); font-size: 13px; font-weight: 700; display: flex; align-items: center; gap: 8px; box-shadow: var(--shadow-soft); }
+
+        /* --- CHECK-IN CARD --- */
+        .checkin-card {
+            background: white; padding: 20px; border-radius: 20px; border: 1px solid var(--border-pink);
+            display: flex; justify-content: space-between; align-items: center; margin-top: 20px;
+        }
+        .ci-info h3 { margin: 0; font-size: 16px; color: var(--text-main); }
+        .ci-info p { margin: 4px 0 0 0; font-size: 13px; color: var(--text-muted); }
+        .btn-claim { background: var(--secondary-green); color: white; border: none; padding: 10px 20px; border-radius: 100px; font-weight: 700; font-size: 13px; cursor: pointer; }
+        .btn-claimed { background: #f0f0f0; color: #999; cursor: not-allowed; }
+
+        /* --- TRANSACTION TABLE --- */
+        .table-card { background: white; border-radius: 20px; border: 1px solid var(--border-pink); overflow: hidden; box-shadow: var(--shadow-soft); }
+        .tr-row { display: flex; justify-content: space-between; align-items: center; padding: 15px 20px; border-bottom: 1px solid var(--bg-soft-white); }
+        .tr-row:last-child { border-bottom: none; }
+        .tr-info h4 { margin: 0; font-size: 14px; font-weight: 700; }
+        .tr-info span { font-size: 11px; color: var(--text-muted); }
+        .tr-amt { font-weight: 700; font-size: 14px; }
+        .amt-pos { color: var(--secondary-green); }
+        .amt-neg { color: #d00000; }
+
+        /* --- REFERRAL BOX --- */
+        .refer-card { background: #1a000d; color: white; padding: 25px; border-radius: 25px; margin-top: 30px; position: relative; }
+        .refer-card h3 { font-family: 'DM Serif Display', serif; margin: 0 0 10px 0; color: var(--primary-magenta); }
+        .refer-card p { font-size: 13px; opacity: 0.8; margin-bottom: 20px; }
+        .ref-code-box { background: rgba(255,255,255,0.1); padding: 15px; border-radius: 15px; display: flex; justify-content: space-between; align-items: center; border: 1px dashed rgba(255,255,255,0.3); }
+        .ref-code { font-family: monospace; font-size: 18px; font-weight: 700; letter-spacing: 2px; }
+        .copy-btn { color: var(--primary-magenta); font-weight: 700; font-size: 12px; cursor: pointer; background: none; border: none; text-transform: uppercase; }
+
+        /* --- MOBILE NAV ISLAND --- */
+        .nav-island {
+            position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%);
+            background: var(--nav-black); height: 65px; width: 90%; max-width: 400px;
+            border-radius: 100px; display: flex; justify-content: space-around; align-items: center;
+            padding: 0 10px; z-index: 1000; box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+        }
+        .nav-item { display: flex; flex-direction: column; align-items: center; gap: 4px; color: #666; text-decoration: none; transition: var(--transition); }
+        .nav-item.active { color: var(--primary-magenta); }
+        .nav-item span { font-size: 10px; font-weight: 700; text-transform: uppercase; }
+        .nav-icon { font-size: 20px; }
+
+        /* --- SIDEBAR --- */
+        .sidebar { position: fixed; top: 0; left: -100%; width: 280px; height: 100%; background: white; z-index: 2000; transition: var(--transition); padding: 30px; box-shadow: 10px 0 40px rgba(0,0,0,0.1); }
+        .sidebar.active { left: 0; }
+        .sidebar-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 1500; display: none; }
+        .sb-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 40px; }
+        .sb-nav { display: flex; flex-direction: column; gap: 15px; }
+        .sb-link { display: flex; align-items: center; gap: 12px; text-decoration: none; color: var(--text-main); font-weight: 600; font-size: 15px; padding: 10px; border-radius: 10px; transition: var(--transition); }
+        .sb-link:hover { background: var(--bg-soft-white); color: var(--primary-magenta); }
+        .sb-link.logout { color: #d00000; margin-top: 20px; border-top: 1px solid #eee; padding-top: 20px; }
+
+        @media (min-width: 1024px) {
+            .stats-grid { grid-template-columns: repeat(4, 1fr); }
+            .dashboard-container { padding: 40px; }
+            .nav-island { display: none; }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="sidebar-overlay" id="overlay"></div>
+    
+    <aside class="sidebar" id="sidebar">
+        <div class="sb-header">
+            <span class="brand-font" style="color: var(--primary-magenta); font-size: 22px;">LAS VEGAS</span>
+            <button id="close-sb" style="background: none; border: none; font-size: 24px;">✕</button>
+        </div>
+        <nav class="sb-nav">
+            <a href="dashboard.html" class="sb-link">🏠 Dashboard</a>
+            <a href="plans.html" class="sb-link">📈 Investment Plans</a>
+            <a href="investment.html" class="sb-link">💰 My Investments</a>
+            <a href="wallet.html" class="sb-link">👛 Wallet</a>
+            <a href="deposit.html" class="sb-link">📥 Deposit Funds</a>
+            <a href="withdraw.html" class="sb-link">📤 Withdraw</a>
+            <a href="referrals.html" class="sb-link">👥 Referrals</a>
+            <a href="notifications.html" class="sb-link">🔔 Notifications</a>
+            <a href="profile.html" class="sb-link">👤 My Profile</a>
+            <a href="support.html" class="sb-link">🎧 Support</a>
+            <button id="logout-btn" class="sb-link logout">🚪 Logout</button>
+        </nav>
+    </aside>
+
+    <div class="dashboard-container">
+        <!-- Top Bar -->
+        <header class="top-bar">
+            <div class="user-greeting">
+                <p>Welcome back,</p>
+                <h1 id="user-name"><div class="skeleton" style="width: 120px; height: 24px;"></div></h1>
+            </div>
+            <div class="top-icons">
+                <div class="icon-btn" id="open-sb">☰</div>
+                <div class="icon-btn">🔔<div class="badge"></div></div>
+            </div>
+        </header>
+
+        <!-- Balance Hero -->
+        <div class="balance-hero">
+            <div class="balance-label">Available Balance</div>
+            <div class="balance-value" id="main-balance">₦0.00</div>
+            <div class="hero-actions">
+                <button class="action-btn btn-white" onclick="location.href='deposit.html'">📥 Deposit</button>
+                <button class="action-btn btn-outline-white" onclick="location.href='withdraw.html'">📤 Withdraw</button>
+            </div>
+        </div>
+
+        <!-- Quick Actions -->
+        <div class="quick-actions">
+            <div class="qa-item" onclick="location.href='plans.html'">📈 Invest</div>
+            <div class="qa-item" onclick="location.href='earnings.html'">💰 Earnings</div>
+            <div class="qa-item" onclick="location.href='gift-code.html'">🎁 Gift Code</div>
+            <div class="qa-item" onclick="location.href='referrals.html'">👥 Refer</div>
+        </div>
+
+        <!-- Stats Grid -->
+        <div class="stats-grid">
+            <div class="stat-card">
+                <span class="label">Invested</span>
+                <div class="value" id="stat-invested">₦0.00</div>
+            </div>
+            <div class="stat-card">
+                <span class="label">Total Earned</span>
+                <div class="value" id="stat-earned">₦0.00</div>
+            </div>
+            <div class="stat-card">
+                <span class="label">Total Deposits</span>
+                <div class="value" id="stat-deposits">₦0.00</div>
+            </div>
+            <div class="stat-card">
+                <span class="label">Withdrawals</span>
+                <div class="value" id="stat-withdrawals">₦0.00</div>
+            </div>
+        </div>
+
+        <!-- Daily Check-In -->
+        <div class="checkin-card">
+            <div class="ci-info">
+                <h3>Daily Check-In</h3>
+                <p>Claim your daily ₦200.00 reward</p>
+            </div>
+            <button id="claim-btn" class="btn-claim">CLAIM</button>
+        </div>
+
+        <!-- Transactions -->
+        <div class="sec-header">
+            <h2>Recent Transactions</h2>
+            <a href="transactions.html">View All</a>
+        </div>
+        <div class="table-card" id="transaction-list">
+            <div style="padding: 30px; text-align: center; color: #999;">Loading transactions...</div>
+        </div>
+
+        <!-- Referral -->
+        <div class="refer-card">
+            <h3>Invite & Earn</h3>
+            <p>Earn up to 20% on Level 1 and 5% on Level 2 referrals.</p>
+            <div class="ref-code-box">
+                <span class="ref-code" id="my-ref-code">------</span>
+                <button class="copy-btn" id="copy-code">Copy</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Mobile Nav Island -->
+    <nav class="nav-island">
+        <a href="dashboard.html" class="nav-item active">
+            <div class="nav-icon">🏠</div>
+            <span>Home</span>
+        </a>
+        <a href="plans.html" class="nav-item">
+            <div class="nav-icon">📈</div>
+            <span>Plans</span>
+        </a>
+        <a href="wallet.html" class="nav-item">
+            <div class="nav-icon">👛</div>
+            <span>Wallet</span>
+        </a>
+        <a href="profile.html" class="nav-item">
+            <div class="nav-icon">👤</div>
+            <span>Profile</span>
+        </a>
+    </nav>
+
+    <script type="module">
+        import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm'
+
+        const supabase = createClient(import.meta.env.VITE_SUPABASE_URL, import.meta.env.VITE_SUPABASE_ANON_KEY);
+
+        const Dashboard = {
+            user: null,
+            wallet: null,
+
+            async init() {
+                const { data: { session } } = await supabase.auth.getSession();
+                if (!session) {
+                    window.location.href = 'login.html';
+                    return;
+                }
+                this.user = session.user;
+                this.setupUI();
+                await this.fetchData();
+            },
+
+            setupUI() {
+                // Sidebar Logic
+                const open = document.getElementById('open-sb');
+                const close = document.getElementById('close-sb');
+                const sidebar = document.getElementById('sidebar');
+                const overlay = document.getElementById('overlay');
+
+                const toggle = () => {
+                    sidebar.classList.toggle('active');
+                    overlay.style.display = sidebar.classList.contains('active') ? 'block' : 'none';
+                };
+
+                [open, close, overlay].forEach(el => el.addEventListener('click', toggle));
+
+                // Logout
+                document.getElementById('logout-btn').onclick = async () => {
+                    await supabase.auth.signOut();
+                    window.location.href = 'index.html';
+                };
+
+                // Copy Logic
+                document.getElementById('copy-code').onclick = () => {
+                    const code = document.getElementById('my-ref-code').innerText;
+                    navigator.clipboard.writeText(code);
+                    document.getElementById('copy-code').innerText = 'Copied!';
+                    setTimeout(() => document.getElementById('copy-code').innerText = 'Copy', 2000);
+                };
+
+                // Check-in logic
+                document.getElementById('claim-btn').onclick = () => this.handleCheckIn();
+            },
+
+            async fetchData() {
+                try {
+                    // 1. Profile & Wallet
+                    const { data: profile } = await supabase.from('profiles').select('*').eq('id', this.user.id).single();
+                    const { data: wallet } = await supabase.from('wallets').select('*').eq('user_id', this.user.id).single();
+                    
+                    if (profile) {
+                        document.getElementById('user-name').innerText = profile.full_name.split(' ')[0];
+                        document.getElementById('my-ref-code').innerText = profile.referral_code;
+                    }
+
+                    if (wallet) {
+                        this.wallet = wallet;
+                        document.getElementById('main-balance').innerText = `₦${Number(wallet.balance).toLocaleString()}`;
+                        document.getElementById('stat-invested').innerText = `₦${Number(wallet.investment_balance || 0).toLocaleString()}`;
+                        document.getElementById('stat-earned').innerText = `₦${Number(wallet.total_earned).toLocaleString()}`;
+                        document.getElementById('stat-deposits').innerText = `₦${Number(wallet.total_deposited).toLocaleString()}`;
+                        document.getElementById('stat-withdrawals').innerText = `₦${Number(wallet.total_withdrawn).toLocaleString()}`;
+                    }
+
+                    // 2. Transactions
+                    const { data: txs } = await supabase.from('transactions').select('*').eq('user_id', this.user.id).order('created_at', { ascending: false }).limit(5);
+                    this.renderTransactions(txs);
+
+                    // 3. Check-in status
+                    const today = new Date().toISOString().split('T')[0];
+                    const { data: checkin } = await supabase.from('transactions').select('*').eq('user_id', this.user.id).eq('type', 'DAILY_CHECKIN').gte('created_at', today);
+                    
+                    if (checkin && checkin.length > 0) {
+                        const btn = document.getElementById('claim-btn');
+                        btn.innerText = 'CLAIMED';
+                        btn.classList.add('btn-claimed');
+                        btn.disabled = true;
+                    }
+
+                } catch (e) {
+                    console.error("Data fetch error", e);
+                }
+            },
+
+            renderTransactions(txs) {
+                const container = document.getElementById('transaction-list');
+                if (!txs || txs.length === 0) {
+                    container.innerHTML = '<div style="padding: 40px; text-align: center; color: #999;">No transactions yet.</div>';
+                    return;
+                }
+
+                container.innerHTML = txs.map(tx => `
+                    <div class="tr-row">
+                        <div class="tr-info">
+                            <h4>${tx.type.replace('_', ' ')}</h4>
+                            <span>${new Date(tx.created_at).toLocaleDateString()}</span>
+                        </div>
+                        <div class="tr-amt ${tx.amount > 0 ? 'amt-pos' : 'amt-neg'}">
+                            ${tx.amount > 0 ? '+' : ''}₦${Math.abs(tx.amount).toLocaleString()}
+                        </div>
+                    </div>
+                `).join('');
+            },
+
+            async handleCheckIn() {
+                const btn = document.getElementById('claim-btn');
+                btn.innerText = '...';
+                btn.disabled = true;
+
+                try {
+                    // Logic: Add 200 to balance, update total earned, record transaction.
+                    // This should be an RPC or Trigger in production.
+                    const newBalance = Number(this.wallet.balance) + 200;
+                    const newEarned = Number(this.wallet.total_earned) + 200;
+
+                    await supabase.from('wallets').update({ 
+                        balance: newBalance, 
+                        total_earned: newEarned 
+                    }).eq('user_id', this.user.id);
+
+                    await supabase.from('transactions').insert({
+                        user_id: this.user.id,
+                        amount: 200.00,
+                        type: 'DAILY_CHECKIN',
+                        status: 'SUCCESS',
+                        description: 'Daily check-in reward'
+                    });
+
+                    btn.innerText = 'CLAIMED';
+                    btn.classList.add('btn-claimed');
+                    document.getElementById('main-balance').innerText = `₦${newBalance.toLocaleString()}`;
+                    
+                } catch (e) {
+                    btn.innerText = 'ERROR';
+                    btn.disabled = false;
+                }
+            }
+        };
+
+        document.addEventListener('DOMContentLoaded', () => Dashboard.init());
+    </script>
+</body>
+</html>
