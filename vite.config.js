@@ -13,6 +13,7 @@ export default defineConfig({
         plans: resolve(__dirname, 'plans.html'),
         investment: resolve(__dirname, 'investment.html'),
         wallet: resolve(__dirname, 'wallet.html'),
+        deposit: resolve(__dirname, 'deposit.html'),
       }
     }
   }
