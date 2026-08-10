@@ -1,0 +1,291 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Gift Code | LAS VEGAS</title>
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display&family=Quicksand:wght@400;500;600;700&display=swap" rel="stylesheet">
+    
+    <style>
+        :root {
+            --primary-magenta: #FF007F;
+            --primary-magenta-dark: #E60072;
+            --secondary-green: #006400;
+            --secondary-green-light: #008000;
+            --bg-soft-white: #FFF5F7;
+            --card-white: #FFFFFF;
+            --text-main: #1A1A1A;
+            --text-muted: #666666;
+            --border-pink: #FFD1E3;
+            --nav-black: #121212;
+            --shadow-soft: 0 4px 20px rgba(255, 0, 127, 0.06);
+            --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+        
+        body {
+            margin: 0; padding: 0;
+            font-family: 'Quicksand', sans-serif;
+            background-color: var(--bg-soft-white);
+            color: var(--text-main);
+            background-image: radial-gradient(var(--border-pink) 0.5px, transparent 0.5px);
+            background-size: 30px 30px;
+            min-height: 100vh;
+            padding-bottom: 110px;
+        }
+
+        .container { max-width: 1200px; margin: 0 auto; padding: 20px; }
+
+        /* --- HEADER --- */
+        .page-header { margin-bottom: 25px; padding-top: 10px; display: flex; justify-content: space-between; align-items: flex-start; }
+        .page-header h1 { font-family: 'DM Serif Display', serif; font-size: 28px; margin: 0; color: var(--text-main); }
+        .page-header p { font-size: 14px; color: var(--text-muted); margin: 5px 0 0 0; }
+
+        /* --- HERO CARD --- */
+        .hero-card {
+            background: linear-gradient(135deg, var(--primary-magenta), #ff4d94);
+            border-radius: 30px; padding: 35px; color: white; margin-bottom: 25px;
+            box-shadow: 0 10px 25px rgba(255, 0, 127, 0.15);
+            position: relative; overflow: hidden; text-align: center;
+        }
+        .hero-card::after { content: "🎁"; position: absolute; right: -10px; top: -10px; font-size: 100px; opacity: 0.1; transform: rotate(15deg); }
+        .hero-card h2 { font-family: 'DM Serif Display', serif; font-size: 24px; margin: 0 0 10px 0; }
+        .hero-card p { font-size: 14px; opacity: 0.9; margin-bottom: 0; }
+
+        /* --- INPUT SECTION --- */
+        .redeem-box { background: white; border-radius: 25px; border: 1px solid var(--border-pink); padding: 30px; box-shadow: var(--shadow-soft); margin-bottom: 25px; }
+        .input-group { margin-bottom: 20px; }
+        .input-label { display: block; font-size: 12px; font-weight: 700; color: var(--primary-magenta); text-transform: uppercase; margin-bottom: 10px; letter-spacing: 1px; }
+        .code-input {
+            width: 100%; padding: 18px; border-radius: 15px; border: 2px solid var(--border-pink);
+            font-family: monospace; font-size: 20px; font-weight: 700; text-align: center;
+            background: #FFF9FB; outline: none; transition: var(--transition); letter-spacing: 2px;
+        }
+        .code-input:focus { border-color: var(--primary-magenta); background: white; }
+        .btn-redeem {
+            width: 100%; padding: 18px; border-radius: 50px; background: var(--primary-magenta); color: white;
+            border: none; font-size: 16px; font-weight: 700; cursor: pointer; transition: var(--transition);
+            box-shadow: 0 4px 15px rgba(255, 0, 127, 0.2);
+        }
+        .btn-redeem:disabled { background: #ccc; cursor: not-allowed; box-shadow: none; }
+
+        /* --- STATS --- */
+        .stats-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 30px; }
+        .stat-card { background: white; border: 1px solid var(--border-pink); padding: 20px; border-radius: 20px; box-shadow: var(--shadow-soft); text-align: center; }
+        .stat-label { font-size: 10px; font-weight: 700; color: var(--text-muted); text-transform: uppercase; display: block; margin-bottom: 5px; }
+        .stat-value { font-size: 18px; font-weight: 700; color: var(--secondary-green); }
+
+        /* --- HISTORY --- */
+        .sec-title { font-family: 'DM Serif Display', serif; font-size: 20px; margin-bottom: 15px; }
+        .history-card { background: white; border-radius: 25px; border: 1px solid var(--border-pink); overflow: hidden; box-shadow: var(--shadow-soft); }
+        .tx-row { display: flex; justify-content: space-between; align-items: center; padding: 18px 20px; border-bottom: 1px solid var(--bg-soft-white); }
+        .tx-row:last-child { border-bottom: none; }
+        .tx-info h4 { margin: 0; font-size: 14px; font-weight: 700; }
+        .tx-info span { font-size: 11px; color: var(--text-muted); display: block; margin-top: 4px; }
+        .tx-amt { font-weight: 700; color: var(--secondary-green); font-size: 14px; }
+
+        /* --- MODAL --- */
+        .modal-overlay { position: fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.7); backdrop-filter: blur(5px); z-index:3000; display:none; align-items:center; justify-content:center; padding:20px; }
+        .modal-card { background:white; width:100%; max-width:400px; border-radius:30px; padding:40px; text-align:center; animation: pop 0.3s ease-out; }
+        @keyframes pop { from { opacity: 0; transform: scale(0.9); } to { opacity: 1; transform: scale(1); } }
+        .success-icon { width:70px; height:70px; background:var(--secondary-green); color:white; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:35px; margin: 0 auto 20px; }
+
+        /* --- NAV ISLAND --- */
+        .nav-island { position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%); background: var(--nav-black); height: 65px; width: 92%; max-width: 400px; border-radius: 100px; display: flex; justify-content: space-around; align-items: center; z-index: 1000; box-shadow: 0 10px 30px rgba(0,0,0,0.3); }
+        .nav-item { color: #666; text-decoration: none; font-size: 10px; font-weight: 700; display: flex; flex-direction: column; align-items: center; gap: 4px; }
+        .nav-item.active { color: var(--primary-magenta); }
+
+        .sidebar { position: fixed; top: 0; left: -100%; width: 280px; height: 100%; background: white; z-index: 2000; transition: var(--transition); padding: 30px; }
+        .sidebar.active { left: 0; }
+        .sb-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 1500; display: none; }
+    </style>
+</head>
+<body>
+
+    <div class="sb-overlay" id="overlay"></div>
+    <aside class="sidebar" id="sidebar">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 40px;">
+            <span class="brand-font" style="color: var(--primary-magenta); font-size: 24px;">LAS VEGAS</span>
+            <button id="close-sb" style="background: none; border: none; font-size: 24px; cursor: pointer;">✕</button>
+        </div>
+        <nav style="display: flex; flex-direction: column; gap: 15px;">
+            <a href="dashboard.html" style="text-decoration: none; color: var(--text-main); font-weight: 600;">🏠 Dashboard</a>
+            <a href="gift-code.html" style="text-decoration: none; color: var(--primary-magenta); font-weight: 700;">🎁 Gift Code</a>
+            <a href="wallet.html" style="text-decoration: none; color: var(--text-main); font-weight: 600;">👛 Wallet</a>
+            <a href="transactions.html" style="text-decoration: none; color: var(--text-main); font-weight: 600;">📜 Transactions</a>
+            <button id="logout-btn" style="margin-top: 30px; text-align: left; border: none; background: none; color: #d00000; font-weight: 700; cursor: pointer;">🚪 Logout</button>
+        </nav>
+    </aside>
+
+    <div class="container">
+        <header class="page-header">
+            <div>
+                <h1>Gift Code</h1>
+                <p>Redeem rewards with your unique promo codes.</p>
+            </div>
+            <button id="open-sb" style="width:45px; height:45px; border-radius:50%; border:1px solid var(--border-pink); background:white; color:var(--primary-magenta);">☰</button>
+        </header>
+
+        <div class="hero-card">
+            <h2>Claim Your Reward</h2>
+            <p>Enter your 8-character gift code below to unlock your bonus.</p>
+        </div>
+
+        <div class="redeem-box">
+            <div class="input-group">
+                <label class="input-label">Enter Gift Code</label>
+                <input type="text" id="gift-input" class="code-input" placeholder="XXXX-XXXX" maxlength="20" autocomplete="off">
+            </div>
+            <button class="btn-redeem" id="redeem-btn">REDEEM CODE</button>
+        </div>
+
+        <div class="stats-grid">
+            <div class="stat-card">
+                <span class="stat-label">Total Redeemed</span>
+                <div class="stat-value" id="stat-count">0</div>
+            </div>
+            <div class="stat-card">
+                <span class="stat-label">Total Reward</span>
+                <div class="stat-value" id="stat-amount">₦0.00</div>
+            </div>
+        </div>
+
+        <h3 class="sec-title">Redemption History</h3>
+        <div class="history-card" id="history-list">
+            <div style="padding: 30px; text-align: center; color: #999;">No codes redeemed yet.</div>
+        </div>
+    </div>
+
+    <!-- Success Modal -->
+    <div class="modal-overlay" id="success-modal">
+        <div class="modal-card">
+            <div class="success-icon">✓</div>
+            <h2 class="brand-font" style="color:var(--primary-magenta);">Code Redeemed!</h2>
+            <p style="color:var(--text-muted); font-size:15px; margin-bottom:25px;">Congratulations! Your reward of <b id="modal-reward" style="color:var(--secondary-green);">₦0.00</b> has been credited to your wallet.</p>
+            <div style="display:grid; gap:10px;">
+                <button class="btn-redeem" onclick="location.reload()">DONE</button>
+                <a href="wallet.html" style="color:var(--primary-magenta); font-weight:700; text-decoration:none; font-size:14px;">View Wallet</a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Nav Island -->
+    <nav class="nav-island">
+        <a href="dashboard.html" class="nav-item"><span>🏠</span><span>Home</span></a>
+        <a href="plans.html" class="nav-item"><span>📈</span><span>Plans</span></a>
+        <a href="wallet.html" class="nav-item"><span>👛</span><span>Wallet</span></a>
+        <a href="gift-code.html" class="nav-item active"><span>🎁</span><span>Gift</span></a>
+    </nav>
+
+    <script type="module">
+        import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm'
+
+        const supabase = createClient(import.meta.env.VITE_SUPABASE_URL, import.meta.env.VITE_SUPABASE_ANON_KEY);
+
+        const GiftApp = {
+            user: null,
+
+            async init() {
+                const { data: { session } } = await supabase.auth.getSession();
+                if (!session) return window.location.href = 'login.html';
+                this.user = session.user;
+
+                this.setupUI();
+                await this.loadData();
+            },
+
+            setupUI() {
+                const sb = document.getElementById('sidebar');
+                const ov = document.getElementById('overlay');
+                document.getElementById('open-sb').onclick = () => { sb.classList.add('active'); ov.style.display = 'block'; };
+                document.getElementById('close-sb').onclick = () => { sb.classList.remove('active'); ov.style.display = 'none'; };
+                ov.onclick = () => { sb.classList.remove('active'); ov.style.display = 'none'; };
+                
+                document.getElementById('logout-btn').onclick = async () => {
+                    await supabase.auth.signOut();
+                    window.location.href = 'index.html';
+                };
+
+                document.getElementById('redeem-btn').onclick = () => this.handleRedeem();
+            },
+
+            async loadData() {
+                try {
+                    const { data, error } = await supabase
+                        .from('gift_code_redemptions')
+                        .select('*, gift_codes(code)')
+                        .eq('user_id', this.user.id)
+                        .order('redeemed_at', { ascending: false });
+
+                    if (error) throw error;
+                    this.renderHistory(data);
+                    this.renderStats(data);
+                } catch (e) {
+                    console.error(e);
+                }
+            },
+
+            renderStats(data) {
+                if (!data) return;
+                const count = data.length;
+                const amount = data.reduce((sum, item) => sum + Number(item.reward_amount), 0);
+                document.getElementById('stat-count').innerText = count;
+                document.getElementById('stat-amount').innerText = this.formatCurrency(amount);
+            },
+
+            renderHistory(data) {
+                const list = document.getElementById('history-list');
+                if (!data || data.length === 0) return;
+
+                list.innerHTML = data.map(item => `
+                    <div class="tx-row">
+                        <div class="tx-info">
+                            <h4>Code: ${item.gift_codes?.code || '••••••••'}</h4>
+                            <span>${new Date(item.redeemed_at).toLocaleDateString()} at ${new Date(item.redeemed_at).toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'})}</span>
+                        </div>
+                        <div class="tx-amt">+${this.formatCurrency(item.reward_amount)}</div>
+                    </div>
+                `).join('');
+            },
+
+            async handleRedeem() {
+                const input = document.getElementById('gift-input');
+                const btn = document.getElementById('redeem-btn');
+                const code = input.value.trim();
+
+                if (!code) return alert("Please enter a gift code.");
+
+                btn.disabled = true;
+                btn.innerText = "VERIFYING...";
+
+                try {
+                    // Call the secure atomic RPC function
+                    const { data, error } = await supabase.rpc('redeem_gift_code', { p_code: code });
+                    
+                    if (error) throw error;
+                    if (!data.success) throw new Error(data.message);
+
+                    // Show success
+                    document.getElementById('modal-reward').innerText = this.formatCurrency(data.reward);
+                    document.getElementById('success-modal').style.display = 'flex';
+
+                } catch (e) {
+                    alert(e.message);
+                    btn.disabled = false;
+                    btn.innerText = "REDEEM CODE";
+                }
+            },
+
+            formatCurrency(val) {
+                return new Intl.NumberFormat('en-NG', { style: 'currency', currency: 'NGN' }).format(val);
+            }
+        };
+
+        document.addEventListener('DOMContentLoaded', () => GiftApp.init());
+    </script>
+</body>
+</html>
