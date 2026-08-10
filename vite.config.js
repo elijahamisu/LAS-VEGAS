@@ -18,6 +18,7 @@ export default defineConfig({
         earnings: resolve(__dirname, 'earnings.html'),
         daily_checkin: resolve(__dirname, 'daily-checkin.html'),
         transactions: resolve(__dirname, 'transactions.html'),
+        referrals: resolve(__dirname, 'referrals.html'),
       }
     }
   }
