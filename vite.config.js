@@ -7,7 +7,7 @@ export default defineConfig({
     rollupOptions: {
       input: {
         main: resolve(__dirname, 'index.html'),
-        // Additional pages will be added here as they are created
+        login: resolve(__dirname, 'login.html'),
       }
     }
   },
