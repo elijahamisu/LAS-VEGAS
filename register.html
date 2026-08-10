@@ -191,9 +191,8 @@
         const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL;
         const SUPABASE_ANON_KEY = import.meta.env.VITE_SUPABASE_ANON_KEY;
 
-        const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-
         // 🔍 TEMPORARY MOBILE DEBUG PANEL — remove once issue is fixed
+        // This runs FIRST, before createClient, so it shows even if createClient crashes
         (function showDebugPanel() {
             const debugDiv = document.createElement('div');
             debugDiv.style.cssText = 'position:fixed;top:0;left:0;right:0;background:#000;color:#0f0;font-family:monospace;font-size:11px;padding:10px;z-index:9999;word-break:break-all;';
@@ -202,6 +201,16 @@
             debugDiv.innerHTML = `DEBUG — URL: ${urlStatus}<br>DEBUG — KEY: ${keyStatus}`;
             document.body.prepend(debugDiv);
         })();
+
+        let supabase;
+        try {
+            supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+        } catch (initErr) {
+            const errDiv = document.createElement('div');
+            errDiv.style.cssText = 'position:fixed;top:40px;left:0;right:0;background:#400;color:#f88;font-family:monospace;font-size:11px;padding:10px;z-index:9999;word-break:break-all;';
+            errDiv.innerHTML = 'CLIENT INIT ERROR: ' + initErr.message;
+            document.body.prepend(errDiv);
+        }
 
         // State & DOM
         const form = document.getElementById('register-form');
