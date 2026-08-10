@@ -21,6 +21,7 @@ export default defineConfig({
         referrals: resolve(__dirname, 'referrals.html'),
         gift_code: resolve(__dirname, 'gift-code.html'),
         notifications: resolve(__dirname, 'notifications.html'),
+        profile: resolve(__dirname, 'profile.html'),
       }
     }
   }
