@@ -1,0 +1,353 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Notifications | LAS VEGAS</title>
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display&family=Quicksand:wght@400;500;600;700&display=swap" rel="stylesheet">
+    
+    <style>
+        :root {
+            --primary-magenta: #FF007F;
+            --primary-magenta-dark: #E60072;
+            --secondary-green: #006400;
+            --secondary-green-light: #008000;
+            --bg-soft-white: #FFF5F7;
+            --card-white: #FFFFFF;
+            --text-main: #1A1A1A;
+            --text-muted: #666666;
+            --border-pink: #FFD1E3;
+            --nav-black: #121212;
+            --shadow-soft: 0 4px 20px rgba(255, 0, 127, 0.06);
+            --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+        
+        body {
+            margin: 0; padding: 0;
+            font-family: 'Quicksand', sans-serif;
+            background-color: var(--bg-soft-white);
+            color: var(--text-main);
+            background-image: radial-gradient(var(--border-pink) 0.5px, transparent 0.5px);
+            background-size: 30px 30px;
+            min-height: 100vh;
+            padding-bottom: 110px;
+        }
+
+        .container { max-width: 1200px; margin: 0 auto; padding: 20px; }
+
+        /* --- HEADER --- */
+        .page-header { margin-bottom: 25px; padding-top: 10px; display: flex; justify-content: space-between; align-items: flex-start; }
+        .page-header h1 { font-family: 'DM Serif Display', serif; font-size: 28px; margin: 0; color: var(--text-main); }
+        .page-header p { font-size: 14px; color: var(--text-muted); margin: 5px 0 0 0; }
+        .btn-mark-read { background: none; border: none; color: var(--primary-magenta); font-weight: 700; font-size: 12px; cursor: pointer; text-transform: uppercase; padding: 10px 0; }
+
+        /* --- SUMMARY CARDS --- */
+        .summary-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 25px; }
+        .summary-card { background: white; padding: 20px; border-radius: 20px; border: 1px solid var(--border-pink); box-shadow: var(--shadow-soft); text-align: center; }
+        .summary-card span { font-size: 10px; font-weight: 700; color: var(--primary-magenta); text-transform: uppercase; display: block; margin-bottom: 5px; }
+        .summary-card b { font-size: 22px; color: var(--secondary-green); }
+
+        /* --- FILTERS --- */
+        .filter-scroll { overflow-x: auto; display: flex; gap: 10px; padding-bottom: 15px; scrollbar-width: none; }
+        .filter-scroll::-webkit-scrollbar { display: none; }
+        .filter-chip { flex: 0 0 auto; padding: 8px 20px; border-radius: 50px; background: white; border: 1px solid var(--border-pink); font-size: 12px; font-weight: 700; cursor: pointer; transition: var(--transition); }
+        .filter-chip.active { background: var(--primary-magenta); color: white; border-color: var(--primary-magenta); }
+
+        /* --- NOTIFICATION CARDS --- */
+        .notif-list { display: grid; gap: 12px; }
+        .notif-card { background: white; border-radius: 20px; border: 1px solid var(--border-pink); padding: 20px; box-shadow: var(--shadow-soft); position: relative; transition: var(--transition); display: flex; gap: 15px; cursor: pointer; }
+        .notif-card.unread { border-left: 5px solid var(--primary-magenta); }
+        .notif-card.read { opacity: 0.8; }
+        .notif-icon { width: 45px; height: 45px; border-radius: 50%; background: var(--bg-soft-white); display: flex; align-items: center; justify-content: center; font-size: 20px; flex-shrink: 0; }
+        
+        .notif-content { flex-grow: 1; }
+        .notif-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 5px; }
+        .notif-title { font-size: 15px; font-weight: 700; color: var(--text-main); margin: 0; }
+        .notif-date { font-size: 11px; color: var(--text-muted); font-weight: 600; }
+        .notif-msg { font-size: 13px; color: var(--text-muted); line-height: 1.4; margin-bottom: 10px; }
+        .notif-amount { font-size: 14px; font-weight: 800; color: var(--secondary-green); }
+
+        /* --- MODAL --- */
+        .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); backdrop-filter: blur(5px); z-index: 3000; display: none; align-items: center; justify-content: center; padding: 20px; }
+        .modal-card { background: white; width: 100%; max-width: 450px; border-radius: 30px; padding: 35px; animation: modalPop 0.3s ease-out; }
+        @keyframes modalPop { from { opacity: 0; transform: scale(0.9); } to { opacity: 1; transform: scale(1); } }
+        .modal-type { font-size: 11px; font-weight: 800; color: var(--primary-magenta); text-transform: uppercase; letter-spacing: 1px; display: block; margin-bottom: 10px; }
+        .modal-title { font-family: 'DM Serif Display', serif; font-size: 22px; margin: 0 0 15px 0; }
+        .modal-msg { font-size: 15px; color: var(--text-muted); line-height: 1.6; margin-bottom: 25px; }
+        .modal-btn { width: 100%; padding: 16px; border-radius: 50px; border: none; background: var(--primary-magenta); color: white; font-weight: 700; cursor: pointer; }
+
+        /* --- EMPTY STATE --- */
+        .empty-state { text-align: center; padding: 60px 20px; }
+        .empty-icon { font-size: 60px; margin-bottom: 20px; display: block; opacity: 0.3; }
+        .empty-state h3 { font-family: 'DM Serif Display', serif; font-size: 20px; margin-bottom: 10px; }
+        .empty-state p { font-size: 14px; color: var(--text-muted); }
+
+        /* --- NAV ISLAND --- */
+        .nav-island { position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%); background: var(--nav-black); height: 65px; width: 92%; max-width: 400px; border-radius: 100px; display: flex; justify-content: space-around; align-items: center; z-index: 1000; box-shadow: 0 10px 30px rgba(0,0,0,0.3); }
+        .nav-item { color: #666; text-decoration: none; font-size: 10px; font-weight: 700; display: flex; flex-direction: column; align-items: center; gap: 4px; position: relative; }
+        .nav-item.active { color: var(--primary-magenta); }
+        .badge { position: absolute; top: -5px; right: -5px; background: var(--primary-magenta); color: white; font-size: 9px; min-width: 16px; height: 16px; border-radius: 50%; display: flex; align-items: center; justify-content: center; border: 2px solid var(--nav-black); }
+
+        .sidebar { position: fixed; top: 0; left: -100%; width: 280px; height: 100%; background: white; z-index: 2000; transition: var(--transition); padding: 30px; box-shadow: 10px 0 40px rgba(0,0,0,0.1); }
+        .sidebar.active { left: 0; }
+        .sb-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 1500; display: none; }
+
+        /* --- SKELETON --- */
+        .skeleton { height: 80px; background: #eee; border-radius: 20px; animation: shine 1.5s infinite; opacity: 0.6; }
+        @keyframes shine { 50% { opacity: 1; } }
+    </style>
+</head>
+<body>
+
+    <div class="sb-overlay" id="overlay"></div>
+    <aside class="sidebar" id="sidebar">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 40px;">
+            <span class="brand-font" style="color: var(--primary-magenta); font-size: 24px;">LAS VEGAS</span>
+            <button id="close-sb" style="background: none; border: none; font-size: 24px; cursor: pointer;">✕</button>
+        </div>
+        <nav style="display: flex; flex-direction: column; gap: 15px;">
+            <a href="dashboard.html" style="text-decoration: none; color: var(--text-main); font-weight: 600;">🏠 Dashboard</a>
+            <a href="wallet.html" style="text-decoration: none; color: var(--text-main); font-weight: 600;">👛 Wallet</a>
+            <a href="notifications.html" style="text-decoration: none; color: var(--primary-magenta); font-weight: 700;">🔔 Notifications</a>
+            <a href="transactions.html" style="text-decoration: none; color: var(--text-main); font-weight: 600;">📜 Transactions</a>
+            <a href="referrals.html" style="text-decoration: none; color: var(--text-main); font-weight: 600;">👥 Referrals</a>
+            <button id="logout-btn" style="margin-top: 30px; text-align: left; border: none; background: none; color: #d00000; font-weight: 700; cursor: pointer;">🚪 Logout</button>
+        </nav>
+    </aside>
+
+    <div class="container">
+        <header class="page-header">
+            <div>
+                <h1>Notifications</h1>
+                <p>Stay updated with your account activity.</p>
+            </div>
+            <button id="open-sb" style="width:45px; height:45px; border-radius:50%; border:1px solid var(--border-pink); background:white; color:var(--primary-magenta);">☰</button>
+        </header>
+
+        <div class="summary-grid">
+            <div class="summary-card">
+                <span>Unread</span>
+                <b id="unread-count">0</b>
+            </div>
+            <div class="summary-card">
+                <span>All Notifications</span>
+                <b id="total-count">0</b>
+            </div>
+        </div>
+
+        <div style="display: flex; justify-content: space-between; align-items: center;">
+            <div class="filter-scroll" id="filter-chips">
+                <div class="filter-chip active" data-filter="ALL">All</div>
+                <div class="filter-chip" data-filter="EARNINGS">Earnings</div>
+                <div class="filter-chip" data-filter="TRANSACTIONS">Payments</div>
+                <div class="filter-chip" data-filter="REWARDS">Rewards</div>
+                <div class="filter-chip" data-filter="ANNOUNCEMENT">Updates</div>
+            </div>
+            <button class="btn-mark-read" id="mark-all-btn">Mark all read</button>
+        </div>
+
+        <div class="notif-list" id="notif-list">
+            <!-- Loading Skeletons -->
+            <div class="skeleton"></div>
+            <div class="skeleton"></div>
+            <div class="skeleton"></div>
+        </div>
+    </div>
+
+    <!-- Modal -->
+    <div class="modal-overlay" id="notif-modal">
+        <div class="modal-card">
+            <span class="modal-type" id="modal-type">SYSTEM</span>
+            <h2 class="modal-title" id="modal-title">Notification Title</h2>
+            <p class="modal-msg" id="modal-msg">Detailed message goes here...</p>
+            <button class="modal-btn" onclick="document.getElementById('notif-modal').style.display='none'">CLOSE</button>
+        </div>
+    </div>
+
+    <!-- Nav Island -->
+    <nav class="nav-island">
+        <a href="dashboard.html" class="nav-item"><span>🏠</span><span>Home</span></a>
+        <a href="plans.html" class="nav-item"><span>📈</span><span>Plans</span></a>
+        <a href="wallet.html" class="nav-item"><span>👛</span><span>Wallet</span></a>
+        <a href="notifications.html" class="nav-item active">
+            <span>🔔</span><span>Alerts</span>
+            <div class="badge" id="nav-badge" style="display:none;">0</div>
+        </a>
+    </nav>
+
+    <script type="module">
+        import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm'
+
+        const supabase = createClient(import.meta.env.VITE_SUPABASE_URL, import.meta.env.VITE_SUPABASE_ANON_KEY);
+
+        const NotifApp = {
+            user: null,
+            filter: 'ALL',
+            notifications: [],
+
+            async init() {
+                const { data: { session } } = await supabase.auth.getSession();
+                if (!session) return window.location.href = 'login.html';
+                this.user = session.user;
+
+                this.setupUI();
+                await this.fetchNotifications();
+                this.subscribeToChanges();
+            },
+
+            setupUI() {
+                const sb = document.getElementById('sidebar');
+                const ov = document.getElementById('overlay');
+                document.getElementById('open-sb').onclick = () => { sb.classList.add('active'); ov.style.display = 'block'; };
+                document.getElementById('close-sb').onclick = () => { sb.classList.remove('active'); ov.style.display = 'none'; };
+                ov.onclick = () => { sb.classList.remove('active'); ov.style.display = 'none'; };
+                
+                document.getElementById('logout-btn').onclick = async () => {
+                    await supabase.auth.signOut();
+                    window.location.href = 'index.html';
+                };
+
+                document.getElementById('mark-all-btn').onclick = () => this.markAllAsRead();
+
+                document.querySelectorAll('.filter-chip').forEach(chip => {
+                    chip.onclick = (e) => {
+                        document.querySelectorAll('.filter-chip').forEach(c => c.classList.remove('active'));
+                        e.target.classList.add('active');
+                        this.filter = e.target.dataset.filter;
+                        this.renderNotifications();
+                    };
+                });
+            },
+
+            async fetchNotifications() {
+                const { data, error } = await supabase
+                    .from('notifications')
+                    .select('*')
+                    .eq('user_id', this.user.id)
+                    .order('created_at', { ascending: false });
+
+                if (error) return console.error(error);
+                this.notifications = data || [];
+                this.renderNotifications();
+            },
+
+            subscribeToChanges() {
+                supabase.channel('notif-db-changes')
+                    .on('postgres_changes', { event: '*', schema: 'public', table: 'notifications', filter: `user_id=eq.${this.user.id}` }, 
+                    () => this.fetchNotifications())
+                    .subscribe();
+            },
+
+            renderNotifications() {
+                const list = document.getElementById('notif-list');
+                const unreadEl = document.getElementById('unread-count');
+                const totalEl = document.getElementById('total-count');
+                const badge = document.getElementById('nav-badge');
+
+                const filtered = this.notifications.filter(n => {
+                    if (this.filter === 'ALL') return true;
+                    if (this.filter === 'TRANSACTIONS') return ['DEPOSIT', 'WITHDRAWAL'].includes(n.type);
+                    if (this.filter === 'REWARDS') return ['CHECKIN', 'REFERRAL', 'GIFT_CODE', 'BONUS'].includes(n.type);
+                    return n.type === this.filter;
+                });
+
+                const unreadCount = this.notifications.filter(n => !n.is_read).length;
+                unreadEl.innerText = unreadCount;
+                totalEl.innerText = this.notifications.length;
+                
+                if (unreadCount > 0) {
+                    badge.innerText = unreadCount;
+                    badge.style.display = 'flex';
+                } else {
+                    badge.style.display = 'none';
+                }
+
+                if (filtered.length === 0) {
+                    list.innerHTML = `
+                        <div class="empty-state">
+                            <span class="empty-icon">🔔</span>
+                            <h3>You're all caught up</h3>
+                            <p>New account activity and rewards will appear here.</p>
+                        </div>
+                    `;
+                    return;
+                }
+
+                list.innerHTML = filtered.map(n => {
+                    const icon = this.getIcon(n.type);
+                    return `
+                        <div class="notif-card ${n.is_read ? 'read' : 'unread'}" onclick="window.NotifApp.openNotif('${n.id}')">
+                            <div class="notif-icon">${icon}</div>
+                            <div class="notif-content">
+                                <div class="notif-header">
+                                    <h4 class="notif-title">${n.title}</h4>
+                                    <span class="notif-date">${this.formatDate(n.created_at)}</span>
+                                </div>
+                                <p class="notif-msg">${n.message}</p>
+                                ${n.amount ? `<span class="notif-amount">+₦${Number(n.amount).toLocaleString()}</span>` : ''}
+                            </div>
+                        </div>
+                    `;
+                }).join('');
+            },
+
+            async openNotif(id) {
+                const n = this.notifications.find(notif => notif.id === id);
+                if (!n) return;
+
+                document.getElementById('modal-type').innerText = n.type;
+                document.getElementById('modal-title').innerText = n.title;
+                document.getElementById('modal-msg').innerText = n.message;
+                document.getElementById('notif-modal').style.display = 'flex';
+
+                if (!n.is_read) {
+                    await supabase.from('notifications').update({ is_read: true }).eq('id', id);
+                    n.is_read = true;
+                    this.renderNotifications();
+                }
+            },
+
+            async markAllAsRead() {
+                const { error } = await supabase
+                    .from('notifications')
+                    .update({ is_read: true })
+                    .eq('user_id', this.user.id)
+                    .eq('is_read', false);
+                
+                if (!error) {
+                    this.notifications.forEach(n => n.is_read = true);
+                    this.renderNotifications();
+                }
+            },
+
+            getIcon(type) {
+                switch(type) {
+                    case 'EARNINGS': return '📈';
+                    case 'DEPOSIT': return '📥';
+                    case 'WITHDRAWAL': return '📤';
+                    case 'CHECKIN': return '📅';
+                    case 'REFERRAL': return '👥';
+                    case 'GIFT_CODE': return '🎁';
+                    case 'ANNOUNCEMENT': return '📢';
+                    default: return '🔔';
+                }
+            },
+
+            formatDate(str) {
+                const d = new Date(str);
+                const now = new Date();
+                if (d.toDateString() === now.toDateString()) return d.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+                return d.toLocaleDateString(undefined, {month: 'short', day: 'numeric'});
+            }
+        };
+
+        window.NotifApp = NotifApp;
+        document.addEventListener('DOMContentLoaded', () => NotifApp.init());
+    </script>
+</body>
+</html>
