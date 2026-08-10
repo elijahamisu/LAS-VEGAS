@@ -1,0 +1,343 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>My Earnings | LAS VEGAS</title>
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display&family=Quicksand:wght@400;500;600;700&display=swap" rel="stylesheet">
+    
+    <style>
+        :root {
+            --primary-magenta: #FF007F;
+            --primary-magenta-dark: #E60072;
+            --secondary-green: #006400;
+            --secondary-green-light: #008000;
+            --bg-soft-white: #FFF5F7;
+            --card-white: #FFFFFF;
+            --text-main: #1A1A1A;
+            --text-muted: #666666;
+            --border-pink: #FFD1E3;
+            --nav-black: #121212;
+            --shadow-soft: 0 4px 20px rgba(255, 0, 127, 0.06);
+            --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+        
+        body {
+            margin: 0; padding: 0;
+            font-family: 'Quicksand', sans-serif;
+            background-color: var(--bg-soft-white);
+            color: var(--text-main);
+            background-image: radial-gradient(var(--border-pink) 0.5px, transparent 0.5px);
+            background-size: 30px 30px;
+            min-height: 100vh;
+            padding-bottom: 110px;
+        }
+
+        .container { max-width: 1200px; margin: 0 auto; padding: 20px; }
+
+        /* --- HEADER --- */
+        .page-header { margin-bottom: 25px; padding-top: 10px; display: flex; justify-content: space-between; align-items: flex-start; }
+        .page-header h1 { font-family: 'DM Serif Display', serif; font-size: 28px; margin: 0; color: var(--text-main); }
+        .page-header p { font-size: 14px; color: var(--text-muted); margin: 5px 0 0 0; }
+
+        /* --- HERO CARD --- */
+        .earnings-hero {
+            background: linear-gradient(135deg, var(--primary-magenta), #ff4d94);
+            border-radius: 30px; padding: 30px; color: white; margin-bottom: 25px;
+            box-shadow: 0 10px 25px rgba(255, 0, 127, 0.15);
+            position: relative; overflow: hidden;
+        }
+        .earnings-hero::after { content: "✦"; position: absolute; right: 20px; top: 10px; font-size: 80px; opacity: 0.1; }
+        .hero-label { font-size: 12px; text-transform: uppercase; letter-spacing: 2px; font-weight: 700; opacity: 0.9; }
+        .hero-value { font-size: 36px; font-weight: 700; margin: 10px 0 0 0; }
+
+        /* --- STATS GRID --- */
+        .stats-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px; margin-bottom: 30px; }
+        .stat-card { background: white; padding: 18px; border-radius: 20px; border: 1px solid var(--border-pink); box-shadow: var(--shadow-soft); }
+        .stat-card .label { font-size: 10px; text-transform: uppercase; font-weight: 700; color: var(--text-muted); display: block; margin-bottom: 6px; }
+        .stat-card .value { font-size: 18px; font-weight: 700; color: var(--secondary-green); }
+
+        /* --- SECTION TITLES --- */
+        .sec-title { font-family: 'DM Serif Display', serif; font-size: 20px; margin: 30px 0 15px 0; display: flex; align-items: center; gap: 10px; }
+        .sec-title::after { content: ""; flex: 1; height: 1px; background: var(--border-pink); opacity: 0.5; }
+
+        /* --- ACTIVE INVESTMENTS --- */
+        .invest-list { display: grid; grid-template-columns: 1fr; gap: 15px; }
+        @media (min-width: 768px) { .invest-list { grid-template-columns: 1fr 1fr; } }
+        
+        .invest-card { background: white; border-radius: 20px; border: 1px solid var(--border-pink); padding: 20px; box-shadow: var(--shadow-soft); }
+        .invest-head { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; }
+        .invest-head h4 { margin: 0; font-family: 'DM Serif Display', serif; color: var(--primary-magenta); font-size: 18px; }
+        .status-tag { font-size: 10px; font-weight: 800; padding: 4px 10px; border-radius: 50px; background: #F0FFF4; color: var(--secondary-green); text-transform: uppercase; }
+        
+        .progress-box { margin: 15px 0; }
+        .progress-bar { height: 8px; background: #FFF0F5; border-radius: 10px; overflow: hidden; position: relative; }
+        .progress-fill { height: 100%; background: var(--primary-magenta); width: 0%; transition: width 1s ease; }
+        .progress-text { display: flex; justify-content: space-between; font-size: 11px; font-weight: 700; color: var(--text-muted); margin-top: 8px; }
+
+        .invest-stats { display: flex; justify-content: space-between; margin-top: 15px; padding-top: 15px; border-top: 1px dashed var(--border-pink); }
+        .i-stat span { display: block; font-size: 10px; color: var(--text-muted); text-transform: uppercase; }
+        .i-stat b { font-size: 14px; color: var(--secondary-green); }
+
+        /* --- HISTORY TABLE --- */
+        .history-card { background: white; border-radius: 20px; border: 1px solid var(--border-pink); overflow: hidden; box-shadow: var(--shadow-soft); }
+        .table-wrap { overflow-x: auto; }
+        table { width: 100%; border-collapse: collapse; min-width: 500px; }
+        th { background: var(--primary-magenta); color: white; padding: 12px 15px; text-align: left; font-size: 12px; text-transform: uppercase; }
+        td { padding: 15px; border-bottom: 1px solid var(--bg-soft-white); font-size: 14px; }
+        tr:nth-child(even) { background: #FFF9FB; }
+        .type-tag { font-size: 10px; font-weight: 800; color: var(--primary-magenta); }
+
+        /* --- MOBILE NAV --- */
+        .nav-island { position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%); background: var(--nav-black); height: 65px; width: 92%; max-width: 400px; border-radius: 100px; display: flex; justify-content: space-around; align-items: center; z-index: 1000; box-shadow: 0 10px 30px rgba(0,0,0,0.3); }
+        .nav-item { color: #666; text-decoration: none; font-size: 10px; font-weight: 700; display: flex; flex-direction: column; align-items: center; gap: 4px; }
+        .nav-item.active { color: var(--primary-magenta); }
+
+        .sidebar { position: fixed; top: 0; left: -100%; width: 280px; height: 100%; background: white; z-index: 2000; transition: var(--transition); padding: 30px; }
+        .sidebar.active { left: 0; }
+        .sb-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 1500; display: none; }
+
+        /* --- SKELETON --- */
+        .skeleton { background: #eee; background: linear-gradient(110deg, #ececec 8%, #f5f5f5 18%, #ececec 33%); border-radius: 5px; background-size: 200% 100%; animation: 1.5s shine linear infinite; }
+        @keyframes shine { to { background-position-x: -200%; } }
+    </style>
+</head>
+<body>
+
+    <div class="sb-overlay" id="overlay"></div>
+    <aside class="sidebar" id="sidebar">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 40px;">
+            <span class="brand-font" style="color: var(--primary-magenta); font-size: 24px;">LAS VEGAS</span>
+            <button id="close-sb" style="background: none; border: none; font-size: 24px;">✕</button>
+        </div>
+        <nav style="display: flex; flex-direction: column; gap: 15px;">
+            <a href="dashboard.html" style="text-decoration: none; color: var(--text-main); font-weight: 600;">🏠 Dashboard</a>
+            <a href="wallet.html" style="text-decoration: none; color: var(--text-main); font-weight: 600;">👛 Wallet</a>
+            <a href="earnings.html" style="text-decoration: none; color: var(--primary-magenta); font-weight: 700;">💰 My Earnings</a>
+            <a href="plans.html" style="text-decoration: none; color: var(--text-main); font-weight: 600;">📈 Plans</a>
+            <a href="referrals.html" style="text-decoration: none; color: var(--text-main); font-weight: 600;">👥 Referrals</a>
+            <button id="logout-btn" style="margin-top: 30px; text-align: left; border: none; background: none; color: #d00000; font-weight: 700; cursor: pointer;">🚪 Logout</button>
+        </nav>
+    </aside>
+
+    <div class="container">
+        <header class="page-header">
+            <div>
+                <h1>My Earnings</h1>
+                <p>Track your daily rewards and bonuses.</p>
+            </div>
+            <button id="open-sb" style="width:45px; height:45px; border-radius:50%; border:1px solid var(--border-pink); background:white; color:var(--primary-magenta);">☰</button>
+        </header>
+
+        <!-- Total Hero -->
+        <div class="earnings-hero">
+            <div class="hero-label">Total All-Time Earnings</div>
+            <div class="hero-value" id="total-earnings">₦0.00</div>
+        </div>
+
+        <!-- Stats Grid -->
+        <div class="stats-grid">
+            <div class="stat-card">
+                <span class="label">Today</span>
+                <div class="value" id="today-earnings">₦0.00</div>
+            </div>
+            <div class="stat-card">
+                <span class="label">Investments</span>
+                <div class="value" id="stat-invest">₦0.00</div>
+            </div>
+            <div class="stat-card">
+                <span class="label">Referrals</span>
+                <div class="value" id="stat-ref">₦0.00</div>
+            </div>
+            <div class="stat-card">
+                <span class="label">Rewards</span>
+                <div class="value" id="stat-reward">₦0.00</div>
+            </div>
+        </div>
+
+        <!-- Active Investments -->
+        <h3 class="sec-title">Generating Earnings</h3>
+        <div class="invest-list" id="active-investments">
+            <div style="padding: 20px; color: #999; text-align: center; grid-column: 1/-1;">Checking active plans...</div>
+        </div>
+
+        <!-- History -->
+        <h3 class="sec-title">Earnings History</h3>
+        <div class="history-card">
+            <div class="table-wrap">
+                <table id="history-table">
+                    <thead>
+                        <tr>
+                            <th>Date</th>
+                            <th>Type</th>
+                            <th>Amount</th>
+                            <th>Status</th>
+                        </tr>
+                    </thead>
+                    <tbody id="history-body">
+                        <tr><td colspan="4" style="text-align: center; padding: 30px;">Loading history...</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- Mobile Nav -->
+    <nav class="nav-island">
+        <a href="dashboard.html" class="nav-item"><span>🏠</span><span>Home</span></a>
+        <a href="plans.html" class="nav-item"><span>📈</span><span>Plans</span></a>
+        <a href="wallet.html" class="nav-item"><span>👛</span><span>Wallet</span></a>
+        <a href="earnings.html" class="nav-item active"><span>💰</span><span>Earnings</span></a>
+    </nav>
+
+    <script type="module">
+        import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm'
+
+        const supabase = createClient(import.meta.env.VITE_SUPABASE_URL, import.meta.env.VITE_SUPABASE_ANON_KEY);
+
+        const EarningsApp = {
+            user: null,
+
+            async init() {
+                const { data: { session } } = await supabase.auth.getSession();
+                if (!session) return window.location.href = 'login.html';
+                this.user = session.user;
+
+                this.setupUI();
+                await this.loadData();
+            },
+
+            setupUI() {
+                const sb = document.getElementById('sidebar');
+                const ov = document.getElementById('overlay');
+                document.getElementById('open-sb').onclick = () => { sb.classList.add('active'); ov.style.display = 'block'; };
+                document.getElementById('close-sb').onclick = () => { sb.classList.remove('active'); ov.style.display = 'none'; };
+                ov.onclick = () => { sb.classList.remove('active'); ov.style.display = 'none'; };
+                
+                document.getElementById('logout-btn').onclick = async () => {
+                    await supabase.auth.signOut();
+                    window.location.href = 'index.html';
+                };
+            },
+
+            async loadData() {
+                try {
+                    // 1. Fetch Summary Stats from Wallet
+                    const { data: wallet } = await supabase.from('wallets').select('*').eq('user_id', this.user.id).single();
+                    if (wallet) {
+                        document.getElementById('total-earnings').innerText = this.formatCurrency(wallet.total_earned);
+                    }
+
+                    // 2. Fetch Earnings Records
+                    const { data: earnings } = await supabase.from('earnings').select('*').eq('user_id', this.user.id).order('created_at', { ascending: false });
+                    this.processSummary(earnings);
+                    this.renderHistory(earnings);
+
+                    // 3. Fetch Active Investments
+                    const { data: investments } = await supabase.from('investments')
+                        .select('*, plans(name)')
+                        .eq('user_id', this.user.id)
+                        .eq('status', 'ACTIVE');
+                    this.renderInvestments(investments);
+
+                } catch (e) {
+                    console.error("Error loading data:", e);
+                }
+            },
+
+            processSummary(data) {
+                if (!data) return;
+                const today = new Date().toISOString().split('T')[0];
+                let todayAmt = 0;
+                let investAmt = 0;
+                let refAmt = 0;
+                let rewardAmt = 0;
+
+                data.forEach(e => {
+                    const amt = Number(e.amount);
+                    if (e.earning_date === today) todayAmt += amt;
+                    if (e.type === 'INVESTMENT') investAmt += amt;
+                    else if (e.type === 'REFERRAL') refAmt += amt;
+                    else rewardAmt += amt;
+                });
+
+                document.getElementById('today-earnings').innerText = this.formatCurrency(todayAmt);
+                document.getElementById('stat-invest').innerText = this.formatCurrency(investAmt);
+                document.getElementById('stat-ref').innerText = this.formatCurrency(refAmt);
+                document.getElementById('stat-reward').innerText = this.formatCurrency(rewardAmt);
+            },
+
+            renderInvestments(data) {
+                const list = document.getElementById('active-investments');
+                if (!data || data.length === 0) {
+                    list.innerHTML = `<div style="padding: 20px; color: #999; text-align: center; grid-column: 1/-1;">No active investments generating profit. <br> <a href="plans.html" style="color:var(--primary-magenta); font-weight:700;">View Plans</a></div>`;
+                    return;
+                }
+
+                list.innerHTML = data.map(inv => {
+                    const startDate = new Date(inv.started_at);
+                    const today = new Date();
+                    const daysPassed = Math.floor((today - startDate) / (1000 * 60 * 60 * 24));
+                    const progress = Math.min(100, (daysPassed / inv.duration_days) * 100);
+
+                    return `
+                        <div class="invest-card">
+                            <div class="invest-head">
+                                <h4>${inv.plans.name}</h4>
+                                <span class="status-tag">ACTIVE</span>
+                            </div>
+                            <div class="progress-box">
+                                <div class="progress-bar">
+                                    <div class="progress-fill" style="width: ${progress}%"></div>
+                                </div>
+                                <div class="progress-text">
+                                    <span>Day ${daysPassed} / ${inv.duration_days}</span>
+                                    <span>${Math.round(progress)}% Complete</span>
+                                </div>
+                            </div>
+                            <div class="invest-stats">
+                                <div class="i-stat">
+                                    <span>Daily Reward</span>
+                                    <b>${this.formatCurrency(inv.daily_profit)}</b>
+                                </div>
+                                <div class="i-stat">
+                                    <span>Total Earned</span>
+                                    <b>${this.formatCurrency(inv.earned_amount)}</b>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                }).join('');
+            },
+
+            renderHistory(data) {
+                const body = document.getElementById('history-body');
+                if (!data || data.length === 0) {
+                    body.innerHTML = '<tr><td colspan="4" style="text-align: center; padding: 20px;">No earnings history yet.</td></tr>';
+                    return;
+                }
+
+                body.innerHTML = data.map(e => `
+                    <tr>
+                        <td style="color:#666;">${new Date(e.created_at).toLocaleDateString()}</td>
+                        <td><span class="type-tag">${e.type}</span></td>
+                        <td style="font-weight:700; color:var(--secondary-green);">+${this.formatCurrency(e.amount)}</td>
+                        <td><span style="font-size:10px; font-weight:800; color:#006400;">${e.status}</span></td>
+                    </tr>
+                `).join('');
+            },
+
+            formatCurrency(val) {
+                return new Intl.NumberFormat('en-NG', { style: 'currency', currency: 'NGN' }).format(val);
+            }
+        };
+
+        document.addEventListener('DOMContentLoaded', () => EarningsApp.init());
+    </script>
+</body>
+</html>
