@@ -1,0 +1,375 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>My Wallet | LAS VEGAS</title>
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display&family=Quicksand:wght@400;500;600;700&display=swap" rel="stylesheet">
+    
+    <style>
+        :root {
+            --primary-magenta: #FF007F;
+            --primary-magenta-dark: #E60072;
+            --secondary-green: #006400;
+            --secondary-green-light: #008000;
+            --bg-soft-white: #FFF5F7;
+            --card-white: #FFFFFF;
+            --text-main: #1A1A1A;
+            --text-muted: #666666;
+            --border-pink: #FFD1E3;
+            --nav-black: #121212;
+            --shadow-soft: 0 4px 20px rgba(255, 0, 127, 0.06);
+            --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+        
+        body {
+            margin: 0; padding: 0;
+            font-family: 'Quicksand', sans-serif;
+            background-color: var(--bg-soft-white);
+            color: var(--text-main);
+            background-image: radial-gradient(var(--border-pink) 0.5px, transparent 0.5px);
+            background-size: 30px 30px;
+            min-height: 100vh;
+            padding-bottom: 110px;
+        }
+
+        .container { max-width: 1200px; margin: 0 auto; padding: 20px; }
+
+        /* --- HEADER --- */
+        .wallet-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 25px; padding-top: 10px; }
+        .wallet-header h1 { font-family: 'DM Serif Display', serif; font-size: 28px; margin: 0; color: var(--text-main); }
+        .wallet-header p { font-size: 14px; color: var(--text-muted); margin: 5px 0 0 0; }
+        .header-actions { display: flex; gap: 12px; }
+        .icon-circle { width: 45px; height: 45px; border-radius: 50%; background: white; border: 1px solid var(--border-pink); display: flex; align-items: center; justify-content: center; color: var(--primary-magenta); cursor: pointer; transition: var(--transition); }
+        .icon-circle:active { transform: rotate(180deg); }
+
+        /* --- HERO CARD --- */
+        .wallet-hero {
+            background: linear-gradient(135deg, var(--primary-magenta), #ff4d94);
+            border-radius: 30px; padding: 35px; color: white; margin-bottom: 25px;
+            box-shadow: 0 12px 30px rgba(255, 0, 127, 0.15);
+            position: relative; overflow: hidden;
+        }
+        .wallet-hero::before { content: ""; position: absolute; top: -50%; left: -20%; width: 100%; height: 200%; background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 60%); pointer-events: none; }
+        
+        .balance-title { font-size: 12px; text-transform: uppercase; letter-spacing: 2.5px; font-weight: 700; opacity: 0.9; display: flex; align-items: center; gap: 10px; }
+        .eye-toggle { background: none; border: none; color: white; cursor: pointer; padding: 5px; opacity: 0.7; }
+        .balance-value { font-size: clamp(32px, 8vw, 42px); font-weight: 700; margin: 15px 0 30px 0; font-variant-numeric: tabular-nums; }
+        
+        .hero-btns { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
+        .hero-btn { padding: 14px; border-radius: 15px; border: none; font-weight: 700; font-size: 14px; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; transition: var(--transition); text-decoration: none; }
+        .btn-light { background: white; color: var(--primary-magenta); }
+        .btn-glass { background: rgba(255,255,255,0.2); color: white; backdrop-filter: blur(5px); border: 1px solid rgba(255,255,255,0.3); }
+
+        /* --- SUMMARY GRID --- */
+        .stat-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px; margin-bottom: 25px; }
+        .stat-card { background: white; padding: 20px; border-radius: 20px; border: 1px solid var(--border-pink); box-shadow: var(--shadow-soft); }
+        .stat-card .label { font-size: 10px; text-transform: uppercase; font-weight: 700; color: var(--text-muted); display: block; margin-bottom: 8px; }
+        .stat-card .value { font-size: 17px; font-weight: 700; color: var(--secondary-green); }
+
+        /* --- BREAKDOWN --- */
+        .breakdown-card { background: white; padding: 25px; border-radius: 25px; border: 1px solid var(--border-pink); margin-bottom: 30px; }
+        .breakdown-header { font-family: 'DM Serif Display', serif; font-size: 18px; margin: 0 0 20px 0; }
+        .progress-container { height: 10px; background: #FFF0F5; border-radius: 10px; display: flex; overflow: hidden; margin-bottom: 20px; }
+        .prog-avail { background: var(--primary-magenta); height: 100%; transition: width 1s ease; }
+        .prog-invest { background: var(--secondary-green); height: 100%; transition: width 1s ease; }
+        .prog-legend { display: flex; gap: 20px; }
+        .leg-item { display: flex; align-items: center; gap: 8px; font-size: 12px; font-weight: 600; color: var(--text-muted); }
+        .dot { width: 8px; height: 8px; border-radius: 50%; }
+
+        /* --- ACTIVITY --- */
+        .section-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; }
+        .section-header h2 { font-family: 'DM Serif Display', serif; font-size: 20px; margin: 0; }
+        .section-header a { font-size: 13px; color: var(--primary-magenta); font-weight: 700; text-decoration: none; }
+        
+        .activity-card { background: white; border-radius: 25px; border: 1px solid var(--border-pink); overflow: hidden; box-shadow: var(--shadow-soft); }
+        .tx-row { display: flex; justify-content: space-between; align-items: center; padding: 18px 20px; border-bottom: 1px solid var(--bg-soft-white); }
+        .tx-row:last-child { border-bottom: none; }
+        .tx-main { display: flex; align-items: center; gap: 15px; }
+        .tx-icon { width: 40px; height: 40px; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 18px; }
+        .tx-info h4 { margin: 0; font-size: 14px; font-weight: 700; }
+        .tx-info span { font-size: 11px; color: var(--text-muted); }
+        .tx-amt { text-align: right; }
+        .amt-val { font-weight: 700; font-size: 14px; display: block; }
+        .amt-status { font-size: 10px; font-weight: 800; text-transform: uppercase; }
+
+        /* --- COLORS --- */
+        .c-magenta { background: #FFF0F5; color: var(--primary-magenta); }
+        .c-green { background: #F0FFF4; color: var(--secondary-green); }
+        .pos { color: var(--secondary-green); }
+        .neg { color: var(--primary-magenta); }
+
+        /* --- PROMO CARDS --- */
+        .promo-grid { display: grid; grid-template-columns: 1fr; gap: 15px; margin-top: 30px; }
+        .promo-card { background: white; border: 1px solid var(--border-pink); padding: 25px; border-radius: 25px; display: flex; justify-content: space-between; align-items: center; }
+        .promo-content h3 { margin: 0; font-size: 16px; font-family: 'DM Serif Display', serif; color: var(--primary-magenta); }
+        .promo-content p { margin: 5px 0 0 0; font-size: 13px; color: var(--text-muted); }
+        .promo-btn { width: 45px; height: 45px; background: var(--bg-soft-white); border-radius: 50%; display: flex; align-items: center; justify-content: center; color: var(--primary-magenta); text-decoration: none; font-weight: 700; }
+
+        /* --- MOBILE NAV --- */
+        .nav-island { position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%); background: var(--nav-black); height: 65px; width: 92%; max-width: 400px; border-radius: 100px; display: flex; justify-content: space-around; align-items: center; z-index: 1000; box-shadow: 0 10px 30px rgba(0,0,0,0.3); }
+        .nav-item { display: flex; flex-direction: column; align-items: center; gap: 4px; color: #666; text-decoration: none; transition: var(--transition); }
+        .nav-item.active { color: var(--primary-magenta); }
+        .nav-item span { font-size: 10px; font-weight: 700; text-transform: uppercase; }
+
+        /* --- SIDEBAR --- */
+        .sidebar { position: fixed; top: 0; left: -100%; width: 280px; height: 100%; background: white; z-index: 2000; transition: var(--transition); padding: 30px; box-shadow: 10px 0 40px rgba(0,0,0,0.1); }
+        .sidebar.active { left: 0; }
+        .sb-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 1500; display: none; }
+
+        /* --- SKELETON --- */
+        .skeleton { background: #eee; background: linear-gradient(110deg, #ececec 8%, #f5f5f5 18%, #ececec 33%); border-radius: 5px; background-size: 200% 100%; animation: 1.5s shine linear infinite; }
+        @keyframes shine { to { background-position-x: -200%; } }
+
+        @media (min-width: 1024px) {
+            .stat-grid { grid-template-columns: repeat(4, 1fr); }
+            .promo-grid { grid-template-columns: repeat(3, 1fr); }
+            .nav-island { display: none; }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="sb-overlay" id="overlay"></div>
+    
+    <aside class="sidebar" id="sidebar">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 40px;">
+            <span class="brand-font" style="color: var(--primary-magenta); font-size: 24px;">LAS VEGAS</span>
+            <button id="close-sb" style="background: none; border: none; font-size: 24px; cursor: pointer;">✕</button>
+        </div>
+        <nav style="display: flex; flex-direction: column; gap: 15px;">
+            <a href="dashboard.html" style="text-decoration: none; color: var(--text-main); font-weight: 600; padding: 10px;">🏠 Dashboard</a>
+            <a href="plans.html" style="text-decoration: none; color: var(--text-main); font-weight: 600; padding: 10px;">📈 Investment Plans</a>
+            <a href="investment.html" style="text-decoration: none; color: var(--text-main); font-weight: 600; padding: 10px;">💰 My Investments</a>
+            <a href="wallet.html" style="text-decoration: none; color: var(--primary-magenta); font-weight: 700; padding: 10px; background: var(--bg-soft-white); border-radius: 10px;">👛 Wallet</a>
+            <a href="referrals.html" style="text-decoration: none; color: var(--text-main); font-weight: 600; padding: 10px;">👥 Referrals</a>
+            <a href="notifications.html" style="text-decoration: none; color: var(--text-main); font-weight: 600; padding: 10px;">🔔 Notifications</a>
+            <a href="profile.html" style="text-decoration: none; color: var(--text-main); font-weight: 600; padding: 10px;">👤 Profile</a>
+            <button id="logout-btn" style="margin-top: 20px; padding: 20px 10px; border: none; border-top: 1px solid #eee; background: none; color: #d00000; font-weight: 700; cursor: pointer; text-align: left; width: 100%;">🚪 Logout</button>
+        </nav>
+    </aside>
+
+    <div class="container">
+        <header class="wallet-header">
+            <div>
+                <h1>My Wallet</h1>
+                <p>Manage your funds & rewards</p>
+            </div>
+            <div class="header-actions">
+                <div class="icon-circle" id="refresh-btn">↻</div>
+                <div class="icon-circle" id="open-sb">☰</div>
+            </div>
+        </header>
+
+        <!-- Wallet Hero -->
+        <div class="wallet-hero">
+            <div class="balance-title">
+                AVAILABLE BALANCE 
+                <button class="eye-toggle" id="eye-toggle">👁</button>
+            </div>
+            <div class="balance-value" id="main-balance">₦0.00</div>
+            <div class="hero-btns">
+                <a href="deposit.html" class="hero-btn btn-light">📥 Deposit</a>
+                <a href="withdraw.html" class="hero-btn btn-glass">📤 Withdraw</a>
+            </div>
+        </div>
+
+        <!-- Summary Grid -->
+        <div class="stat-grid">
+            <div class="stat-card">
+                <span class="label">Invested</span>
+                <div class="value" id="stat-invested">₦0.00</div>
+            </div>
+            <div class="stat-card">
+                <span class="label">Pending</span>
+                <div class="value" id="stat-pending">₦0.00</div>
+            </div>
+            <div class="stat-card">
+                <span class="label">Total Earned</span>
+                <div class="value" id="stat-earned">₦0.00</div>
+            </div>
+            <div class="stat-card">
+                <span class="label">Deposited</span>
+                <div class="value" id="stat-deposited">₦0.00</div>
+            </div>
+        </div>
+
+        <!-- Breakdown -->
+        <div class="breakdown-card">
+            <h3 class="breakdown-header">Asset Breakdown</h3>
+            <div class="progress-container">
+                <div class="prog-avail" id="bar-avail" style="width: 0%"></div>
+                <div class="prog-invest" id="bar-invest" style="width: 0%"></div>
+            </div>
+            <div class="prog-legend">
+                <div class="leg-item"><div class="dot" style="background: var(--primary-magenta);"></div> Available</div>
+                <div class="leg-item"><div class="dot" style="background: var(--secondary-green);"></div> Invested</div>
+            </div>
+        </div>
+
+        <!-- Recent Activity -->
+        <div class="section-header">
+            <h2>Recent Activity</h2>
+            <a href="transactions.html">View All</a>
+        </div>
+        <div class="activity-card" id="tx-list">
+            <div style="padding: 40px; text-align: center; color: #999;">
+                <div class="skeleton" style="height: 50px; margin-bottom: 10px;"></div>
+                <div class="skeleton" style="height: 50px; margin-bottom: 10px;"></div>
+                <div class="skeleton" style="height: 50px;"></div>
+            </div>
+        </div>
+
+        <!-- Promos -->
+        <div class="promo-grid">
+            <div class="promo-card">
+                <div class="promo-content">
+                    <h3>Investment Plans</h3>
+                    <p>Put your money to work</p>
+                </div>
+                <a href="plans.html" class="promo-btn">→</a>
+            </div>
+            <div class="promo-card">
+                <div class="promo-content">
+                    <h3>Daily Reward</h3>
+                    <p>Claim your ₦200 today</p>
+                </div>
+                <a href="daily-checkin.html" class="promo-btn">→</a>
+            </div>
+            <div class="promo-card">
+                <div class="promo-content">
+                    <h3>Refer & Earn</h3>
+                    <p>Invite your network</p>
+                </div>
+                <a href="referrals.html" class="promo-btn">→</a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Mobile Nav -->
+    <nav class="nav-island">
+        <a href="dashboard.html" class="nav-item"><span>🏠</span><span>Home</span></a>
+        <a href="plans.html" class="nav-item"><span>📈</span><span>Plans</span></a>
+        <a href="wallet.html" class="nav-item active"><span>👛</span><span>Wallet</span></a>
+        <a href="profile.html" class="nav-item"><span>👤</span><span>Profile</span></a>
+    </nav>
+
+    <script type="module">
+        import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm'
+
+        const supabase = createClient(import.meta.env.VITE_SUPABASE_URL, import.meta.env.VITE_SUPABASE_ANON_KEY);
+
+        const WalletApp = {
+            user: null,
+            wallet: null,
+            isHidden: false,
+
+            async init() {
+                const { data: { session } } = await supabase.auth.getSession();
+                if (!session) return window.location.href = 'login.html';
+                this.user = session.user;
+
+                this.setupNavigation();
+                await this.fetchData();
+            },
+
+            setupNavigation() {
+                const sb = document.getElementById('sidebar');
+                const ov = document.getElementById('overlay');
+                
+                document.getElementById('open-sb').onclick = () => { sb.classList.add('active'); ov.style.display = 'block'; };
+                document.getElementById('close-sb').onclick = () => { sb.classList.remove('active'); ov.style.display = 'none'; };
+                ov.onclick = () => { sb.classList.remove('active'); ov.style.display = 'none'; };
+
+                document.getElementById('logout-btn').onclick = async () => {
+                    await supabase.auth.signOut();
+                    window.location.href = 'index.html';
+                };
+
+                document.getElementById('refresh-btn').onclick = () => this.fetchData();
+
+                document.getElementById('eye-toggle').onclick = () => {
+                    this.isHidden = !this.isHidden;
+                    this.renderBalances();
+                };
+            },
+
+            async fetchData() {
+                try {
+                    // Fetch Wallet
+                    const { data: wallet, error: wErr } = await supabase.from('wallets').select('*').eq('user_id', this.user.id).single();
+                    if (wErr) throw wErr;
+                    this.wallet = wallet;
+
+                    // Fetch Transactions
+                    const { data: txs, error: tErr } = await supabase.from('transactions').select('*').eq('user_id', this.user.id).order('created_at', { ascending: false }).limit(5);
+                    if (tErr) throw tErr;
+
+                    this.renderBalances();
+                    this.renderTransactions(txs);
+                } catch (e) {
+                    console.error("Wallet Load Error:", e);
+                }
+            },
+
+            formatNGN(amt) {
+                return new Intl.NumberFormat('en-NG', { style: 'currency', currency: 'NGN' }).format(amt);
+            },
+
+            renderBalances() {
+                const w = this.wallet;
+                const format = (val) => this.isHidden ? "₦••••••" : this.formatNGN(val);
+
+                document.getElementById('main-balance').innerText = format(w.balance);
+                document.getElementById('stat-invested').innerText = format(w.investment_balance || 0);
+                document.getElementById('stat-pending').innerText = format(w.pending_balance || 0);
+                document.getElementById('stat-earned').innerText = format(w.total_earned || 0);
+                document.getElementById('stat-deposited').innerText = format(w.total_deposited || 0);
+
+                // Progress Bar calculation
+                const total = (Number(w.balance) || 0) + (Number(w.investment_balance) || 0);
+                if (total > 0) {
+                    const availPct = (w.balance / total) * 100;
+                    const investPct = (w.investment_balance / total) * 100;
+                    document.getElementById('bar-avail').style.width = `${availPct}%`;
+                    document.getElementById('bar-invest').style.width = `${investPct}%`;
+                }
+            },
+
+            renderTransactions(txs) {
+                const list = document.getElementById('tx-list');
+                if (!txs || txs.length === 0) {
+                    list.innerHTML = `<div style="padding: 40px; text-align: center; color: #999;">No activity recorded yet.</div>`;
+                    return;
+                }
+
+                list.innerHTML = txs.map(tx => {
+                    const isCredit = tx.amount > 0;
+                    return `
+                        <div class="tx-row">
+                            <div class="tx-main">
+                                <div class="tx-icon ${isCredit ? 'c-green' : 'c-magenta'}">${isCredit ? '↓' : '↑'}</div>
+                                <div class="tx-info">
+                                    <h4>${tx.type.replace('_', ' ')}</h4>
+                                    <span>${new Date(tx.created_at).toLocaleDateString()} • ${new Date(tx.created_at).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}</span>
+                                </div>
+                            </div>
+                            <div class="tx-amt">
+                                <span class="amt-val ${isCredit ? 'pos' : 'neg'}">${isCredit ? '+' : ''}${this.formatNGN(tx.amount)}</span>
+                                <span class="amt-status" style="color: ${tx.status === 'SUCCESS' ? 'var(--secondary-green)' : '#f39c12'}">${tx.status}</span>
+                            </div>
+                        </div>
+                    `;
+                }).join('');
+            }
+        };
+
+        document.addEventListener('DOMContentLoaded', () => WalletApp.init());
+    </script>
+</body>
+</html>
