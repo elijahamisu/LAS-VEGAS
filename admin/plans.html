@@ -195,8 +195,8 @@
                         <input type="number" class="input-field" id="f-min" required step="100">
                     </div>
                     <div class="form-group">
-                        <label class="label">Daily Profit (%)</label>
-                        <input type="number" class="input-field" id="f-daily" required step="0.01">
+                        <label class="label">Daily Profit (₦)</label>
+                        <input type="number" class="input-field" id="f-daily" required step="1">
                     </div>
                 </div>
                 <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
@@ -283,9 +283,9 @@
                     <tr>
                         <td style="font-weight:700; color:var(--primary-magenta);">${p.name}</td>
                         <td style="font-weight:700;">${this.formatCurrency(p.min_amount)}</td>
-                        <td>${p.daily_percent}%</td>
+                        <td>${this.formatCurrency(p.daily_percent)}</td>
                         <td>${p.duration_days} Days</td>
-                        <td style="color:var(--secondary-green); font-weight:700;">${p.daily_percent * p.duration_days}%</td>
+                        <td style="color:var(--secondary-green); font-weight:700;">${this.formatCurrency(p.daily_percent * p.duration_days)}</td>
                         <td>${p.purchase_limit || 'Unlimited'}</td>
                         <td><span class="status-badge ${p.is_active ? 'active-bg' : 'inactive-bg'}">${p.is_active ? 'ACTIVE' : 'INACTIVE'}</span></td>
                         <td><button class="btn-edit" onclick="window.PlansManager.openModal('${p.id}')">EDIT</button></td>
@@ -297,7 +297,8 @@
                         <h3>${p.name}</h3>
                         <div class="card-row"><span>Status</span> <span class="${p.is_active ? 'active-bg' : 'inactive-bg'}" style="padding:2px 8px; border-radius:10px; font-size:10px;">${p.is_active ? 'ACTIVE' : 'INACTIVE'}</span></div>
                         <div class="card-row"><span>Minimum</span> <b>${this.formatCurrency(p.min_amount)}</b></div>
-                        <div class="card-row"><span>Return</span> <b>${p.daily_percent * p.duration_days}% Total</b></div>
+                        <div class="card-row"><span>Daily Profit</span> <b>${this.formatCurrency(p.daily_percent)}</b></div>
+                        <div class="card-row"><span>Return</span> <b>${this.formatCurrency(p.daily_percent * p.duration_days)} Total</b></div>
                         <div class="card-row"><span>Duration</span> <b>${p.duration_days} Days</b></div>
                         <button class="btn-save" style="padding:10px; font-size:12px;" onclick="window.PlansManager.openModal('${p.id}')">EDIT PLAN</button>
                     </div>
