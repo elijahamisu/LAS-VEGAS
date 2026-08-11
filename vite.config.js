@@ -31,6 +31,7 @@ export default defineConfig({
         admin_plans: resolve(__dirname, 'admin/plans.html'),
         admin_investments: resolve(__dirname, 'admin/investments.html'),
         admin_earnings: resolve(__dirname, 'admin/earnings.html'),
+        admin_deposits: resolve(__dirname, 'admin/deposits.html'),
       }
     }
   }
