@@ -28,6 +28,7 @@ export default defineConfig({
         admin_dashboard: resolve(__dirname, 'admin/index.html'),
         admin_users: resolve(__dirname, 'admin/users.html'),
         admin_user_details: resolve(__dirname, 'admin/user-details.html'),
+        admin_plans: resolve(__dirname, 'admin/plans.html'),
       }
     }
   }
