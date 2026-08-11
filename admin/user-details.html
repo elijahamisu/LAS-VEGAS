@@ -1,0 +1,434 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Review Member | LAS VEGAS Admin</title>
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display&family=Quicksand:wght@400;500;600;700&display=swap" rel="stylesheet">
+    
+    <style>
+        :root {
+            --primary-magenta: #FF007F;
+            --secondary-green: #006400;
+            --admin-bg: #F8F9FB;
+            --sidebar-dark: #121212;
+            --card-white: #FFFFFF;
+            --text-main: #1A1A1A;
+            --text-muted: #666666;
+            --border-pink: #FFD1E3;
+            --shadow-sm: 0 2px 10px rgba(0,0,0,0.05);
+            --transition: all 0.3s ease;
+        }
+
+        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+        body { margin: 0; font-family: 'Quicksand', sans-serif; background: var(--admin-bg); color: var(--text-main); overflow-x: hidden; }
+
+        .admin-wrapper { display: flex; min-height: 100vh; }
+        
+        /* --- SIDEBAR --- */
+        .sidebar { 
+            width: 260px; background: var(--sidebar-dark); color: white; 
+            display: flex; flex-direction: column; position: fixed; 
+            height: 100vh; z-index: 1000; transition: var(--transition);
+        }
+        .sidebar-header { padding: 30px 20px; border-bottom: 1px solid rgba(255,255,255,0.1); text-align: center; }
+        .logo-text { font-family: 'DM Serif Display', serif; color: var(--primary-magenta); font-size: 22px; }
+        .nav-list { flex: 1; overflow-y: auto; padding: 20px 0; }
+        .nav-item { display: flex; align-items: center; padding: 12px 25px; color: rgba(255,255,255,0.6); text-decoration: none; font-size: 14px; font-weight: 600; transition: var(--transition); }
+        .nav-item:hover, .nav-item.active { color: white; background: rgba(255, 0, 127, 0.1); border-left: 4px solid var(--primary-magenta); }
+
+        /* --- MAIN CONTENT --- */
+        .main-content { flex: 1; margin-left: 260px; padding: 30px; transition: var(--transition); width: calc(100% - 260px); }
+        
+        /* --- TOP BAR & BREADCRUMB --- */
+        .top-bar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+        .breadcrumb { font-size: 13px; color: var(--text-muted); font-weight: 600; }
+        .breadcrumb a { color: var(--primary-magenta); text-decoration: none; }
+        .btn-back { display: flex; align-items: center; gap: 8px; font-weight: 700; color: var(--primary-magenta); text-decoration: none; font-size: 14px; }
+
+        /* --- USER HERO --- */
+        .user-hero { 
+            background: white; border-radius: 25px; border: 1px solid var(--border-pink); 
+            padding: 30px; margin-bottom: 30px; box-shadow: var(--shadow-sm);
+            display: flex; flex-wrap: wrap; gap: 30px; align-items: center;
+        }
+        .avatar-lg { width: 90px; height: 90px; border-radius: 50%; background: var(--primary-magenta); color: white; display: flex; align-items: center; justify-content: center; font-size: 32px; font-weight: 700; box-shadow: var(--shadow-sm); }
+        .hero-info h1 { margin: 0; font-family: 'DM Serif Display', serif; font-size: 26px; }
+        .hero-info p { margin: 5px 0 0 0; font-size: 14px; color: var(--text-muted); font-weight: 600; }
+        .status-pill { padding: 6px 15px; border-radius: 50px; font-size: 11px; font-weight: 800; text-transform: uppercase; margin-top: 10px; display: inline-block; }
+        .status-ACTIVE { background: #F0FFF4; color: var(--secondary-green); }
+        .status-SUSPENDED { background: #FFF0F0; color: #D00000; }
+
+        /* --- GRID SYSTEM --- */
+        .details-grid { display: grid; grid-template-columns: repeat(1, 1fr); gap: 20px; margin-bottom: 30px; }
+        @media (min-width: 1024px) { .details-grid { grid-template-columns: repeat(2, 1fr); } }
+
+        .card { background: white; border-radius: 20px; border: 1px solid var(--border-pink); padding: 25px; box-shadow: var(--shadow-sm); }
+        .card-title { font-family: 'DM Serif Display', serif; font-size: 18px; color: var(--primary-magenta); margin: 0 0 20px 0; border-bottom: 1px solid #F8F9FB; padding-bottom: 10px; }
+
+        /* --- STATS --- */
+        .mini-stats { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
+        .m-stat { padding: 15px; background: #FFF9FB; border-radius: 12px; border: 1px solid var(--border-pink); }
+        .m-label { font-size: 10px; font-weight: 800; color: var(--text-muted); text-transform: uppercase; display: block; margin-bottom: 5px; }
+        .m-value { font-size: 16px; font-weight: 700; color: var(--secondary-green); }
+
+        /* --- TABLES --- */
+        .table-wrap { overflow-x: auto; margin-top: 10px; }
+        .admin-table { width: 100%; border-collapse: collapse; font-size: 12px; }
+        .admin-table th { text-align: left; padding: 10px; border-bottom: 2px solid #f0f0f0; color: var(--text-muted); text-transform: uppercase; }
+        .admin-table td { padding: 12px 10px; border-bottom: 1px solid #f9f9f9; }
+
+        /* --- TIMELINE --- */
+        .timeline { position: relative; padding-left: 20px; border-left: 2px solid var(--border-pink); }
+        .t-item { margin-bottom: 15px; position: relative; }
+        .t-item::before { content: ""; position: absolute; left: -26px; top: 5px; width: 10px; height: 10px; background: var(--primary-magenta); border-radius: 50%; }
+        .t-date { font-size: 11px; font-weight: 700; color: var(--text-muted); }
+        .t-desc { font-size: 13px; font-weight: 600; margin-top: 2px; }
+
+        /* --- UTILS --- */
+        .pos { color: var(--secondary-green); font-weight: 700; }
+        .neg { color: var(--primary-magenta); font-weight: 700; }
+        .btn-action { background: var(--primary-magenta); color: white; border: none; padding: 10px 20px; border-radius: 10px; font-weight: 700; font-size: 12px; cursor: pointer; text-decoration: none; display: inline-block; text-align: center; }
+
+        .skeleton { height: 20px; background: #eee; border-radius: 5px; animation: pulse 1.5s infinite; }
+        @keyframes pulse { 0% { opacity: 0.6; } 50% { opacity: 1; } 100% { opacity: 0.6; } }
+
+        .mobile-toggle { display: none; background: none; border: none; font-size: 24px; cursor: pointer; }
+        @media (max-width: 1024px) {
+            .sidebar { left: -260px; }
+            .sidebar.active { left: 0; }
+            .main-content { margin-left: 0; width: 100%; }
+            .mobile-toggle { display: block; }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="admin-wrapper">
+        <aside class="sidebar" id="adminSidebar">
+            <div class="sidebar-header">
+                <div class="logo-text">LAS VEGAS ADMIN</div>
+            </div>
+            <nav class="nav-list">
+                <a href="index.html" class="nav-item">📊 Dashboard</a>
+                <a href="users.html" class="nav-item active">👥 Users</a>
+                <a href="plans.html" class="nav-item">📈 Plans</a>
+                <a href="investments.html" class="nav-item">💰 Investments</a>
+                <a href="earnings.html" class="nav-item">💸 Earnings</a>
+                <a href="deposits.html" class="nav-item">📥 Deposits</a>
+                <a href="withdrawals.html" class="nav-item">📤 Withdrawals</a>
+                <a href="transactions.html" class="nav-item">📜 Transactions</a>
+                <a href="#" id="logoutBtn" class="nav-item" style="margin-top: 20px; color: #ff4d4d;">🚪 Logout</a>
+            </nav>
+        </aside>
+
+        <main class="main-content">
+            <header class="top-bar">
+                <button class="mobile-toggle" id="menuBtn">☰</button>
+                <div class="breadcrumb">
+                    <a href="index.html">Dashboard</a> / <a href="users.html">Users</a> / User Details
+                </div>
+                <a href="users.html" class="btn-back">← Back</a>
+            </header>
+
+            <!-- User Hero -->
+            <section class="user-hero" id="hero-area">
+                <div class="avatar-lg" id="avatar">...</div>
+                <div class="hero-info">
+                    <h1 id="user-fullname">Loading Member...</h1>
+                    <p id="user-meta">Member ID: --- • user@example.com</p>
+                    <span class="status-pill" id="user-status">---</span>
+                </div>
+                <div style="flex: 1; text-align: right;">
+                    <button class="btn-action" style="background: #121212;">CHANGE STATUS</button>
+                </div>
+            </section>
+
+            <div class="details-grid">
+                <!-- Wallet Overview -->
+                <div class="card">
+                    <h3 class="card-title">Wallet Overview</h3>
+                    <div class="mini-stats">
+                        <div class="m-stat">
+                            <span class="m-label">Available Balance</span>
+                            <div class="m-value" id="val-balance">₦0.00</div>
+                        </div>
+                        <div class="m-stat">
+                            <span class="m-label">Total Earned</span>
+                            <div class="m-value" id="val-earned">₦0.00</div>
+                        </div>
+                        <div class="m-stat">
+                            <span class="m-label">Total Deposited</span>
+                            <div class="m-value" id="val-deposited">₦0.00</div>
+                        </div>
+                        <div class="m-stat">
+                            <span class="m-label">Total Withdrawn</span>
+                            <div class="m-value" id="val-withdrawn">₦0.00</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Referral & Rewards -->
+                <div class="card">
+                    <h3 class="card-title">Rewards & Network</h3>
+                    <div class="mini-stats">
+                        <div class="m-stat">
+                            <span class="m-label">Referral Code</span>
+                            <div class="m-value" id="val-ref-code" style="color: var(--primary-magenta);">---</div>
+                        </div>
+                        <div class="m-stat">
+                            <span class="m-label">Total Network</span>
+                            <div class="m-value" id="val-network">0 Users</div>
+                        </div>
+                        <div class="m-stat">
+                            <span class="m-label">Daily Check-ins</span>
+                            <div class="m-value" id="val-checkins">0 Total</div>
+                        </div>
+                        <div class="m-stat">
+                            <span class="m-label">Check-in Earned</span>
+                            <div class="m-value" id="val-checkin-reward">₦0.00</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Active Investments -->
+                <div class="card">
+                    <h3 class="card-title">Active Investments</h3>
+                    <div class="table-wrap">
+                        <table class="admin-table">
+                            <thead>
+                                <tr><th>Plan</th><th>Amount</th><th>Progress</th><th>Status</th></tr>
+                            </thead>
+                            <tbody id="investments-list">
+                                <tr><td colspan="4"><div class="skeleton"></div></td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- Recent Deposits -->
+                <div class="card">
+                    <h3 class="card-title">Recent Deposits</h3>
+                    <div class="table-wrap">
+                        <table class="admin-table">
+                            <thead>
+                                <tr><th>Ref</th><th>Amount</th><th>Date</th><th>Status</th></tr>
+                            </thead>
+                            <tbody id="deposits-list">
+                                <tr><td colspan="4"><div class="skeleton"></div></td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Full Transaction History -->
+            <div class="card" style="margin-bottom: 30px;">
+                <h3 class="card-title">Account Ledger</h3>
+                <div class="table-wrap">
+                    <table class="admin-table">
+                        <thead>
+                            <tr><th>Date</th><th>Reference</th><th>Type</th><th>Amount</th><th>Status</th></tr>
+                        </thead>
+                        <tbody id="transactions-list">
+                            <tr><td colspan="5"><div class="skeleton"></div></td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Support & Activity Row -->
+            <div class="details-grid">
+                <div class="card">
+                    <h3 class="card-title">Support Tickets</h3>
+                    <div id="tickets-list">
+                        <p style="color:#999; font-size:13px;">No tickets found.</p>
+                    </div>
+                </div>
+                <div class="card">
+                    <h3 class="card-title">Recent Activity</h3>
+                    <div class="timeline" id="activity-timeline">
+                        <!-- JS generated -->
+                    </div>
+                </div>
+            </div>
+
+        </main>
+    </div>
+
+    <script type="module">
+        import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm'
+
+        const supabase = createClient(import.meta.env.VITE_SUPABASE_URL, import.meta.env.VITE_SUPABASE_ANON_KEY);
+
+        const UserDetailsApp = {
+            targetUserId: null,
+
+            async init() {
+                // 1. Session & Auth Guard
+                const { data: { session } } = await supabase.auth.getSession();
+                if (!session) return window.location.href = 'login.html';
+
+                const { data: adminProfile } = await supabase.from('profiles').select('is_admin').eq('id', session.user.id).single();
+                if (!adminProfile || !adminProfile.is_admin) return window.location.href = 'login.html';
+
+                // 2. ID Validation
+                const urlParams = new URLSearchParams(window.location.search);
+                this.targetUserId = urlParams.get('id');
+                if (!this.targetUserId) return alert("User ID missing.");
+
+                this.setupUI();
+                await this.loadAllData();
+            },
+
+            setupUI() {
+                document.getElementById('menuBtn').onclick = () => document.getElementById('adminSidebar').classList.toggle('active');
+                document.getElementById('logoutBtn').onclick = () => supabase.auth.signOut().then(() => window.location.href = 'login.html');
+            },
+
+            async loadAllData() {
+                try {
+                    // Execute specific fetchers in parallel
+                    await Promise.all([
+                        this.fetchProfile(),
+                        this.fetchWallet(),
+                        this.fetchInvestments(),
+                        this.fetchDeposits(),
+                        this.fetchTransactions(),
+                        this.fetchSupport(),
+                        this.fetchCheckins()
+                    ]);
+                } catch (e) {
+                    console.error("Data Load Error:", e);
+                }
+            },
+
+            async fetchProfile() {
+                const { data, error } = await supabase.from('profiles').select('*').eq('id', this.targetUserId).single();
+                if (error || !data) return;
+
+                document.getElementById('user-fullname').innerText = data.full_name;
+                const memberId = `LV-${data.id.substring(0, 6).toUpperCase()}`;
+                document.getElementById('user-meta').innerText = `Member ID: ${memberId} • ${data.email}`;
+                document.getElementById('avatar').innerText = data.full_name.charAt(0).toUpperCase();
+                
+                const statusEl = document.getElementById('user-status');
+                statusEl.innerText = data.status || 'ACTIVE';
+                statusEl.className = `status-pill status-${data.status || 'ACTIVE'}`;
+                
+                document.getElementById('val-ref-code').innerText = data.referral_code;
+                
+                // Fetch network count
+                const { count } = await supabase.from('profiles').select('*', { count: 'exact', head: true }).eq('referred_by', this.targetUserId);
+                document.getElementById('val-network').innerText = `${count || 0} Users`;
+            },
+
+            async fetchWallet() {
+                const { data } = await supabase.from('wallets').select('*').eq('user_id', this.targetUserId).single();
+                if (!data) return;
+
+                document.getElementById('val-balance').innerText = this.formatCurrency(data.balance);
+                document.getElementById('val-earned').innerText = this.formatCurrency(data.total_earned);
+                document.getElementById('val-deposited').innerText = this.formatCurrency(data.total_deposited);
+                document.getElementById('val-withdrawn').innerText = this.formatCurrency(data.total_withdrawn);
+            },
+
+            async fetchInvestments() {
+                const { data } = await supabase.from('investments').select('*, plans(name)').eq('user_id', this.targetUserId).order('created_at', { ascending: false });
+                const list = document.getElementById('investments-list');
+                if (!data || data.length === 0) return list.innerHTML = '<tr><td colspan="4">No investments.</td></tr>';
+
+                list.innerHTML = data.map(inv => `
+                    <tr>
+                        <td>${inv.plans?.name || '---'}</td>
+                        <td>${this.formatCurrency(inv.amount)}</td>
+                        <td>Day ${inv.duration_days} cycle</td>
+                        <td><span class="pos">${inv.status}</span></td>
+                    </tr>
+                `).join('');
+            },
+
+            async fetchDeposits() {
+                const { data } = await supabase.from('deposits').select('*').eq('user_id', this.targetUserId).order('created_at', { ascending: false }).limit(5);
+                const list = document.getElementById('deposits-list');
+                if (!data || data.length === 0) return list.innerHTML = '<tr><td colspan="4">No deposits.</td></tr>';
+
+                list.innerHTML = data.map(d => `
+                    <tr>
+                        <td style="font-family:monospace;">${d.reference.substring(0, 10)}...</td>
+                        <td>${this.formatCurrency(d.amount)}</td>
+                        <td>${new Date(d.created_at).toLocaleDateString()}</td>
+                        <td><span class="pos">${d.status}</span></td>
+                    </tr>
+                `).join('');
+            },
+
+            async fetchTransactions() {
+                const { data } = await supabase.from('transactions').select('*').eq('user_id', this.targetUserId).order('created_at', { ascending: false }).limit(10);
+                const list = document.getElementById('transactions-list');
+                if (!data || data.length === 0) return list.innerHTML = '<tr><td colspan="5">No ledger records.</td></tr>';
+
+                list.innerHTML = data.map(tx => `
+                    <tr>
+                        <td>${new Date(tx.created_at).toLocaleDateString()}</td>
+                        <td style="font-family:monospace;">${tx.id.substring(0, 8)}</td>
+                        <td>${tx.type}</td>
+                        <td class="${tx.amount > 0 ? 'pos' : 'neg'}">${tx.amount > 0 ? '+' : ''}${this.formatCurrency(tx.amount)}</td>
+                        <td>${tx.status}</td>
+                    </tr>
+                `).join('');
+            },
+
+            async fetchSupport() {
+                const { data } = await supabase.from('support_tickets').select('*').eq('user_id', this.targetUserId).order('updated_at', { ascending: false });
+                if (data && data.length > 0) {
+                    document.getElementById('tickets-list').innerHTML = data.map(t => `
+                        <div style="padding:10px; border-bottom:1px solid #eee; display:flex; justify-content:space-between; align-items:center;">
+                            <div>
+                                <div style="font-weight:700; font-size:13px;">${t.subject}</div>
+                                <div style="font-size:11px; color:#999;">#${t.ticket_number} • ${t.category}</div>
+                            </div>
+                            <span class="status-pill status-ACTIVE" style="padding:2px 8px; font-size:9px;">${t.status}</span>
+                        </div>
+                    `).join('');
+                }
+            },
+
+            async fetchCheckins() {
+                const { data } = await supabase.from('daily_checkins').select('*').eq('user_id', this.targetUserId);
+                if (!data) return;
+                
+                document.getElementById('val-checkins').innerText = `${data.length} Total`;
+                const earned = data.reduce((sum, c) => sum + Number(c.reward_amount), 0);
+                document.getElementById('val-checkin-reward').innerText = this.formatCurrency(earned);
+
+                // Populate Activity Timeline (Top 5 items)
+                const timeline = document.getElementById('activity-timeline');
+                const activity = data.slice(-5).map(c => ({
+                    date: new Date(c.created_at),
+                    desc: 'Daily Check-in completed'
+                }));
+                
+                if(activity.length > 0) {
+                    timeline.innerHTML = activity.sort((a,b) => b.date - a.date).map(a => `
+                        <div class="t-item">
+                            <div class="t-date">${a.date.toLocaleDateString()} ${a.date.toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'})}</div>
+                            <div class="t-desc">${a.desc}</div>
+                        </div>
+                    `).join('');
+                }
+            },
+
+            formatCurrency(val) {
+                return new Intl.NumberFormat('en-NG', { style: 'currency', currency: 'NGN' }).format(val);
+            }
+        };
+
+        window.UserDetailsApp = UserDetailsApp;
+        document.addEventListener('DOMContentLoaded', () => UserDetailsApp.init());
+    </script>
+</body>
+</html>
