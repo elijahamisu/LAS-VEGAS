@@ -39,7 +39,8 @@ export default defineConfig({
         admin_gift_codes: resolve(__dirname, 'admin/gift-codes.html'),
         admin_notifications: resolve(__dirname, 'admin/notifications.html'),
         admin_nekpay: resolve(__dirname, 'admin/nekpay.html'),
-       admin_payout_accounts: resolve(__dirname, 'admin/payout-accounts.html'),
+        admin_payout_accounts: resolve(__dirname, 'admin/payout-accounts.html'),
+        admin_reports: resolve(__dirname, 'admin/reports.html'),
       }
     }
   }
