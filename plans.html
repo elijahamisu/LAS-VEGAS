@@ -265,7 +265,7 @@
                         </div>
                         <div class="plan-stat">
                             <span class="stat-label">Daily Profit</span>
-                            <span class="stat-value">${plan.daily_percent}%</span>
+                            <span class="stat-value">${this.formatNGN(plan.daily_percent)}</span>
                         </div>
                         <div class="plan-stat">
                             <span class="stat-label">Duration</span>
@@ -273,7 +273,7 @@
                         </div>
                         <div class="plan-stat">
                             <span class="stat-label">Total Return</span>
-                            <span class="stat-value">${plan.daily_percent * plan.duration_days}%</span>
+                            <span class="stat-value">${this.formatNGN(plan.daily_percent * plan.duration_days)}</span>
                         </div>
                         <div class="btn-group">
                             <button class="btn btn-outline" onclick="window.PlansApp.showDetails('${plan.id}')">DETAILS</button>
@@ -287,9 +287,9 @@
                     <tr>
                         <td style="font-weight: 700; color: var(--primary-magenta);"><span class="badge-circle">P</span> ${plan.name}</td>
                         <td style="font-weight: 700; color: var(--secondary-green);">${this.formatNGN(plan.min_amount)}</td>
-                        <td>${plan.daily_percent}%</td>
+                        <td>${this.formatNGN(plan.daily_percent)}</td>
                         <td>${plan.duration_days} Days</td>
-                        <td style="font-weight: 700; color: var(--secondary-green);">${this.formatNGN(plan.min_amount * (1 + (plan.daily_percent * plan.duration_days / 100)))}</td>
+                        <td style="font-weight: 700; color: var(--secondary-green);">${this.formatNGN(plan.min_amount + (plan.daily_percent * plan.duration_days))}</td>
                         <td><button class="btn btn-primary" style="padding: 8px 15px;" onclick="window.PlansApp.invest('${plan.id}')">INVEST</button></td>
                     </tr>
                 `).join('');
@@ -300,11 +300,11 @@
                 if (!plan) return;
 
                 document.getElementById('modal-title').innerText = plan.name;
-                document.getElementById('modal-desc').innerText = plan.description || `Premium high-yield investment plan with ${plan.daily_percent}% daily returns over ${plan.duration_days} days. Secure your financial future with LAS VEGAS.`;
+                document.getElementById('modal-desc').innerText = plan.description || `Premium high-yield investment plan with ${this.formatNGN(plan.daily_percent)} daily returns over ${plan.duration_days} days. Secure your financial future with LAS VEGAS.`;
                 
                 document.getElementById('modal-stats').innerHTML = `
                     <div class="plan-stat"><span class="stat-label">Min. Investment</span><span class="stat-value">${this.formatNGN(plan.min_amount)}</span></div>
-                    <div class="plan-stat"><span class="stat-label">Daily Return</span><span class="stat-value">${plan.daily_percent}%</span></div>
+                    <div class="plan-stat"><span class="stat-label">Daily Return</span><span class="stat-value">${this.formatNGN(plan.daily_percent)}</span></div>
                     <div class="plan-stat"><span class="stat-label">Duration</span><span class="stat-value">${plan.duration_days} Days</span></div>
                 `;
 
