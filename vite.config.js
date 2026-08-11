@@ -23,7 +23,7 @@ export default defineConfig({
         notifications: resolve(__dirname, 'notifications.html'),
         profile: resolve(__dirname, 'profile.html'),
         support: resolve(__dirname, 'support.html'),
-        my_investments: resolve(__dirname, 'my-investments.html'),
+        my_investment: resolve(__dirname, 'my-investments.html'),
         // Admin Entry
         admin_login: resolve(__dirname, 'admin/login.html'),
         admin_dashboard: resolve(__dirname, 'admin/index.html'),
@@ -41,7 +41,9 @@ export default defineConfig({
         admin_notifications: resolve(__dirname, 'admin/notifications.html'),
         admin_nekpay: resolve(__dirname, 'admin/nekpay.html'),
         admin_payout_accounts: resolve(__dirname, 'admin/payout-accounts.html'),
-        admin_reports: resolve(__dirname, 'admin/reports.html'),    
+        admin_reports: resolve(__dirname, 'admin/reports.html'),
+        admin_settings: resolve(__dirname, 'admin/settings.html'),
+      }
     }
   }
 });
