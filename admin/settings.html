@@ -1,0 +1,410 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Platform Settings | LAS VEGAS Admin</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display&family=Quicksand:wght@400;500;600;700&display=swap" rel="stylesheet">
+    
+    <style>
+        :root {
+            --primary-magenta: #FF007F;
+            --primary-magenta-dark: #E60072;
+            --secondary-green: #006400;
+            --secondary-green-light: #008000;
+            --bg-soft-white: #FFF5F7;
+            --card-white: #FFFFFF;
+            --text-main: #1A1A1A;
+            --text-muted: #666666;
+            --border-pink: #FFD1E3;
+            --shadow-soft: 0 10px 30px rgba(255, 0, 127, 0.05);
+            --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+        body {
+            margin: 0; padding: 0;
+            font-family: 'Quicksand', sans-serif;
+            background-color: var(--bg-soft-white);
+            color: var(--text-main);
+            background-image: radial-gradient(var(--border-pink) 0.5px, transparent 0.5px);
+            background-size: 30px 30px;
+            display: flex; min-height: 100vh;
+        }
+
+        h1, h2, h3, .brand-font { font-family: 'DM Serif Display', serif; font-weight: 400; margin: 0; }
+
+        /* --- SIDEBAR --- */
+        #sidebar-container { width: 260px; background: #121212; color: white; transition: var(--transition); z-index: 1000; }
+        .sidebar-fixed { position: fixed; width: 260px; height: 100vh; display: flex; flex-direction: column; padding: 30px 20px; }
+        .sidebar-logo { color: var(--primary-magenta); font-size: 22px; letter-spacing: 1px; margin-bottom: 40px; text-align: center; border-bottom: 1px solid #333; padding-bottom: 20px; }
+        .nav-list { list-style: none; padding: 0; margin: 0; flex: 1; overflow-y: auto; }
+        .nav-item { padding: 12px 15px; border-radius: 12px; margin-bottom: 5px; cursor: pointer; display: flex; align-items: center; gap: 12px; color: #999; text-decoration: none; font-size: 14px; font-weight: 600; transition: var(--transition); }
+        .nav-item:hover, .nav-item.active { background: rgba(255, 0, 127, 0.1); color: white; }
+        .nav-item.active { border-left: 4px solid var(--primary-magenta); border-radius: 4px 12px 12px 4px; }
+
+        /* --- MAIN CONTENT --- */
+        main { flex: 1; padding: 40px 20px; max-width: 1100px; margin: 0 auto; }
+        
+        .page-header { margin-bottom: 30px; display: flex; justify-content: space-between; align-items: flex-start; }
+        .status-indicator { font-size: 12px; font-weight: 800; text-transform: uppercase; color: var(--secondary-green); display: flex; align-items: center; gap: 6px; background: white; padding: 6px 14px; border-radius: 50px; border: 1px solid var(--border-pink); box-shadow: var(--shadow-soft); }
+        .status-dot { width: 8px; height: 8px; background: var(--secondary-green); border-radius: 50%; animation: pulse 2s infinite; }
+
+        @keyframes pulse { 0% { opacity: 1; } 50% { opacity: 0.3; } 100% { opacity: 1; } }
+
+        /* --- SUMMARY CARDS --- */
+        .summary-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 15px; margin-bottom: 30px; }
+        .summary-card { background: white; padding: 20px; border-radius: 20px; border: 1px solid var(--border-pink); box-shadow: var(--shadow-soft); text-align: center; }
+        .summary-card label { display: block; font-size: 10px; font-weight: 800; color: var(--primary-magenta); text-transform: uppercase; margin-bottom: 5px; }
+        .summary-card span { font-size: 18px; font-weight: 700; color: var(--secondary-green); }
+
+        /* --- SETTINGS GRID --- */
+        .settings-grid { display: grid; grid-template-columns: 1fr; gap: 25px; }
+        @media (min-width: 900px) { .settings-grid { grid-template-columns: 1fr 1fr; } }
+
+        .card { background: white; border-radius: 25px; border: 1px solid var(--border-pink); padding: 30px; box-shadow: var(--shadow-soft); position: relative; }
+        .card-header { display: flex; align-items: center; gap: 10px; margin-bottom: 25px; border-bottom: 1px solid var(--bg-soft-white); padding-bottom: 15px; }
+        .card-header h3 { font-size: 18px; color: var(--primary-magenta); }
+
+        /* --- FORM ELEMENTS --- */
+        .form-group { margin-bottom: 20px; }
+        .form-label { display: block; font-size: 12px; font-weight: 800; color: var(--text-muted); text-transform: uppercase; margin-bottom: 8px; letter-spacing: 0.5px; }
+        .input-wrapper { position: relative; display: flex; align-items: center; }
+        .currency-symbol { position: absolute; left: 15px; font-weight: 700; color: var(--text-main); }
+        .form-input { width: 100%; padding: 14px 18px; border-radius: 12px; border: 1px solid var(--border-pink); background: var(--bg-soft-white); font-family: inherit; font-size: 15px; font-weight: 600; transition: var(--transition); outline: none; }
+        .form-input:focus { border-color: var(--primary-magenta); background: white; box-shadow: 0 0 0 4px rgba(255, 0, 127, 0.05); }
+        .form-input.has-symbol { padding-left: 35px; }
+        
+        .select-field { width: 100%; padding: 14px; border-radius: 12px; border: 1px solid var(--border-pink); background: var(--bg-soft-white); font-family: inherit; font-weight: 700; cursor: pointer; }
+
+        /* --- BUTTONS --- */
+        .action-footer { margin-top: 40px; padding: 25px; background: white; border-radius: 25px; border: 1px solid var(--border-pink); display: flex; justify-content: flex-end; gap: 15px; position: sticky; bottom: 20px; box-shadow: 0 -10px 30px rgba(0,0,0,0.03); }
+        .btn { padding: 14px 30px; border-radius: 50px; border: none; font-weight: 700; font-size: 14px; cursor: pointer; transition: var(--transition); display: inline-flex; align-items: center; gap: 8px; }
+        .btn-primary { background: var(--primary-magenta); color: white; box-shadow: 0 4px 15px rgba(255, 0, 127, 0.2); }
+        .btn-primary:hover { background: var(--primary-magenta-dark); transform: translateY(-2px); }
+        .btn-outline { background: white; color: var(--text-muted); border: 1px solid var(--border-pink); }
+        .btn:disabled { opacity: 0.5; cursor: not-allowed; }
+
+        /* --- UTILS --- */
+        .leaf-divider { height: 1px; background: linear-gradient(to right, transparent, var(--secondary-green), transparent); opacity: 0.2; margin: 40px 0; }
+        .alert { padding: 15px 20px; border-radius: 15px; font-size: 13px; font-weight: 600; margin-bottom: 20px; display: none; }
+        .alert-success { background: #F0FFF4; color: var(--secondary-green); border: 1px solid #C6F6D5; }
+        .alert-error { background: #FFF5F5; color: #C53030; border: 1px solid #FED7D7; }
+
+        /* --- MOBILE OVERRIDES --- */
+        @media (max-width: 1024px) {
+            #sidebar-container { display: none; }
+            body { padding-bottom: 100px; }
+        }
+
+        .loader-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(255,255,255,0.9); z-index: 2000; display: flex; flex-direction: column; align-items: center; justify-content: center; }
+        .spinner { width: 40px; height: 40px; border: 4px solid var(--border-pink); border-top-color: var(--primary-magenta); border-radius: 50%; animation: spin 1s linear infinite; }
+        @keyframes spin { to { transform: rotate(360deg); } }
+    </style>
+</head>
+<body>
+
+    <div id="loader" class="loader-overlay">
+        <div class="spinner"></div>
+        <p style="margin-top: 15px; font-weight: 700; color: var(--primary-magenta);">Loading Platform Rules...</p>
+    </div>
+
+    <!-- Sidebar (Desktop) -->
+    <aside id="sidebar-container">
+        <div class="sidebar-fixed">
+            <div class="sidebar-logo">LAS VEGAS ADMIN</div>
+            <nav class="nav-list">
+                <a href="index.html" class="nav-item">📊 Dashboard</a>
+                <a href="users.html" class="nav-item">👥 Users</a>
+                <a href="plans.html" class="nav-item">📈 Plans</a>
+                <a href="investments.html" class="nav-item">💰 Investments</a>
+                <a href="earnings.html" class="nav-item">💸 Earnings</a>
+                <a href="deposits.html" class="nav-item">📥 Deposits</a>
+                <a href="withdrawals.html" class="nav-item">📤 Withdrawals</a>
+                <a href="transactions.html" class="nav-item">📜 Transactions</a>
+                <a href="daily-checkins.html" class="nav-item">📅 Daily Check-ins</a>
+                <a href="referrals.html" class="nav-item">🔗 Referrals</a>
+                <a href="gift-codes.html" class="nav-item">🎁 Gift Codes</a>
+                <a href="notifications.html" class="nav-item">🔔 Notifications</a>
+                <a href="nekpay.html" class="nav-item">💳 NekPay</a>
+                <a href="payout-accounts.html" class="nav-item">🏦 Payout Accounts</a>
+                <a href="reports.html" class="nav-item">📈 Reports</a>
+                <a href="settings.html" class="nav-item active">⚙️ Settings</a>
+                <a href="#" id="logout-btn" class="nav-item" style="color: #ff4d4d; margin-top: 20px;">🚪 Logout</a>
+            </nav>
+        </div>
+    </aside>
+
+    <main>
+        <header class="page-header">
+            <div>
+                <h1>Settings</h1>
+                <p style="color: var(--text-muted); font-size: 14px; margin-top: 5px;">Configure global platform behavior and rewards.</p>
+            </div>
+            <div class="status-indicator" id="platform-status-badge">
+                <div class="status-dot"></div>
+                Status: <span id="current-status-text">Active</span>
+            </div>
+        </header>
+
+        <div id="toast" class="alert"></div>
+
+        <!-- Live Summary -->
+        <div class="summary-grid">
+            <div class="summary-card">
+                <label>Welcome Bonus</label>
+                <span id="sum-welcome">₦0.00</span>
+            </div>
+            <div class="summary-card">
+                <label>Daily Check-in</label>
+                <span id="sum-checkin">₦0.00</span>
+            </div>
+            <div class="summary-card">
+                <label>Ref L1</label>
+                <span id="sum-l1">0%</span>
+            </div>
+            <div class="summary-card">
+                <label>WD Charge</label>
+                <span id="sum-fee">0%</span>
+            </div>
+        </div>
+
+        <form id="settings-form">
+            <div class="settings-grid">
+                <!-- General Section -->
+                <div class="card">
+                    <div class="card-header"><h3>General Configuration</h3></div>
+                    <div class="form-group">
+                        <label class="form-label">Platform Name</label>
+                        <input type="text" class="form-input" id="platform_name" required>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">System Status</label>
+                        <select class="select-field" id="platform_status">
+                            <option value="ACTIVE">ACTIVE (Normal Operation)</option>
+                            <option value="MAINTENANCE">MAINTENANCE (Restrict Access)</option>
+                        </select>
+                    </div>
+                    <p style="font-size: 11px; color: var(--text-muted);">Last Updated: <span id="updated-at">---</span></p>
+                </div>
+
+                <!-- Reward Settings -->
+                <div class="card">
+                    <div class="card-header"><h3>Reward Engine</h3></div>
+                    <div class="form-group">
+                        <label class="form-label">Welcome Bonus (One-time)</label>
+                        <div class="input-wrapper">
+                            <span class="currency-symbol">₦</span>
+                            <input type="number" class="form-input has-symbol" id="welcome_bonus" min="0">
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Daily Check-in Amount</label>
+                        <div class="input-wrapper">
+                            <span class="currency-symbol">₦</span>
+                            <input type="number" class="form-input has-symbol" id="daily_checkin_reward" min="0">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Referral Settings -->
+                <div class="card">
+                    <div class="card-header"><h3>Referral Commission</h3></div>
+                    <div class="form-group">
+                        <label class="form-label">Level 1 Commission Rate (%)</label>
+                        <input type="number" class="form-input" id="referral_l1_percent" min="0" max="100">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Level 2 Commission Rate (%)</label>
+                        <input type="number" class="form-input" id="referral_l2_percent" min="0" max="100">
+                    </div>
+                </div>
+
+                <!-- Financial Boundaries -->
+                <div class="card">
+                    <div class="card-header"><h3>Financial Limits</h3></div>
+                    <div class="form-group">
+                        <label class="form-label">Minimum Withdrawal Amount</label>
+                        <div class="input-wrapper">
+                            <span class="currency-symbol">₦</span>
+                            <input type="number" class="form-input has-symbol" id="minimum_withdrawal" min="0">
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Withdrawal Charge (%)</label>
+                        <input type="number" class="form-input" id="withdrawal_fee_percent" min="0" max="100">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Minimum Deposit Limit</label>
+                        <div class="input-wrapper">
+                            <span class="currency-symbol">₦</span>
+                            <input type="number" class="form-input has-symbol" id="minimum_deposit" min="0">
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="leaf-divider"></div>
+
+            <div class="action-footer">
+                <button type="button" class="btn btn-outline" id="reset-btn">RESET CHANGES</button>
+                <button type="submit" class="btn btn-primary" id="save-btn">SAVE SETTINGS</button>
+            </div>
+        </form>
+    </main>
+
+    <script type="module">
+        import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm'
+
+        const supabase = createClient(import.meta.env.VITE_SUPABASE_URL, import.meta.env.VITE_SUPABASE_ANON_KEY);
+
+        const SettingsApp = {
+            isDirty: false,
+            initialData: {},
+
+            async init() {
+                // 1. Session Guard
+                const { data: { session } } = await supabase.auth.getSession();
+                if (!session) return window.location.href = 'login.html';
+
+                const { data: profile } = await supabase.from('profiles').select('is_admin').eq('id', session.user.id).single();
+                if (!profile?.is_admin) return window.location.href = '../login.html';
+
+                this.setupUI();
+                await this.fetchSettings();
+            },
+
+            setupUI() {
+                const form = document.getElementById('settings-form');
+                form.addEventListener('input', () => this.isDirty = true);
+
+                form.addEventListener('submit', (e) => {
+                    e.preventDefault();
+                    this.handleSave();
+                });
+
+                document.getElementById('reset-btn').onclick = () => {
+                    if (confirm("Reset all fields to their last saved values?")) {
+                        this.renderData(this.initialData);
+                        this.isDirty = false;
+                    }
+                };
+
+                document.getElementById('logout-btn').onclick = async () => {
+                    await supabase.auth.signOut();
+                    window.location.href = 'login.html';
+                };
+
+                window.addEventListener('beforeunload', (e) => {
+                    if (this.isDirty) {
+                        e.preventDefault();
+                        e.returnValue = '';
+                    }
+                });
+            },
+
+            async fetchSettings() {
+                document.getElementById('loader').style.display = 'flex';
+                try {
+                    // Call the secure Admin Settings API
+                    const res = await fetch('/api/settings?action=admin', {
+                        headers: { 'Authorization': `Bearer ${(await supabase.auth.getSession()).data.session.access_token}` }
+                    });
+                    const result = await res.json();
+
+                    if (result.success) {
+                        // Settings are returned as an array of {key, value, updated_at}
+                        const dataMap = result.data.reduce((acc, obj) => ({ ...acc, [obj.key]: obj.value }), {});
+                        dataMap.updated_at = result.data[0]?.updated_at;
+                        
+                        this.initialData = dataMap;
+                        this.renderData(dataMap);
+                    } else {
+                        throw new Error(result.message);
+                    }
+                } catch (e) {
+                    this.showToast(e.message, 'error');
+                } finally {
+                    document.getElementById('loader').style.display = 'none';
+                }
+            },
+
+            renderData(map) {
+                // Populate Inputs
+                Object.keys(map).forEach(key => {
+                    const el = document.getElementById(key);
+                    if (el) el.value = map[key];
+                });
+
+                // Update UI Labels
+                document.getElementById('sum-welcome').innerText = `₦${Number(map.welcome_bonus).toLocaleString()}`;
+                document.getElementById('sum-checkin').innerText = `₦${Number(map.daily_checkin_reward).toLocaleString()}`;
+                document.getElementById('sum-l1').innerText = `${map.referral_l1_percent}%`;
+                document.getElementById('sum-fee').innerText = `${map.withdrawal_fee_percent}%`;
+                document.getElementById('updated-at').innerText = map.updated_at ? new Date(map.updated_at).toLocaleString() : 'Never';
+                
+                const statusText = document.getElementById('current-status-text');
+                statusText.innerText = map.platform_status || 'ACTIVE';
+                statusText.style.color = map.platform_status === 'MAINTENANCE' ? '#D00000' : 'var(--secondary-green)';
+                
+                this.isDirty = false;
+            },
+
+            async handleSave() {
+                const btn = document.getElementById('save-btn');
+                btn.disabled = true;
+                btn.innerText = "SAVING...";
+
+                const updates = [
+                    { key: 'platform_name', value: document.getElementById('platform_name').value },
+                    { key: 'platform_status', value: document.getElementById('platform_status').value },
+                    { key: 'welcome_bonus', value: document.getElementById('welcome_bonus').value },
+                    { key: 'daily_checkin_reward', value: document.getElementById('daily_checkin_reward').value },
+                    { key: 'referral_l1_percent', value: document.getElementById('referral_l1_percent').value },
+                    { key: 'referral_l2_percent', value: document.getElementById('referral_l2_percent').value },
+                    { key: 'minimum_withdrawal', value: document.getElementById('minimum_withdrawal').value },
+                    { key: 'withdrawal_fee_percent', value: document.getElementById('withdrawal_fee_percent').value },
+                    { key: 'minimum_deposit', value: document.getElementById('minimum_deposit').value }
+                ];
+
+                try {
+                    const session = await supabase.auth.getSession();
+                    const res = await fetch('/api/settings', {
+                        method: 'POST',
+                        headers: { 
+                            'Content-Type': 'application/json',
+                            'Authorization': `Bearer ${session.data.session.access_token}`
+                        },
+                        body: JSON.stringify({ action: 'update', updates })
+                    });
+
+                    const result = await res.json();
+                    if (!result.success) throw new Error(result.message);
+
+                    this.showToast("Configuration saved successfully. Future transactions will use these rules.", "success");
+                    await this.fetchSettings();
+                } catch (e) {
+                    this.showToast(e.message, "error");
+                    btn.disabled = false;
+                    btn.innerText = "SAVE SETTINGS";
+                }
+            },
+
+            showToast(msg, type) {
+                const toast = document.getElementById('toast');
+                toast.innerText = msg;
+                toast.className = `alert alert-${type}`;
+                toast.style.display = 'block';
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+                if (type === 'success') {
+                    setTimeout(() => toast.style.display = 'none', 5000);
+                }
+            }
+        };
+
+        document.addEventListener('DOMContentLoaded', () => SettingsApp.init());
+    </script>
+</body>
+</html>
