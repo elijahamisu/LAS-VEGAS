@@ -89,6 +89,8 @@
 
         .btn-save { width: 100%; padding: 16px; border-radius: 50px; background: var(--primary-magenta); color: white; border: none; font-weight: 700; cursor: pointer; margin-top: 10px; }
         .btn-edit { background: none; border: 1px solid var(--primary-magenta); color: var(--primary-magenta); padding: 5px 12px; border-radius: 8px; font-size: 11px; font-weight: 700; cursor: pointer; }
+        .btn-delete { background: none; border: 1px solid #D00000; color: #D00000; padding: 5px 12px; border-radius: 8px; font-size: 11px; font-weight: 700; cursor: pointer; }
+        .btn-delete:hover { background: #FFF0F0; }
 
         .mobile-toggle { display: none; background: none; border: none; font-size: 24px; cursor: pointer; }
         @media (max-width: 1024px) {
@@ -288,7 +290,10 @@
                         <td style="color:var(--secondary-green); font-weight:700;">${this.formatCurrency(p.daily_percent * p.duration_days)}</td>
                         <td>${p.purchase_limit || 'Unlimited'}</td>
                         <td><span class="status-badge ${p.is_active ? 'active-bg' : 'inactive-bg'}">${p.is_active ? 'ACTIVE' : 'INACTIVE'}</span></td>
-                        <td><button class="btn-edit" onclick="window.PlansManager.openModal('${p.id}')">EDIT</button></td>
+                        <td style="display:flex; gap:8px;">
+                            <button class="btn-edit" onclick="window.PlansManager.openModal('${p.id}')">EDIT</button>
+                            <button class="btn-delete" onclick="window.PlansManager.deletePlan('${p.id}', '${p.name.replace(/'/g, "\\'")}')">DELETE</button>
+                        </td>
                     </tr>
                 `).join('');
 
@@ -300,7 +305,10 @@
                         <div class="card-row"><span>Daily Profit</span> <b>${this.formatCurrency(p.daily_percent)}</b></div>
                         <div class="card-row"><span>Return</span> <b>${this.formatCurrency(p.daily_percent * p.duration_days)} Total</b></div>
                         <div class="card-row"><span>Duration</span> <b>${p.duration_days} Days</b></div>
-                        <button class="btn-save" style="padding:10px; font-size:12px;" onclick="window.PlansManager.openModal('${p.id}')">EDIT PLAN</button>
+                        <div style="display:flex; gap:10px; margin-top:10px;">
+                            <button class="btn-save" style="padding:10px; font-size:12px; margin-top:0; flex:1;" onclick="window.PlansManager.openModal('${p.id}')">EDIT</button>
+                            <button class="btn-delete" style="padding:10px; font-size:12px; flex:1; border-radius:50px;" onclick="window.PlansManager.deletePlan('${p.id}', '${p.name.replace(/'/g, "\\'")}')">DELETE</button>
+                        </div>
                     </div>
                 `).join('');
 
@@ -370,6 +378,23 @@
                 } finally {
                     btn.disabled = false;
                     btn.innerText = "SAVE CONFIGURATION";
+                }
+            },
+
+            async deletePlan(id, name) {
+                const confirmed = confirm(`Delete plan "${name}"? This cannot be undone. Existing investments already purchased on this plan are not affected, but no new investments will be able to select it.`);
+                if (!confirmed) return;
+
+                try {
+                    const { error } = await supabase.from('plans').delete().eq('id', id);
+                    if (error) throw error;
+
+                    await this.logAudit('DELETE_PLAN', id, { name });
+
+                    alert("Plan deleted successfully.");
+                    await this.fetchPlans();
+                } catch (e) {
+                    alert("Could not delete plan: " + e.message);
                 }
             },
 
