@@ -38,6 +38,7 @@ export default defineConfig({
         admin_referrals: resolve(__dirname, 'admin/referrals.html'),
         admin_gift_codes: resolve(__dirname, 'admin/gift-codes.html'),
         admin_notifications: resolve(__dirname, 'admin/notifications.html'),
+        admin_nekpay: resolve(__dirname, 'admin/nekpay.html'),
       }
     }
   }
