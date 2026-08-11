@@ -363,7 +363,7 @@
                         status: 'ACTIVE',
                         started_at: new Date().toISOString()
                     });
-                    if (iErr) throw new Error("Could not create investment record.");
+                    if (iErr) throw new Error("Could not create investment record: " + iErr.message);
 
                     // 3. Log transaction
                     await supabase.from('transactions').insert({
