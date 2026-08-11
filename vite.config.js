@@ -37,6 +37,7 @@ export default defineConfig({
         admin_daily_checkins: resolve(__dirname, 'admin/daily-checkins.html'),
         admin_referrals: resolve(__dirname, 'admin/referrals.html'),
         admin_gift_codes: resolve(__dirname, 'admin/gift-codes.html'),
+        admin_notifications: resolve(__dirname, 'admin/notifications.html'),
       }
     }
   }
