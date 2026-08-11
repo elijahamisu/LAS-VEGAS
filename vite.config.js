@@ -23,7 +23,7 @@ export default defineConfig({
         notifications: resolve(__dirname, 'notifications.html'),
         profile: resolve(__dirname, 'profile.html'),
         support: resolve(__dirname, 'support.html'),
-        my_investment: resolve(__dirname, 'my-investment.html'),
+        my_investments: resolve(__dirname, 'my-investments.html'),
         // Admin Entry
         admin_login: resolve(__dirname, 'admin/login.html'),
         admin_dashboard: resolve(__dirname, 'admin/index.html'),
