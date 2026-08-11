@@ -1,0 +1,367 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>My Investments | LAS VEGAS</title>
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display&family=Quicksand:wght@400;500;600;700&display=swap" rel="stylesheet">
+    
+    <style>
+        :root {
+            --primary-magenta: #FF007F;
+            --primary-magenta-dark: #E60072;
+            --secondary-green: #006400;
+            --secondary-green-light: #008000;
+            --bg-soft-white: #FFF5F7;
+            --card-white: #FFFFFF;
+            --text-main: #1A1A1A;
+            --text-muted: #666666;
+            --border-pink: #FFD1E3;
+            --nav-black: #121212;
+            --shadow-soft: 0 4px 20px rgba(255, 0, 127, 0.06);
+            --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+        
+        body {
+            margin: 0; padding: 0;
+            font-family: 'Quicksand', sans-serif;
+            background-color: var(--bg-soft-white);
+            color: var(--text-main);
+            background-image: radial-gradient(var(--border-pink) 0.5px, transparent 0.5px);
+            background-size: 30px 30px;
+            min-height: 100vh;
+            padding-bottom: 100px;
+        }
+
+        .container { max-width: 1200px; margin: 0 auto; padding: 20px; }
+
+        .page-header { margin-bottom: 25px; padding-top: 20px; }
+        .page-header h1 { font-family: 'DM Serif Display', serif; font-size: 26px; margin: 0; color: var(--text-main); }
+        .page-header p { font-size: 14px; color: var(--text-muted); margin: 5px 0 0 0; }
+
+        /* --- SUMMARY STATS --- */
+        .summary-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 12px; margin-bottom: 25px; }
+        .summary-card { background: white; border: 1px solid var(--border-pink); border-radius: 16px; padding: 16px; text-align: center; box-shadow: var(--shadow-soft); }
+        .summary-label { font-size: 10px; font-weight: 800; color: var(--text-muted); text-transform: uppercase; display: block; margin-bottom: 6px; }
+        .summary-value { font-size: 17px; font-weight: 700; }
+
+        /* --- FILTER TABS --- */
+        .filter-tabs { display: flex; gap: 8px; margin-bottom: 20px; overflow-x: auto; padding-bottom: 4px; }
+        .filter-tab { padding: 8px 18px; border-radius: 100px; border: 1px solid var(--border-pink); background: white; color: var(--text-muted); font-size: 12px; font-weight: 700; cursor: pointer; white-space: nowrap; transition: var(--transition); }
+        .filter-tab.active { background: var(--primary-magenta); color: white; border-color: var(--primary-magenta); }
+
+        /* --- INVESTMENT CARDS --- */
+        .invest-list { display: grid; gap: 16px; }
+        .invest-card { background: white; border-radius: 20px; border: 1px solid var(--border-pink); padding: 22px; box-shadow: var(--shadow-soft); position: relative; overflow: hidden; }
+        .invest-card-top { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 15px; }
+        .invest-plan-name { font-family: 'DM Serif Display', serif; font-size: 18px; color: var(--primary-magenta); margin: 0 0 4px 0; }
+        .invest-date { font-size: 11px; color: var(--text-muted); }
+
+        .status-badge { padding: 4px 12px; border-radius: 50px; font-size: 9px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.5px; }
+        .status-active { background: #F0FFF4; color: var(--secondary-green); }
+        .status-completed { background: #F0F0FF; color: #4040C0; }
+        .status-unknown { background: #F0F0F0; color: #666; }
+
+        .invest-stats-row { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-bottom: 15px; }
+        .mini-stat { text-align: center; }
+        .mini-stat-label { display: block; font-size: 10px; color: var(--text-muted); font-weight: 700; text-transform: uppercase; margin-bottom: 4px; }
+        .mini-stat-value { font-size: 14px; font-weight: 700; color: var(--text-main); }
+
+        /* --- PROGRESS BAR --- */
+        .progress-wrap { margin-bottom: 15px; }
+        .progress-labels { display: flex; justify-content: space-between; font-size: 11px; color: var(--text-muted); font-weight: 600; margin-bottom: 6px; }
+        .progress-track { width: 100%; height: 8px; background: #F5F5F5; border-radius: 10px; overflow: hidden; }
+        .progress-fill { height: 100%; background: linear-gradient(90deg, var(--primary-magenta), var(--secondary-green-light)); border-radius: 10px; transition: width 0.4s ease; }
+
+        .earnings-row { display: flex; justify-content: space-between; align-items: center; padding-top: 12px; border-top: 1px dashed var(--border-pink); }
+        .earnings-label { font-size: 12px; color: var(--text-muted); font-weight: 700; }
+        .earnings-value { font-size: 16px; font-weight: 800; color: var(--secondary-green); }
+
+        /* --- EMPTY STATE --- */
+        .empty-state { text-align: center; padding: 60px 20px; }
+        .empty-icon { font-size: 50px; margin-bottom: 15px; opacity: 0.4; }
+        .empty-state h3 { font-family: 'DM Serif Display', serif; margin: 0 0 8px 0; }
+        .empty-state p { color: var(--text-muted); font-size: 14px; margin-bottom: 25px; }
+        .btn-cta { display: inline-block; background: var(--primary-magenta); color: white; padding: 14px 30px; border-radius: 50px; text-decoration: none; font-weight: 700; font-size: 14px; box-shadow: 0 4px 15px rgba(255, 0, 127, 0.2); }
+
+        /* --- LOADING --- */
+        .loading-screen { text-align: center; padding: 100px 20px; }
+        .spinner { width: 40px; height: 40px; border: 4px solid var(--border-pink); border-top: 4px solid var(--primary-magenta); border-radius: 50%; animation: spin 1s linear infinite; margin: 0 auto 20px; }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+
+        /* --- SIDEBAR & NAV --- */
+        .sidebar { position: fixed; top: 0; left: -100%; width: 280px; height: 100%; background: white; z-index: 2500; transition: var(--transition); padding: 30px; box-shadow: 10px 0 40px rgba(0,0,0,0.1); }
+        .sidebar.active { left: 0; }
+        .sidebar-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 2400; display: none; }
+        .nav-island { position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%); background: var(--nav-black); height: 65px; width: 90%; max-width: 400px; border-radius: 100px; display: flex; justify-content: space-around; align-items: center; z-index: 2000; box-shadow: 0 10px 30px rgba(0,0,0,0.3); }
+        .nav-item { color: #666; text-decoration: none; font-size: 10px; font-weight: 700; text-align: center; display: flex; flex-direction: column; align-items: center; gap: 4px; }
+        .nav-item.active { color: var(--primary-magenta); }
+        .top-open-btn { width: 45px; height: 45px; border-radius: 50%; border: 1px solid var(--border-pink); background: white; color: var(--primary-magenta); cursor: pointer; }
+    </style>
+</head>
+<body>
+
+    <div class="sidebar-overlay" id="overlay"></div>
+    
+    <aside class="sidebar" id="sidebar">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 40px;">
+            <span style="color: var(--primary-magenta); font-size: 22px; font-family: 'DM Serif Display', serif;">LAS VEGAS</span>
+            <button id="close-sb" style="background: none; border: none; font-size: 24px;">✕</button>
+        </div>
+        <nav style="display: flex; flex-direction: column; gap: 15px;">
+            <a href="dashboard.html" style="text-decoration: none; color: var(--text-main); font-weight: 600;">🏠 Dashboard</a>
+            <a href="plans.html" style="text-decoration: none; color: var(--text-main); font-weight: 600;">📈 Investment Plans</a>
+            <a href="my-investments.html" style="text-decoration: none; color: var(--primary-magenta); font-weight: 700;">💰 My Investments</a>
+            <a href="wallet.html" style="text-decoration: none; color: var(--text-main); font-weight: 600;">👛 Wallet</a>
+            <a href="referrals.html" style="text-decoration: none; color: var(--text-main); font-weight: 600;">👥 Referrals</a>
+            <button id="logout-btn" style="margin-top: 20px; border: none; background: none; color: #d00000; font-weight: 700; cursor: pointer; text-align: left; padding: 0;">🚪 Logout</button>
+        </nav>
+    </aside>
+
+    <div class="container">
+        <header class="page-header">
+            <div style="display: flex; justify-content: space-between; align-items: flex-start;">
+                <div>
+                    <h1>My Investments</h1>
+                    <p>Track your active plans and earnings in real time.</p>
+                </div>
+                <button class="top-open-btn" id="open-sb">☰</button>
+            </div>
+        </header>
+
+        <!-- Loading -->
+        <div id="view-loading" class="loading-screen">
+            <div class="spinner"></div>
+            <p>Loading your investments...</p>
+        </div>
+
+        <!-- Content -->
+        <div id="view-content" style="display:none;">
+
+            <div class="summary-grid">
+                <div class="summary-card">
+                    <span class="summary-label">Total Invested</span>
+                    <span class="summary-value" id="stat-invested">₦0</span>
+                </div>
+                <div class="summary-card">
+                    <span class="summary-label">Total Earned</span>
+                    <span class="summary-value" style="color: var(--secondary-green);" id="stat-earned">₦0</span>
+                </div>
+                <div class="summary-card">
+                    <span class="summary-label">Active Plans</span>
+                    <span class="summary-value" id="stat-active">0</span>
+                </div>
+            </div>
+
+            <div class="filter-tabs">
+                <button class="filter-tab active" data-filter="ALL">All</button>
+                <button class="filter-tab" data-filter="ACTIVE">Active</button>
+                <button class="filter-tab" data-filter="COMPLETED">Completed</button>
+            </div>
+
+            <div class="invest-list" id="invest-list"></div>
+
+            <!-- Empty state (hidden by default, shown if no investments) -->
+            <div class="empty-state" id="empty-state" style="display:none;">
+                <div class="empty-icon">💼</div>
+                <h3>No Investments Yet</h3>
+                <p>You haven't invested in any plan. Explore our plans and start earning today.</p>
+                <a href="plans.html" class="btn-cta">BROWSE PLANS</a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Mobile Nav Island -->
+    <nav class="nav-island">
+        <a href="dashboard.html" class="nav-item"><div>🏠</div><span>Home</span></a>
+        <a href="plans.html" class="nav-item"><div>📈</div><span>Plans</span></a>
+        <a href="wallet.html" class="nav-item"><div>👛</div><span>Wallet</span></a>
+        <a href="profile.html" class="nav-item"><div>👤</div><span>Profile</span></a>
+    </nav>
+
+    <script type="module">
+        import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm'
+
+        const supabase = createClient(import.meta.env.VITE_SUPABASE_URL, import.meta.env.VITE_SUPABASE_ANON_KEY);
+
+        const MyInvestments = {
+            user: null,
+            investments: [],
+            currentFilter: 'ALL',
+
+            async init() {
+                const { data: { session } } = await supabase.auth.getSession();
+                if (!session) return window.location.href = 'login.html';
+                this.user = session.user;
+
+                this.setupNav();
+                await this.fetchInvestments();
+            },
+
+            setupNav() {
+                const sidebar = document.getElementById('sidebar');
+                const overlay = document.getElementById('overlay');
+
+                document.getElementById('open-sb').onclick = () => { sidebar.classList.add('active'); overlay.style.display = 'block'; };
+                document.getElementById('close-sb').onclick = () => { sidebar.classList.remove('active'); overlay.style.display = 'none'; };
+                overlay.onclick = () => { sidebar.classList.remove('active'); overlay.style.display = 'none'; };
+
+                document.getElementById('logout-btn').onclick = async () => {
+                    await supabase.auth.signOut();
+                    window.location.href = 'index.html';
+                };
+
+                document.querySelectorAll('.filter-tab').forEach(tab => {
+                    tab.addEventListener('click', () => {
+                        document.querySelectorAll('.filter-tab').forEach(t => t.classList.remove('active'));
+                        tab.classList.add('active');
+                        this.currentFilter = tab.dataset.filter;
+                        this.render();
+                    });
+                });
+            },
+
+            async fetchInvestments() {
+                try {
+                    // Join plan name via plans table for display
+                    const { data, error } = await supabase
+                        .from('investments')
+                        .select('*, plans(name)')
+                        .eq('user_id', this.user.id)
+                        .order('started_at', { ascending: false });
+
+                    if (error) throw error;
+
+                    this.investments = data || [];
+                    document.getElementById('view-loading').style.display = 'none';
+                    document.getElementById('view-content').style.display = 'block';
+                    this.render();
+                } catch (e) {
+                    document.getElementById('view-loading').innerHTML = `<p style="color:#d00000;">Unable to load investments: ${e.message}</p>`;
+                }
+            },
+
+            // Computes days elapsed, days remaining, progress %, and amount earned so far
+            computeProgress(inv) {
+                const start = new Date(inv.started_at);
+                const now = new Date();
+                const msPerDay = 1000 * 60 * 60 * 24;
+                let daysElapsed = Math.floor((now - start) / msPerDay);
+                if (daysElapsed < 0) daysElapsed = 0;
+                if (daysElapsed > inv.duration_days) daysElapsed = inv.duration_days;
+
+                const daysRemaining = Math.max(inv.duration_days - daysElapsed, 0);
+                const progressPct = inv.duration_days > 0 ? Math.round((daysElapsed / inv.duration_days) * 100) : 0;
+                const earnedSoFar = daysElapsed * Number(inv.daily_profit);
+                const isComplete = daysElapsed >= inv.duration_days;
+
+                return { daysElapsed, daysRemaining, progressPct, earnedSoFar, isComplete };
+            },
+
+            render() {
+                const list = document.getElementById('invest-list');
+                const emptyState = document.getElementById('empty-state');
+
+                if (this.investments.length === 0) {
+                    list.innerHTML = '';
+                    emptyState.style.display = 'block';
+                    this.updateSummary([]);
+                    return;
+                }
+                emptyState.style.display = 'none';
+
+                const filtered = this.investments.filter(inv => {
+                    if (this.currentFilter === 'ALL') return true;
+                    const { isComplete } = this.computeProgress(inv);
+                    const effectiveStatus = isComplete ? 'COMPLETED' : 'ACTIVE';
+                    return effectiveStatus === this.currentFilter;
+                });
+
+                if (filtered.length === 0) {
+                    list.innerHTML = `<div class="empty-state"><div class="empty-icon">📭</div><h3>Nothing here</h3><p>No investments match this filter.</p></div>`;
+                } else {
+                    list.innerHTML = filtered.map(inv => this.renderCard(inv)).join('');
+                }
+
+                this.updateSummary(this.investments);
+            },
+
+            renderCard(inv) {
+                const planName = inv.plans?.name || 'Investment Plan';
+                const { daysElapsed, daysRemaining, progressPct, earnedSoFar, isComplete } = this.computeProgress(inv);
+
+                const statusLabel = isComplete ? 'COMPLETED' : 'ACTIVE';
+                const statusClass = isComplete ? 'status-completed' : 'status-active';
+
+                const startDate = new Date(inv.started_at).toLocaleDateString('en-NG', { day: '2-digit', month: 'short', year: 'numeric' });
+
+                return `
+                    <div class="invest-card">
+                        <div class="invest-card-top">
+                            <div>
+                                <h3 class="invest-plan-name">${planName}</h3>
+                                <span class="invest-date">Started ${startDate}</span>
+                            </div>
+                            <span class="status-badge ${statusClass}">${statusLabel}</span>
+                        </div>
+
+                        <div class="invest-stats-row">
+                            <div class="mini-stat">
+                                <span class="mini-stat-label">Invested</span>
+                                <span class="mini-stat-value">${this.formatCurrency(inv.amount)}</span>
+                            </div>
+                            <div class="mini-stat">
+                                <span class="mini-stat-label">Daily Profit</span>
+                                <span class="mini-stat-value">${this.formatCurrency(inv.daily_profit)}</span>
+                            </div>
+                            <div class="mini-stat">
+                                <span class="mini-stat-label">Days Left</span>
+                                <span class="mini-stat-value">${daysRemaining} / ${inv.duration_days}</span>
+                            </div>
+                        </div>
+
+                        <div class="progress-wrap">
+                            <div class="progress-labels">
+                                <span>Day ${daysElapsed} of ${inv.duration_days}</span>
+                                <span>${progressPct}%</span>
+                            </div>
+                            <div class="progress-track">
+                                <div class="progress-fill" style="width:${progressPct}%;"></div>
+                            </div>
+                        </div>
+
+                        <div class="earnings-row">
+                            <span class="earnings-label">Earned so far</span>
+                            <span class="earnings-value">${this.formatCurrency(earnedSoFar)}</span>
+                        </div>
+                    </div>
+                `;
+            },
+
+            updateSummary(investments) {
+                const totalInvested = investments.reduce((sum, inv) => sum + Number(inv.amount), 0);
+                const totalEarned = investments.reduce((sum, inv) => {
+                    const { earnedSoFar } = this.computeProgress(inv);
+                    return sum + earnedSoFar;
+                }, 0);
+                const activeCount = investments.filter(inv => !this.computeProgress(inv).isComplete).length;
+
+                document.getElementById('stat-invested').innerText = this.formatCurrency(totalInvested);
+                document.getElementById('stat-earned').innerText = this.formatCurrency(totalEarned);
+                document.getElementById('stat-active').innerText = activeCount;
+            },
+
+            formatCurrency(val) {
+                return new Intl.NumberFormat('en-NG', { style: 'currency', currency: 'NGN' }).format(val);
+            }
+        };
+
+        document.addEventListener('DOMContentLoaded', () => MyInvestments.init());
+    </script>
+</body>
+</html>
