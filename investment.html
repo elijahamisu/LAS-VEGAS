@@ -38,35 +38,40 @@
             padding-bottom: 100px;
         }
 
-        /* --- LAYOUT --- */
         .container { max-width: 1200px; margin: 0 auto; padding: 20px; }
         
-        /* --- HEADER --- */
         .page-header { margin-bottom: 30px; padding-top: 20px; position: relative; }
         .page-header h1 { font-family: 'DM Serif Display', serif; font-size: 26px; margin: 0; color: var(--text-main); }
         .page-header p { font-size: 14px; color: var(--text-muted); margin: 5px 0 0 0; }
         .btn-back { display: inline-flex; align-items: center; gap: 5px; color: var(--primary-magenta); font-weight: 700; text-decoration: none; font-size: 13px; margin-bottom: 15px; }
 
-        /* --- GRID --- */
         .invest-grid { display: grid; grid-template-columns: 1fr; gap: 20px; }
         @media (min-width: 1024px) { .invest-grid { grid-template-columns: 1fr 1fr; } }
 
-        /* --- CARDS --- */
         .card { background: white; border-radius: 25px; border: 1px solid var(--border-pink); padding: 25px; box-shadow: var(--shadow-soft); height: fit-content; }
         .card-title { font-family: 'DM Serif Display', serif; font-size: 18px; color: var(--primary-magenta); margin: 0 0 20px 0; border-bottom: 1px solid var(--bg-soft-white); padding-bottom: 10px; }
 
-        /* --- PLAN INFO --- */
         .plan-item { display: flex; justify-content: space-between; margin-bottom: 12px; font-size: 14px; }
         .plan-label { color: var(--text-muted); font-weight: 600; }
         .plan-value { color: var(--secondary-green); font-weight: 700; }
 
-        /* --- FORM --- */
         .input-group { margin-bottom: 20px; }
         .input-label { display: block; font-size: 12px; font-weight: 700; color: var(--primary-magenta); margin-bottom: 8px; text-transform: uppercase; letter-spacing: 0.5px; }
-        .amount-wrapper { position: relative; display: flex; align-items: center; }
-        .currency-symbol { position: absolute; left: 15px; font-weight: 700; color: var(--text-main); }
-        .amount-input { width: 100%; padding: 15px 15px 15px 35px; border-radius: 15px; border: 1px solid var(--border-pink); background: #FFF9FB; font-family: inherit; font-size: 18px; font-weight: 700; outline: none; transition: var(--transition); }
-        .amount-input:focus { border-color: var(--primary-magenta); background: white; }
+
+        /* --- Fixed amount display (replaces the old editable input) --- */
+        .fixed-amount-box {
+            width: 100%;
+            padding: 18px 15px;
+            border-radius: 15px;
+            border: 1px solid var(--border-pink);
+            background: #FFF9FB;
+            font-family: inherit;
+            display: flex;
+            align-items: baseline;
+            gap: 6px;
+        }
+        .fixed-amount-box .currency-symbol { font-weight: 700; color: var(--text-main); font-size: 18px; }
+        .fixed-amount-box .fixed-amount-value { font-weight: 700; color: var(--text-main); font-size: 22px; }
 
         /* --- SUMMARY --- */
         .summary-box { background: #FFF9FB; border-radius: 20px; padding: 20px; margin: 20px 0; border: 1px dashed var(--border-pink); }
@@ -83,6 +88,19 @@
         /* --- BUTTONS --- */
         .btn-invest { width: 100%; padding: 16px; background: var(--primary-magenta); color: white; border: none; border-radius: 50px; font-size: 15px; font-weight: 700; cursor: pointer; transition: var(--transition); box-shadow: 0 4px 15px rgba(255, 0, 127, 0.2); }
         .btn-invest:disabled { background: #ccc; cursor: not-allowed; box-shadow: none; }
+
+        /* --- Insufficient balance notice --- */
+        .balance-warning {
+            display: none;
+            background: #fff0f0;
+            border: 1px solid #ffc9c9;
+            color: #d00000;
+            font-size: 12.5px;
+            padding: 12px 14px;
+            border-radius: 12px;
+            margin-bottom: 16px;
+            line-height: 1.5;
+        }
 
         /* --- STATUS --- */
         .status-screen { display: none; text-align: center; padding: 40px 20px; }
@@ -172,12 +190,19 @@
                 </div>
 
                 <div class="input-group">
-                    <label class="input-label">Enter Amount to Invest</label>
-                    <div class="amount-wrapper">
+                    <label class="input-label">Investment Amount (Fixed by Plan)</label>
+                    <!-- FIX: amount is now a fixed, read-only display of the plan's
+                         min_amount instead of an editable number input. Every
+                         investment in this plan uses exactly this amount. -->
+                    <div class="fixed-amount-box">
                         <span class="currency-symbol">₦</span>
-                        <input type="number" id="input-amount" class="amount-input" placeholder="0.00" step="100">
+                        <span class="fixed-amount-value" id="fixed-amount-display">0.00</span>
                     </div>
-                    <p id="amount-hint" style="font-size:11px; color:var(--text-muted); margin:8px 0 0 0;">Minimum: ₦0.00</p>
+                    <p id="amount-hint" style="font-size:11px; color:var(--text-muted); margin:8px 0 0 0;">This plan requires a fixed investment of ₦0.00</p>
+                </div>
+
+                <div class="balance-warning" id="balance-warning">
+                    Your wallet balance is below this plan's required amount. Please fund your wallet before investing.
                 </div>
 
                 <div class="summary-box">
@@ -222,6 +247,7 @@
             user: null,
             plan: null,
             wallet: null,
+            fixedAmount: 0, // NEW: the locked-in amount for this investment = plan.min_amount
 
             async init() {
                 const { data: { session } } = await supabase.auth.getSession();
@@ -239,7 +265,6 @@
 
             async loadData(planId) {
                 try {
-                    // Fetch Plan & Wallet in parallel
                     const [planRes, walletRes] = await Promise.all([
                         supabase.from('plans').select('*').eq('id', planId).eq('is_active', true).single(),
                         supabase.from('wallets').select('*').eq('user_id', this.user.id).single()
@@ -250,6 +275,7 @@
 
                     this.plan = planRes.data;
                     this.wallet = walletRes.data;
+                    this.fixedAmount = Number(this.plan.min_amount);
 
                     this.renderForm();
                 } catch (e) {
@@ -268,29 +294,36 @@
                 document.getElementById('disp-days').innerText = `${this.plan.duration_days} Days`;
                 document.getElementById('disp-total-p').innerText = `${this.plan.daily_percent * this.plan.duration_days}%`;
                 document.getElementById('disp-balance').innerText = this.formatCurrency(this.wallet.balance);
-                document.getElementById('amount-hint').innerText = `Minimum: ${this.formatCurrency(this.plan.min_amount)}`;
+
+                // Fixed amount display
+                document.getElementById('fixed-amount-display').innerText = Number(this.fixedAmount).toLocaleString('en-NG', { minimumFractionDigits: 2 });
+                document.getElementById('amount-hint').innerText = `This plan requires a fixed investment of ${this.formatCurrency(this.fixedAmount)}`;
                 document.getElementById('sum-duration').innerText = `${this.plan.duration_days} Days`;
+
+                this.updateSummary(this.fixedAmount);
+                this.validate();
             },
 
             setupListeners() {
-                const amountInput = document.getElementById('input-amount');
                 const confirmBox = document.getElementById('confirm-box');
                 const submitBtn = document.getElementById('btn-submit');
 
-                const validate = () => {
-                    const amt = parseFloat(amountInput.value);
-                    const isAmountValid = amt >= this.plan.min_amount && amt <= this.wallet.balance;
-                    submitBtn.disabled = !(isAmountValid && confirmBox.checked);
-                    this.updateSummary(amt);
-                };
-
-                amountInput.addEventListener('input', validate);
-                confirmBox.addEventListener('change', validate);
+                confirmBox.addEventListener('change', () => this.validate());
                 submitBtn.addEventListener('click', () => this.handleInvestment());
             },
 
+            validate() {
+                const confirmBox = document.getElementById('confirm-box');
+                const submitBtn = document.getElementById('btn-submit');
+                const warning = document.getElementById('balance-warning');
+
+                const hasSufficientBalance = Number(this.wallet.balance) >= this.fixedAmount;
+                warning.style.display = hasSufficientBalance ? 'none' : 'block';
+
+                submitBtn.disabled = !(hasSufficientBalance && confirmBox.checked);
+            },
+
             updateSummary(amt) {
-                if (!amt || isNaN(amt)) amt = 0;
                 const daily = (amt * (this.plan.daily_percent / 100));
                 const total = amt + (daily * this.plan.duration_days);
 
@@ -299,16 +332,15 @@
             },
 
             async handleInvestment() {
-                const amount = parseFloat(document.getElementById('input-amount').value);
+                const amount = this.fixedAmount; // FIX: always the plan's fixed amount, never user input
                 const submitBtn = document.getElementById('btn-submit');
 
                 submitBtn.disabled = true;
                 submitBtn.innerText = "PROCESSING...";
 
                 try {
-                    // Security Check: Re-verify balance and min amount
-                    if (amount < this.plan.min_amount) throw new Error("Amount is below the minimum required.");
-                    if (amount > this.wallet.balance) throw new Error("Insufficient wallet balance.");
+                    // Security Check: Re-verify balance (amount itself can no longer be tampered with client-side beyond this fixed value)
+                    if (amount > Number(this.wallet.balance)) throw new Error("Insufficient wallet balance.");
 
                     // Transactional Block (Simulation of RPC logic)
                     // 1. Deduct from wallet
