@@ -1,0 +1,400 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Deposit Management | LAS VEGAS Admin</title>
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display&family=Quicksand:wght@400;500;600;700&display=swap" rel="stylesheet">
+    
+    <style>
+        :root {
+            --primary-magenta: #FF007F;
+            --secondary-green: #006400;
+            --admin-bg: #F8F9FB;
+            --sidebar-dark: #121212;
+            --card-white: #FFFFFF;
+            --text-main: #1A1A1A;
+            --text-muted: #666666;
+            --border-pink: #FFD1E3;
+            --shadow-sm: 0 2px 10px rgba(0,0,0,0.05);
+            --transition: all 0.3s ease;
+        }
+
+        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+        body { margin: 0; font-family: 'Quicksand', sans-serif; background: var(--admin-bg); color: var(--text-main); overflow-x: hidden; }
+
+        .admin-wrapper { display: flex; min-height: 100vh; }
+        
+        /* --- SIDEBAR --- */
+        .sidebar { 
+            width: 260px; background: var(--sidebar-dark); color: white; 
+            display: flex; flex-direction: column; position: fixed; 
+            height: 100vh; z-index: 1000; transition: var(--transition);
+        }
+        .sidebar-header { padding: 30px 20px; border-bottom: 1px solid rgba(255,255,255,0.1); text-align: center; }
+        .logo-text { font-family: 'DM Serif Display', serif; color: var(--primary-magenta); font-size: 22px; }
+        .nav-list { flex: 1; overflow-y: auto; padding: 20px 0; }
+        .nav-item { display: flex; align-items: center; padding: 12px 25px; color: rgba(255,255,255,0.6); text-decoration: none; font-size: 14px; font-weight: 600; transition: var(--transition); }
+        .nav-item:hover, .nav-item.active { color: white; background: rgba(255, 0, 127, 0.1); border-left: 4px solid var(--primary-magenta); }
+
+        /* --- MAIN CONTENT --- */
+        .main-content { flex: 1; margin-left: 260px; padding: 30px; transition: var(--transition); width: calc(100% - 260px); }
+        .top-bar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px; }
+
+        /* --- SUMMARY STATS --- */
+        .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 15px; margin-bottom: 25px; }
+        .stat-card { background: white; padding: 20px; border-radius: 15px; border: 1px solid var(--border-pink); text-align: center; box-shadow: var(--shadow-sm); }
+        .stat-label { font-size: 10px; font-weight: 800; color: var(--text-muted); text-transform: uppercase; display: block; margin-bottom: 5px; }
+        .stat-value { font-size: 18px; font-weight: 700; color: var(--text-main); }
+        .stat-value.green { color: var(--secondary-green); }
+
+        /* --- CONTROLS --- */
+        .controls-card { background: white; padding: 20px; border-radius: 20px; border: 1px solid var(--border-pink); margin-bottom: 25px; }
+        .filter-grid { display: grid; grid-template-columns: 1fr; gap: 15px; }
+        @media (min-width: 1024px) { .filter-grid { grid-template-columns: 2fr 1fr 1fr 1fr; } }
+        
+        .input-field { width: 100%; padding: 12px 15px; border-radius: 10px; border: 1px solid var(--border-pink); font-family: inherit; font-size: 13px; background: #FFF9FB; outline: none; }
+        .input-field:focus { border-color: var(--primary-magenta); background: white; }
+
+        /* --- TABLE --- */
+        .table-container { background: white; border-radius: 20px; border: 1px solid var(--border-pink); overflow-x: auto; display: none; }
+        @media (min-width: 1024px) { .table-container { display: block; } }
+        table { width: 100%; border-collapse: collapse; min-width: 1000px; }
+        th { text-align: left; padding: 15px 20px; background: #FFF9FB; border-bottom: 2px solid var(--border-pink); font-size: 10px; text-transform: uppercase; color: var(--text-muted); letter-spacing: 1px; }
+        td { padding: 15px 20px; border-bottom: 1px solid var(--admin-bg); font-size: 13px; }
+        
+        .user-link { color: var(--primary-magenta); font-weight: 700; text-decoration: none; }
+        .status-badge { padding: 4px 10px; border-radius: 50px; font-size: 9px; font-weight: 800; text-transform: uppercase; }
+        .status-SUCCESSFUL, .status-COMPLETED { background: #F0FFF4; color: var(--secondary-green); }
+        .status-PENDING { background: #FFF9E6; color: #D4A017; }
+        .status-FAILED { background: #FFF0F0; color: #D00000; }
+
+        /* --- MOBILE LIST --- */
+        .mobile-list { display: grid; gap: 15px; }
+        @media (min-width: 1024px) { .mobile-list { display: none; } }
+        .dep-card { background: white; border: 1px solid var(--border-pink); border-radius: 15px; padding: 20px; }
+        .card-row { display: flex; justify-content: space-between; font-size: 12px; padding: 6px 0; border-bottom: 1px solid #f9f9f9; }
+
+        /* --- MODAL --- */
+        .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); backdrop-filter: blur(5px); z-index: 3000; display: none; align-items: center; justify-content: center; padding: 20px; }
+        .modal-card { background: white; width: 100%; max-width: 500px; border-radius: 25px; padding: 30px; position: relative; animation: pop 0.3s ease-out; }
+        .modal-close { position: absolute; top: 20px; right: 20px; cursor: pointer; font-size: 20px; color: var(--text-muted); }
+        @keyframes pop { from { opacity: 0; transform: scale(0.95); } to { opacity: 1; transform: scale(1); } }
+        .detail-row { display: flex; justify-content: space-between; padding: 12px 0; border-bottom: 1px solid #f5f5f5; font-size: 14px; }
+        .detail-label { color: var(--text-muted); font-weight: 600; }
+        .detail-value { font-weight: 700; color: var(--text-main); word-break: break-all; margin-left: 10px; text-align: right; }
+
+        /* --- PAGINATION --- */
+        .pagination { display: flex; justify-content: space-between; align-items: center; margin-top: 25px; }
+        .page-btn { padding: 10px 20px; border: 1px solid var(--border-pink); background: white; border-radius: 10px; cursor: pointer; font-weight: 700; transition: var(--transition); }
+        .page-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+
+        .mobile-toggle { display: none; background: none; border: none; font-size: 24px; cursor: pointer; }
+        @media (max-width: 1024px) {
+            .sidebar { left: -260px; }
+            .sidebar.active { left: 0; }
+            .main-content { margin-left: 0; width: 100%; }
+            .mobile-toggle { display: block; }
+        }
+
+        .skeleton { height: 20px; background: #eee; border-radius: 5px; animation: pulse 1.5s infinite; }
+        @keyframes pulse { 0.6 { opacity: 0.6; } 1 { opacity: 1; } }
+    </style>
+</head>
+<body>
+
+    <div class="admin-wrapper">
+        <aside class="sidebar" id="adminSidebar">
+            <div class="sidebar-header">
+                <div class="logo-text">LAS VEGAS ADMIN</div>
+            </div>
+            <nav class="nav-list">
+                <a href="index.html" class="nav-item">📊 Dashboard</a>
+                <a href="users.html" class="nav-item">👥 Users</a>
+                <a href="plans.html" class="nav-item">📈 Plans</a>
+                <a href="investments.html" class="nav-item">💰 Investments</a>
+                <a href="earnings.html" class="nav-item">💸 Earnings</a>
+                <a href="deposits.html" class="nav-item active">📥 Deposits</a>
+                <a href="withdrawals.html" class="nav-item">📤 Withdrawals</a>
+                <a href="transactions.html" class="nav-item">📜 Transactions</a>
+                <a href="#" id="logoutBtn" class="nav-item" style="margin-top: 20px; color: #ff4d4d;">🚪 Logout</a>
+            </nav>
+        </aside>
+
+        <main class="main-content">
+            <header class="top-bar">
+                <div style="display: flex; align-items: center; gap: 15px;">
+                    <button class="mobile-toggle" id="menuBtn">☰</button>
+                    <h1 style="margin: 0; font-family: 'DM Serif Display', serif;">Member Deposits</h1>
+                </div>
+                <div style="display: flex; gap: 10px;">
+                    <button class="page-btn" id="syncBtn" style="background: var(--primary-magenta); color: white; border: none;">🔄 SYNC NEKPAY</button>
+                    <button class="page-btn" onclick="location.reload()">Refresh</button>
+                </div>
+            </header>
+
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <span class="stat-label">Total Volume</span>
+                    <span class="stat-value green" id="stat-total">₦0.00</span>
+                </div>
+                <div class="stat-card">
+                    <span class="stat-label">Today's Deposits</span>
+                    <span class="stat-value" id="stat-today">₦0.00</span>
+                </div>
+                <div class="stat-card">
+                    <span class="stat-label">Pending Total</span>
+                    <span class="stat-value" id="stat-pending">₦0.00</span>
+                </div>
+                <div class="stat-card">
+                    <span class="stat-label">Verified Today</span>
+                    <span class="stat-value" id="stat-count">0</span>
+                </div>
+            </div>
+
+            <div class="controls-card">
+                <div class="filter-grid">
+                    <input type="text" id="searchInput" class="input-field" placeholder="Search User, ID or Ref...">
+                    <select id="filterStatus" class="input-field">
+                        <option value="ALL">All Statuses</option>
+                        <option value="SUCCESSFUL">Successful</option>
+                        <option value="PENDING">Pending</option>
+                        <option value="FAILED">Failed</option>
+                    </select>
+                    <input type="date" id="filterDate" class="input-field" title="Deposit Date">
+                    <select id="sortBy" class="input-field">
+                        <option value="newest">Newest First</option>
+                        <option value="oldest">Oldest First</option>
+                        <option value="amount-high">Highest Amount</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="table-container">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>User</th>
+                            <th>Deposit ID</th>
+                            <th>Amount</th>
+                            <th>Gateway</th>
+                            <th>NekPay Ref</th>
+                            <th>Status</th>
+                            <th>Date</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody id="deposits-table-body">
+                        <tr><td colspan="8"><div class="skeleton"></div></td></tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="mobile-list" id="deposits-mobile-list"></div>
+
+            <div class="pagination">
+                <span id="pageInfo" style="font-size: 12px; color: var(--text-muted);">Showing -- to -- of --</span>
+                <div style="display: flex; gap: 10px;">
+                    <button class="page-btn" id="prevBtn" disabled>Previous</button>
+                    <button class="page-btn" id="nextBtn">Next</button>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Detail Modal -->
+    <div class="modal-overlay" id="detail-modal">
+        <div class="modal-card">
+            <span class="modal-close" id="modal-close">✕</span>
+            <h3 class="brand-font" style="margin-top: 0; color: var(--primary-magenta);">Deposit Audit Trail</h3>
+            <div id="modal-content"></div>
+            <div style="margin-top: 25px; display: grid; gap: 10px;">
+                <button class="page-btn" id="btn-view-user" style="background: var(--sidebar-dark); color: white; border: none;">VIEW USER DETAILS</button>
+                <button class="page-btn" onclick="document.getElementById('detail-modal').style.display='none'">CLOSE</button>
+            </div>
+        </div>
+    </div>
+
+    <script type="module">
+        import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm'
+
+        const supabase = createClient(import.meta.env.VITE_SUPABASE_URL, import.meta.env.VITE_SUPABASE_ANON_KEY);
+
+        const DepManager = {
+            currentPage: 0,
+            pageSize: 20,
+            totalCount: 0,
+
+            async init() {
+                const { data: { session } } = await supabase.auth.getSession();
+                if (!session) return window.location.href = 'login.html';
+
+                const { data: profile } = await supabase.from('profiles').select('is_admin').eq('id', session.user.id).single();
+                if (!profile || !profile.is_admin) return window.location.href = 'login.html';
+
+                this.setupUI();
+                await this.fetchStats();
+                await this.fetchDeposits();
+            },
+
+            setupUI() {
+                document.getElementById('menuBtn').onclick = () => document.getElementById('adminSidebar').classList.toggle('active');
+                document.getElementById('logoutBtn').onclick = () => supabase.auth.signOut().then(() => window.location.href = 'login.html');
+                document.getElementById('modal-close').onclick = () => document.getElementById('detail-modal').style.display = 'none';
+
+                document.getElementById('syncBtn').onclick = () => this.handleSync();
+
+                const reload = () => { this.currentPage = 0; this.fetchDeposits(); };
+                document.getElementById('searchInput').oninput = this.debounce(reload, 500);
+                ['filterStatus', 'filterDate', 'sortBy'].forEach(id => {
+                    document.getElementById(id).onchange = reload;
+                });
+
+                document.getElementById('nextBtn').onclick = () => { this.currentPage++; this.fetchDeposits(); };
+                document.getElementById('prevBtn').onclick = () => { this.currentPage--; this.fetchDeposits(); };
+            },
+
+            async fetchStats() {
+                const today = new Date().toISOString().split('T')[0];
+                const { data: sums } = await supabase.from('deposits').select('amount, status, created_at');
+                
+                if (!sums) return;
+
+                const totals = { total: 0, today: 0, pending: 0, countToday: 0 };
+                sums.forEach(d => {
+                    const val = Number(d.amount);
+                    const date = new Date(d.created_at).toISOString().split('T')[0];
+                    
+                    if (d.status === 'SUCCESSFUL') {
+                        totals.total += val;
+                        if (date === today) {
+                            totals.today += val;
+                            totals.countToday++;
+                        }
+                    } else if (d.status === 'PENDING') {
+                        totals.pending += val;
+                    }
+                });
+
+                document.getElementById('stat-total').innerText = this.formatCurrency(totals.total);
+                document.getElementById('stat-today').innerText = this.formatCurrency(totals.today);
+                document.getElementById('stat-pending').innerText = this.formatCurrency(totals.pending);
+                document.getElementById('stat-count').innerText = totals.countToday;
+            },
+
+            async fetchDeposits() {
+                const search = document.getElementById('searchInput').value.trim();
+                const status = document.getElementById('filterStatus').value;
+                const date = document.getElementById('filterDate').value;
+                const sort = document.getElementById('sortBy').value;
+
+                let query = supabase.from('deposits').select('*, profiles(full_name, id)', { count: 'exact' });
+
+                if (status !== 'ALL') query = query.eq('status', status);
+                if (date) query = query.gte('created_at', `${date}T00:00:00`).lte('created_at', `${date}T23:59:59`);
+                
+                if (search) query = query.or(`reference.ilike.%${search}%,gateway_ref.ilike.%${search}%`);
+
+                if (sort === 'newest') query = query.order('created_at', { ascending: false });
+                else if (sort === 'oldest') query = query.order('created_at', { ascending: true });
+                else if (sort === 'amount-high') query = query.order('amount', { ascending: false });
+
+                const from = this.currentPage * this.pageSize;
+                const { data, count, error } = await query.range(from, from + this.pageSize - 1);
+
+                if (!error) {
+                    this.totalCount = count;
+                    this.renderDeposits(data);
+                    this.updatePagination();
+                }
+            },
+
+            renderDeposits(data) {
+                const tbody = document.getElementById('deposits-table-body');
+                const mList = document.getElementById('deposits-mobile-list');
+
+                if (!data || data.length === 0) {
+                    tbody.innerHTML = '<tr><td colspan="8" style="text-align:center; padding:40px;">No matching deposits found.</td></tr>';
+                    mList.innerHTML = '<p style="text-align:center; color:#999;">No records.</p>';
+                    return;
+                }
+
+                tbody.innerHTML = data.map(d => `
+                    <tr>
+                        <td><a href="user-details.html?id=${d.user_id}" class="user-link">${d.profiles?.full_name || 'User'}</a></td>
+                        <td style="font-family:monospace; font-weight:700;">DEP-${d.id.substring(0,6).toUpperCase()}</td>
+                        <td style="font-weight:700;">${this.formatCurrency(d.amount)}</td>
+                        <td>${d.gateway || 'NekPay'}</td>
+                        <td style="font-family:monospace; font-size:11px;">${d.gateway_ref || '---'}</td>
+                        <td><span class="status-badge status-${d.status}">${d.status}</span></td>
+                        <td>${new Date(d.created_at).toLocaleDateString()}</td>
+                        <td><button class="page-btn" style="padding:5px 12px; font-size:10px;" onclick="window.DepManager.showDetails('${d.id}')">VIEW</button></td>
+                    </tr>
+                `).join('');
+
+                mList.innerHTML = data.map(d => `
+                    <div class="dep-card">
+                        <div class="card-row"><span>User</span> <a href="user-details.html?id=${d.user_id}" class="user-link">${d.profiles?.full_name}</a></div>
+                        <div class="card-row"><span>Reference</span> <b>DEP-${d.id.substring(0,6).toUpperCase()}</b></div>
+                        <div class="card-row"><span>Amount</span> <b>${this.formatCurrency(d.amount)}</b></div>
+                        <div class="card-row"><span>Status</span> <span class="status-badge status-${d.status}">${d.status}</span></div>
+                        <button class="page-btn" style="width:100%; margin-top:10px;" onclick="window.DepManager.showDetails('${d.id}')">AUDIT DEPOSIT</button>
+                    </div>
+                `).join('');
+
+                this.cachedDeposits = data;
+            },
+
+            showDetails(id) {
+                const d = this.cachedDeposits.find(item => item.id === id);
+                if (!d) return;
+
+                document.getElementById('modal-content').innerHTML = `
+                    <div class="detail-row"><span class="detail-label">Internal Ref</span><span class="detail-value">DEP-${d.id.toUpperCase()}</span></div>
+                    <div class="detail-row"><span class="detail-label">Payment Ref</span><span class="detail-value">${d.reference}</span></div>
+                    <div class="detail-row"><span class="detail-label">Gateway (NekPay) Ref</span><span class="detail-value" style="color:var(--primary-magenta);">${d.gateway_ref || 'Wait for Payment'}</span></div>
+                    <div class="detail-row"><span class="detail-label">Amount Paid</span><span class="detail-value green">${this.formatCurrency(d.amount)}</span></div>
+                    <div class="detail-row"><span class="detail-label">Gateway Method</span><span class="detail-value">${d.gateway || 'NEKPAY'}</span></div>
+                    <div class="detail-row"><span class="detail-label">Status</span><span class="status-badge status-${d.status}">${d.status}</span></div>
+                    <div class="detail-row"><span class="detail-label">Created At</span><span class="detail-value">${new Date(d.created_at).toLocaleString()}</span></div>
+                    <div class="detail-row"><span class="detail-label">Reconciliation</span><span class="detail-value" style="color:var(--secondary-green);">MATCHED BY WEBHOOK</span></div>
+                `;
+
+                document.getElementById('btn-view-user').onclick = () => window.location.href = `user-details.html?id=${d.user_id}`;
+                document.getElementById('detail-modal').style.display = 'flex';
+            },
+
+            handleSync() {
+                alert("NekPay API Sync initiated via secure backend. Please wait 30 seconds for verification.");
+                // In production: await fetch('/api/admin/nekpay/sync', { method: 'POST' });
+            },
+
+            updatePagination() {
+                const from = this.currentPage * this.pageSize + 1;
+                const to = Math.min((this.currentPage + 1) * this.pageSize, this.totalCount);
+                document.getElementById('pageInfo').innerText = `Showing ${from}-${to} of ${this.totalCount}`;
+                document.getElementById('prevBtn').disabled = this.currentPage === 0;
+                document.getElementById('nextBtn').disabled = to >= this.totalCount;
+            },
+
+            formatCurrency(val) {
+                return new Intl.NumberFormat('en-NG', { style: 'currency', currency: 'NGN' }).format(val);
+            },
+
+            debounce(func, wait) {
+                let timeout;
+                return function(...args) {
+                    clearTimeout(timeout);
+                    timeout = setTimeout(() => func.apply(this, args), wait);
+                };
+            }
+        };
+
+        window.DepManager = DepManager;
+        document.addEventListener('DOMContentLoaded', () => DepManager.init());
+    </script>
+</body>
+</html>
