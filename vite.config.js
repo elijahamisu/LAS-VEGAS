@@ -35,6 +35,7 @@ export default defineConfig({
         admin_withdrawals: resolve(__dirname, 'admin/withdrawals.html'),
         admin_transactions: resolve(__dirname, 'admin/transactions.html'),
         admin_daily_checkins: resolve(__dirname, 'admin/daily-checkins.html'),
+        admin_referrals: resolve(__dirname, 'admin/referrals.html'),
       }
     }
   }
