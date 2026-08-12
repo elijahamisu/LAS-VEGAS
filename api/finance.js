@@ -30,6 +30,8 @@ export default async function handler(req, res) {
         return await handleRewards({ method, action, query, body, userId, res });
       case 'payments':
         return await handlePayments({ method, action, body, userId, res });
+      case 'withdrawals':
+        return await handleWithdrawals({ method, action, body, userId, res });
       default:
         return res.status(400).json({ success: false, message: 'Invalid or missing resource' });
     }
@@ -232,6 +234,41 @@ async function handlePayments({ method, action, body, userId, res }) {
       return res.status(200).json({ success: true, payInfo: result.payInfo });
     }
     return res.status(400).json({ success: false, message: result.tradeMsg });
+  }
+
+  return res.status(400).json({ success: false, message: 'Invalid action' });
+}
+
+// ---------------------------------------------------------------------------
+// WITHDRAWALS  (new — user-initiated withdrawal request)
+// Approval, rejection, and payout still live in admin.js (resource=admin),
+// this is just the user-facing "submit a request" step.
+// ---------------------------------------------------------------------------
+async function handleWithdrawals({ method, action, body, userId, res }) {
+  if (method !== 'POST') return res.status(405).json({ success: false, message: 'Method Not Allowed' });
+
+  if (action === 'withdraw') {
+    const { amount, payout_account_id } = body;
+
+    if (!amount || isNaN(amount) || amount <= 0) throw new Error('Invalid withdrawal amount');
+    if (!payout_account_id) throw new Error('Payout account is required');
+
+    const { data, error } = await supabase.rpc('request_withdrawal_v2', {
+      p_user_id: userId,
+      p_amount: parseFloat(amount),
+      p_account_id: payout_account_id
+    });
+    if (error || !data.success) throw new Error(error?.message || data?.message || 'Withdrawal failed');
+
+    // Trigger internal notification
+    await supabase.from('notifications').insert({
+      user_id: userId,
+      title: "Withdrawal Pending",
+      message: `Your request for \u20a6${amount} is pending admin review.`,
+      type: "WITHDRAWAL"
+    });
+
+    return res.status(200).json({ success: true, message: 'Request submitted' });
   }
 
   return res.status(400).json({ success: false, message: 'Invalid action' });
