@@ -1,1 +1,366 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Daily Check-In | LAS VEGAS</title>
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display&family=Quicksand:wght@400;500;600;700&display=swap" rel="stylesheet">
+    
+    <style>
+        :root {
+            --primary-magenta: #FF007F;
+            --primary-magenta-dark: #E60072;
+            --secondary-green: #006400;
+            --secondary-green-light: #008000;
+            --bg-soft-white: #FFF5F7;
+            --card-white: #FFFFFF;
+            --text-main: #1A1A1A;
+            --text-muted: #666666;
+            --border-pink: #FFD1E3;
+            --nav-black: #121212;
+            --shadow-soft: 0 4px 20px rgba(255, 0, 127, 0.06);
+            --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+        
+        body {
+            margin: 0; padding: 0;
+            font-family: 'Quicksand', sans-serif;
+            background-color: var(--bg-soft-white);
+            color: var(--text-main);
+            background-image: radial-gradient(var(--border-pink) 0.5px, transparent 0.5px);
+            background-size: 30px 30px;
+            min-height: 100vh;
+            padding-bottom: 110px;
+        }
+
+        .container { max-width: 1200px; margin: 0 auto; padding: 20px; }
+
+        /* --- HEADER --- */
+        .page-header { margin-bottom: 25px; padding-top: 10px; display: flex; justify-content: space-between; align-items: flex-start; }
+        .page-header h1 { font-family: 'DM Serif Display', serif; font-size: 28px; margin: 0; color: var(--text-main); }
+        .page-header p { font-size: 14px; color: var(--text-muted); margin: 5px 0 0 0; }
+
+        /* --- HERO CARD --- */
+        .reward-hero {
+            background: linear-gradient(135deg, var(--primary-magenta), #ff4d94);
+            border-radius: 30px; padding: 40px 20px; color: white; text-align: center;
+            margin-bottom: 25px; box-shadow: 0 10px 25px rgba(255, 0, 127, 0.15);
+            position: relative; overflow: hidden;
+        }
+        .reward-hero::after { content: "★"; position: absolute; right: 20px; top: -10px; font-size: 100px; opacity: 0.1; }
+        .reward-label { font-size: 12px; text-transform: uppercase; letter-spacing: 3px; font-weight: 700; opacity: 0.9; }
+        .reward-value { font-size: 48px; font-weight: 700; margin: 10px 0 25px 0; display: block; }
+        
+        /* --- ACTION BUTTON --- */
+        .btn-claim {
+            width: 100%; max-width: 300px; padding: 18px; border-radius: 50px;
+            background: white; color: var(--primary-magenta); border: none;
+            font-size: 16px; font-weight: 700; cursor: pointer; transition: var(--transition);
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        }
+        .btn-claim:hover { transform: scale(1.02); }
+        .btn-claim:disabled { background: rgba(255,255,255,0.3); color: white; cursor: not-allowed; }
+
+        /* --- STATS GRID --- */
+        .stats-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-bottom: 25px; }
+        .stat-card { background: white; padding: 15px 10px; border-radius: 20px; border: 1px solid var(--border-pink); text-align: center; box-shadow: var(--shadow-soft); }
+        .stat-card .label { font-size: 9px; text-transform: uppercase; font-weight: 700; color: var(--text-muted); display: block; margin-bottom: 5px; }
+        .stat-card .value { font-size: 14px; font-weight: 700; color: var(--secondary-green); }
+
+        /* --- CALENDAR --- */
+        .calendar-card { background: white; padding: 25px; border-radius: 25px; border: 1px solid var(--border-pink); margin-bottom: 25px; }
+        .calendar-title { font-family: 'DM Serif Display', serif; font-size: 18px; margin: 0 0 20px 0; text-align: center; }
+        .calendar-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 10px; }
+        .cal-day { display: flex; flex-direction: column; align-items: center; gap: 8px; }
+        .cal-label { font-size: 10px; font-weight: 700; color: var(--text-muted); text-transform: uppercase; }
+        .cal-circle { width: 35px; height: 35px; border-radius: 50%; background: var(--bg-soft-white); border: 1px solid var(--border-pink); display: flex; align-items: center; justify-content: center; font-size: 14px; transition: var(--transition); }
+        .cal-circle.checked { background: var(--secondary-green); color: white; border-color: var(--secondary-green); }
+        .cal-circle.today { border-color: var(--primary-magenta); border-width: 2px; color: var(--primary-magenta); font-weight: 700; }
+
+        /* --- HISTORY --- */
+        .history-section h3 { font-family: 'DM Serif Display', serif; font-size: 18px; margin-bottom: 15px; }
+        .history-list { background: white; border-radius: 20px; border: 1px solid var(--border-pink); overflow: hidden; }
+        .history-item { display: flex; justify-content: space-between; align-items: center; padding: 15px 20px; border-bottom: 1px solid var(--bg-soft-white); }
+        .history-item:last-child { border-bottom: none; }
+        .history-date { font-size: 14px; font-weight: 600; }
+        .history-amt { font-size: 14px; font-weight: 700; color: var(--secondary-green); }
+
+        /* --- NAV ISLAND --- */
+        .nav-island { position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%); background: var(--nav-black); height: 65px; width: 92%; max-width: 400px; border-radius: 100px; display: flex; justify-content: space-around; align-items: center; z-index: 1000; box-shadow: 0 10px 30px rgba(0,0,0,0.3); }
+        .nav-item { color: #666; text-decoration: none; font-size: 10px; font-weight: 700; display: flex; flex-direction: column; align-items: center; gap: 4px; }
+        .nav-item.active { color: var(--primary-magenta); }
+
+        .sidebar { position: fixed; top: 0; left: -100%; width: 280px; height: 100%; background: white; z-index: 2000; transition: var(--transition); padding: 30px; }
+        .sidebar.active { left: 0; }
+        .sb-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 1500; display: none; }
+
+        @keyframes pulse { 0% { transform: scale(1); } 50% { transform: scale(1.05); } 100% { transform: scale(1); } }
+        .anim-pulse { animation: pulse 2s infinite; }
+    </style>
+</head>
+<body>
+
+    <div class="sb-overlay" id="overlay"></div>
+    <aside class="sidebar" id="sidebar">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 40px;">
+            <span class="brand-font" style="color: var(--primary-magenta); font-size: 24px;">LAS VEGAS</span>
+            <button id="close-sb" style="background: none; border: none; font-size: 24px; cursor: pointer;">✕</button>
+        </div>
+        <nav style="display: flex; flex-direction: column; gap: 15px;">
+            <a href="dashboard.html" style="text-decoration: none; color: var(--text-main); font-weight: 600;">🏠 Dashboard</a>
+            <a href="wallet.html" style="text-decoration: none; color: var(--text-main); font-weight: 600;">👛 Wallet</a>
+            <a href="daily-checkin.html" style="text-decoration: none; color: var(--primary-magenta); font-weight: 700;">📅 Daily Check-In</a>
+            <a href="earnings.html" style="text-decoration: none; color: var(--text-main); font-weight: 600;">💰 My Earnings</a>
+            <button id="logout-btn" style="margin-top: 30px; text-align: left; border: none; background: none; color: #d00000; font-weight: 700; cursor: pointer;">🚪 Logout</button>
+        </nav>
+    </aside>
+
+    <div class="container">
+        <header class="page-header">
+            <div>
+                <h1>Daily Check-In</h1>
+                <p>Claim your daily ₦200 reward.</p>
+            </div>
+            <button id="open-sb" style="width:45px; height:45px; border-radius:50%; border:1px solid var(--border-pink); background:white; color:var(--primary-magenta);">☰</button>
+        </header>
+
+        <!-- Hero Card -->
+        <div class="reward-hero">
+            <span class="reward-label">Today's Reward</span>
+            <span class="reward-value" id="reward-amt">₦200.00</span>
+            <button class="btn-claim anim-pulse" id="btn-claim">CHECK IN NOW</button>
+            <p id="status-text" style="margin-top: 15px; font-size: 13px; font-weight: 600;"></p>
+        </div>
+
+        <!-- Stats -->
+        <div class="stats-grid">
+            <div class="stat-card">
+                <span class="label">Streak</span>
+                <div class="value" id="stat-streak">0 Days</div>
+            </div>
+            <div class="stat-card">
+                <span class="label">Check-ins</span>
+                <div class="value" id="stat-total">0</div>
+            </div>
+            <div class="stat-card">
+                <span class="label">Earned</span>
+                <div class="value" id="stat-earned">₦0</div>
+            </div>
+        </div>
+
+        <!-- Calendar -->
+        <div class="calendar-card">
+            <h3 class="calendar-title">Last 7 Days</h3>
+            <div class="calendar-grid" id="calendar-grid">
+                <!-- JS generated -->
+            </div>
+        </div>
+
+        <!-- History -->
+        <div class="history-section">
+            <h3>Check-In History</h3>
+            <div class="history-list" id="history-list">
+                <p style="padding: 20px; text-align: center; color: #999;">Loading history...</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Mobile Nav Island -->
+    <nav class="nav-island">
+        <a href="dashboard.html" class="nav-item"><span>🏠</span><span>Home</span></a>
+        <a href="plans.html" class="nav-item"><span>📈</span><span>Plans</span></a>
+        <a href="wallet.html" class="nav-item"><span>👛</span><span>Wallet</span></a>
+        <a href="daily-checkin.html" class="nav-item active"><span>📅</span><span>Checkin</span></a>
+    </nav>
+
+    <script type="module">
+        import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm'
+
+        const supabase = createClient(import.meta.env.VITE_SUPABASE_URL, import.meta.env.VITE_SUPABASE_ANON_KEY);
+
+        const CheckInApp = {
+            user: null,
+            history: [],
+
+            async init() {
+                const { data: { session } } = await supabase.auth.getSession();
+                if (!session) return window.location.href = 'login.html';
+                this.user = session.user;
+
+                this.setupUI();
+                await this.loadData();
+            },
+
+            setupUI() {
+                const sb = document.getElementById('sidebar');
+                const ov = document.getElementById('overlay');
+                document.getElementById('open-sb').onclick = () => { sb.classList.add('active'); ov.style.display = 'block'; };
+                document.getElementById('close-sb').onclick = () => { sb.classList.remove('active'); ov.style.display = 'none'; };
+                ov.onclick = () => { sb.classList.remove('active'); ov.style.display = 'none'; };
+                
+                document.getElementById('logout-btn').onclick = async () => {
+                    await supabase.auth.signOut();
+                    window.location.href = 'index.html';
+                };
+
+                document.getElementById('btn-claim').onclick = () => this.handleClaim();
+            },
+
+            async loadData() {
+                try {
+                    // 1. Fetch History
+                    const { data, error } = await supabase.from('daily_checkins')
+                        .select('*')
+                        .eq('user_id', this.user.id)
+                        .order('checkin_date', { ascending: false })
+                        .limit(30);
+
+                    this.history = data || [];
+                    this.renderUI();
+                } catch (e) {
+                    console.error(e);
+                }
+            },
+
+            // Normalizes any date value (plain "YYYY-MM-DD" string, ISO timestamp,
+            // or Date-parseable value) down to a "YYYY-MM-DD" string so comparisons
+            // are never broken by formatting differences between Postgres and JS.
+            normalizeDate(val) {
+                if (!val) return '';
+                // If it's already a plain YYYY-MM-DD string, just take the first 10 chars
+                if (typeof val === 'string' && /^\d{4}-\d{2}-\d{2}/.test(val)) {
+                    return val.slice(0, 10);
+                }
+                return new Date(val).toISOString().split('T')[0];
+            },
+
+            renderUI() {
+                const today = new Date().toISOString().split('T')[0];
+                const alreadyClaimed = this.history.some(h => this.normalizeDate(h.checkin_date) === today);
+
+                const btn = document.getElementById('btn-claim');
+                const status = document.getElementById('status-text');
+
+                if (alreadyClaimed) {
+                    btn.innerText = "ALREADY CLAIMED";
+                    btn.disabled = true;
+                    btn.classList.remove('anim-pulse');
+                    status.innerText = "✓ You've claimed today's reward. Come back tomorrow!";
+                } else {
+                    btn.innerText = "CHECK IN NOW";
+                    btn.disabled = false;
+                    status.innerText = "Your daily reward is waiting.";
+                }
+
+                // Stats
+                document.getElementById('stat-total').innerText = this.history.length;
+                const totalEarned = this.history.reduce((sum, h) => sum + Number(h.reward_amount), 0);
+                document.getElementById('stat-earned').innerText = `₦${totalEarned.toLocaleString()}`;
+                
+                const streak = this.calculateStreak();
+                document.getElementById('stat-streak').innerText = `${streak} Day${streak === 1 ? '' : 's'}`;
+
+                this.renderCalendar();
+                this.renderHistory();
+            },
+
+            calculateStreak() {
+                if (this.history.length === 0) return 0;
+                let streak = 0;
+
+                // If the most recent checkin is not today or yesterday, streak is broken
+                const mostRecent = new Date(this.normalizeDate(this.history[0].checkin_date));
+                const diff = Math.floor((new Date() - mostRecent) / (1000 * 60 * 60 * 24));
+                if (diff > 1) return 0;
+
+                const alreadyClaimedToday = this.normalizeDate(this.history[0].checkin_date) === new Date().toISOString().split('T')[0];
+
+                for (let i = 0; i < this.history.length; i++) {
+                    const compareDate = new Date();
+                    compareDate.setDate(compareDate.getDate() - (alreadyClaimedToday ? i : i + 1));
+                    const compareStr = compareDate.toISOString().split('T')[0];
+
+                    if (this.history.some(h => this.normalizeDate(h.checkin_date) === compareStr)) {
+                        streak++;
+                    } else {
+                        break;
+                    }
+                }
+                return streak;
+            },
+
+            renderCalendar() {
+                const grid = document.getElementById('calendar-grid');
+                const days = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+                let html = '';
+
+                for (let i = 6; i >= 0; i--) {
+                    const date = new Date();
+                    date.setDate(date.getDate() - i);
+                    const dateStr = date.toISOString().split('T')[0];
+                    const isToday = i === 0;
+                    const isChecked = this.history.some(h => this.normalizeDate(h.checkin_date) === dateStr);
+                    const dayLabel = days[date.getDay()];
+
+                    html += `
+                        <div class="cal-day">
+                            <span class="cal-label">${dayLabel}</span>
+                            <div class="cal-circle ${isChecked ? 'checked' : ''} ${isToday ? 'today' : ''}">
+                                ${isChecked ? '✓' : date.getDate()}
+                            </div>
+                        </div>
+                    `;
+                }
+                grid.innerHTML = html;
+            },
+
+            renderHistory() {
+                const list = document.getElementById('history-list');
+                if (this.history.length === 0) {
+                    list.innerHTML = `<p style="padding: 20px; text-align: center; color: #999;">No check-ins yet.</p>`;
+                    return;
+                }
+                list.innerHTML = this.history.slice(0, 5).map(h => `
+                    <div class="history-item">
+                        <span class="history-date">${new Date(this.normalizeDate(h.checkin_date)).toLocaleDateString(undefined, {month: 'short', day: 'numeric', year: 'numeric'})}</span>
+                        <span class="history-amt">+₦${Number(h.reward_amount).toLocaleString()}</span>
+                    </div>
+                `).join('');
+            },
+
+            async handleClaim() {
+                const btn = document.getElementById('btn-claim');
+                btn.disabled = true;
+                btn.innerText = "PROCESSING...";
+
+                try {
+                    const { data, error } = await supabase.rpc('claim_daily_checkin');
+                    
+                    if (error) throw error;
+                    if (!data.success) throw new Error(data.message);
+
+                    // Success UI
+                    btn.innerText = "✓ SUCCESS";
+                    document.getElementById('status-text').innerText = "₦200 reward credited to your wallet!";
+                    
+                    // Reload data to update UI
+                    setTimeout(() => this.loadData(), 1500);
+
+                } catch (e) {
+                    alert(e.message);
+                    btn.disabled = false;
+                    btn.innerText = "TRY AGAIN";
+                }
+            }
+        };
+
+        document.addEventListener('DOMContentLoaded', () => CheckInApp.init());
+    </script>
+</body>
+</html>
 
