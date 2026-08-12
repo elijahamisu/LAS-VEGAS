@@ -132,6 +132,66 @@ async function handleAdmin({ method, action, query, body, adminId, res }) {
       await supabase.from('admin_audit_logs').insert({ admin_id: adminId, action: 'SETTINGS_UPDATE', details: updates });
       return res.status(200).json({ success: true, message: 'Settings updated' });
     }
+
+    // --- Manual account-editing actions ---------------------------------
+
+    if (action === 'adjust-balance') {
+      const { user_id, amount, direction, reason } = body; // direction: 'CREDIT' | 'DEBIT'
+      const { data, error } = await supabase.rpc('admin_adjust_wallet_balance', {
+        p_admin_id: adminId, p_user_id: user_id, p_amount: parseFloat(amount), p_direction: direction, p_reason: reason
+      });
+      if (error || !data.success) throw new Error(error?.message || data?.message || 'Balance adjustment failed');
+      return res.status(200).json({ success: true, message: data.message, new_balance: data.new_balance });
+    }
+
+    if (action === 'create-investment') {
+      const { user_id, plan_id, amount, deduct_balance } = body;
+      const { data, error } = await supabase.rpc('admin_create_investment', {
+        p_admin_id: adminId, p_user_id: user_id, p_plan_id: plan_id, p_amount: parseFloat(amount), p_deduct_balance: !!deduct_balance
+      });
+      if (error || !data.success) throw new Error(error?.message || data?.message || 'Could not create investment');
+      return res.status(200).json({ success: true, message: data.message, investment_id: data.investment_id });
+    }
+
+    if (action === 'update-investment-status') {
+      const { investment_id, status, refund } = body; // status: 'ACTIVE' | 'CANCELLED' | 'COMPLETED'
+      const { data, error } = await supabase.rpc('admin_update_investment_status', {
+        p_admin_id: adminId, p_investment_id: investment_id, p_status: status, p_refund: !!refund
+      });
+      if (error || !data.success) throw new Error(error?.message || data?.message || 'Could not update investment');
+      return res.status(200).json({ success: true, message: data.message });
+    }
+
+    if (action === 'delete-investment') {
+      const { investment_id } = body;
+      const { data, error } = await supabase.rpc('admin_delete_investment', {
+        p_admin_id: adminId, p_investment_id: investment_id
+      });
+      if (error || !data.success) throw new Error(error?.message || data?.message || 'Could not delete investment');
+      return res.status(200).json({ success: true, message: data.message });
+    }
+
+    if (action === 'update-user-status') {
+      const { user_id, status } = body; // 'ACTIVE' | 'SUSPENDED'
+      const { data, error } = await supabase.rpc('admin_update_user_status', {
+        p_admin_id: adminId, p_user_id: user_id, p_status: status
+      });
+      if (error || !data.success) throw new Error(error?.message || data?.message || 'Could not update user status');
+      return res.status(200).json({ success: true, message: data.message });
+    }
+
+    if (action === 'update-profile') {
+      const { user_id, full_name, phone_number, is_admin } = body;
+      const { data, error } = await supabase.rpc('admin_update_profile', {
+        p_admin_id: adminId,
+        p_user_id: user_id,
+        p_full_name: full_name ?? null,
+        p_phone_number: phone_number ?? null,
+        p_is_admin: typeof is_admin === 'boolean' ? is_admin : null
+      });
+      if (error || !data.success) throw new Error(error?.message || data?.message || 'Could not update profile');
+      return res.status(200).json({ success: true, message: data.message });
+    }
   }
 
   return res.status(400).json({ success: false, message: 'Invalid admin action' });
