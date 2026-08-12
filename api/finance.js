@@ -199,7 +199,7 @@ async function handlePayments({ method, action, body, userId, res }) {
     // Create record in Supabase first
     const { error: dbErr } = await supabase.from('deposits').insert({
       user_id: userId,
-      mch_order_no: mchOrderNo,
+      reference: mchOrderNo,
       amount: parseFloat(amount),
       status: 'PENDING',
       provider: 'nekpay'
