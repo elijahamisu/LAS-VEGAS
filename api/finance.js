@@ -1,5 +1,6 @@
 import { createClient } from '@supabase/supabase-js';
-import { NekPay } from '../lib/nekpay.js';
+import { generateNekpaySignature } from '../lib/nekpay.js';
+import { isValidBankCode, NEK_BANKS } from '../lib/nek-banks.js';
 
 const supabase = createClient(
   process.env.VITE_SUPABASE_URL,
@@ -31,7 +32,7 @@ export default async function handler(req, res) {
       case 'payments':
         return await handlePayments({ method, action, body, userId, res });
       case 'withdrawals':
-        return await handleWithdrawals({ method, action, body, userId, res });
+        return await handleWithdrawals({ method, action, query, body, userId, res });
       default:
         return res.status(400).json({ success: false, message: 'Invalid or missing resource' });
     }
@@ -193,6 +194,12 @@ async function handlePayments({ method, action, body, userId, res }) {
 
   if (action === 'initiate-deposit') {
     const { amount } = body;
+
+    const amountNumber = Number(amount);
+    if (!Number.isFinite(amountNumber) || amountNumber <= 0) {
+      return res.status(400).json({ success: false, message: 'Invalid deposit amount' });
+    }
+
     const mchOrderNo = `LV${Date.now()}${Math.floor(Math.random() * 1000)}`;
     const orderDate = new Date().toISOString().slice(0, 19).replace('T', ' '); // YYYY-MM-DD HH:mm:ss
 
@@ -200,7 +207,7 @@ async function handlePayments({ method, action, body, userId, res }) {
     const { error: dbErr } = await supabase.from('deposits').insert({
       user_id: userId,
       reference: mchOrderNo,
-      amount: parseFloat(amount),
+      amount: amountNumber,
       status: 'PENDING',
       provider: 'nekpay'
     });
@@ -211,32 +218,43 @@ async function handlePayments({ method, action, body, userId, res }) {
 
     const params = {
       version: "1.0",
-      mch_id: process.env.NEKPAY_MCH_ID,
-      notify_url: process.env.NEKPAY_NOTIFY_URL,
-      page_url: process.env.NEKPAY_RETURN_URL,
+      mch_id: process.env.NEKPAYMENT_MCH_ID,
+      notify_url: process.env.NEKPAYMENT_NOTIFY_URL,
+      page_url: process.env.NEKPAYMENT_PAGE_URL,
       mch_order_no: mchOrderNo,
-      pay_type: process.env.NEKPAY_PAY_TYPE || "122",
-      trade_amount: parseFloat(amount).toFixed(2),
+      pay_type: process.env.NEKPAYMENT_PAY_TYPE || "122",
+      trade_amount: amountNumber.toFixed(2),
       order_date: orderDate,
-      bank_code: "",
+      bank_code: process.env.NEKPAYMENT_BANK_CODE || 'NGR044',
       goods_name: "Wallet Topup",
+      mch_return_msg: "LAS VEGAS wallet top-up",
       sign_type: "MD5"
     };
 
-    params.sign = NekPay.generateSignature(params);
+    let nekRes, result;
+    try {
+      params.sign = generateNekpaySignature(params);
 
-    // Call NekPay
-    const nekRes = await fetch('https://api.nekpayment.com/pay/web', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-      body: new URLSearchParams(params)
-    });
+      nekRes = await fetch('https://api.nekpayment.com/pay/web', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+        body: new URLSearchParams(params)
+      });
+      result = await nekRes.json();
+    } catch (providerErr) {
+      // Provider call itself blew up (network, config, etc.) — don't leave the row stuck PENDING
+      await supabase.from('deposits').update({ status: 'FAILED' }).eq('reference', mchOrderNo);
+      console.error('[NEKPAY DEPOSIT REQUEST ERROR]:', providerErr.message);
+      return res.status(400).json({ success: false, message: 'Could not reach payment provider' });
+    }
 
-    const result = await nekRes.json();
     if (result.respCode === "SUCCESS" && result.tradeResult === "1") {
       return res.status(200).json({ success: true, payInfo: result.payInfo });
     }
-    return res.status(400).json({ success: false, message: result.tradeMsg });
+
+    // Provider explicitly rejected the request — mark it FAILED, don't leave it PENDING forever
+    await supabase.from('deposits').update({ status: 'FAILED' }).eq('reference', mchOrderNo);
+    return res.status(400).json({ success: false, message: result.tradeMsg || 'Deposit request was rejected' });
   }
 
   return res.status(400).json({ success: false, message: 'Invalid action' });
@@ -247,14 +265,66 @@ async function handlePayments({ method, action, body, userId, res }) {
 // Approval, rejection, and payout still live in admin.js (resource=admin),
 // this is just the user-facing "submit a request" step.
 // ---------------------------------------------------------------------------
-async function handleWithdrawals({ method, action, body, userId, res }) {
+async function handleWithdrawals({ method, action, query, body, userId, res }) {
+  // GET: list saved payout accounts, or the allowed bank list for the add-account form
+  if (method === 'GET' && action === 'accounts') {
+    const { data, error } = await supabase
+      .from('withdrawal_accounts')
+      .select('id, bank_code, bank_name, account_number, account_name, is_default')
+      .eq('user_id', userId)
+      .order('is_default', { ascending: false });
+    if (error) throw error;
+    return res.status(200).json({ success: true, data });
+  }
+
+  if (method === 'GET' && action === 'bank-list') {
+    return res.status(200).json({ success: true, data: NEK_BANKS });
+  }
+
   if (method !== 'POST') return res.status(405).json({ success: false, message: 'Method Not Allowed' });
+
+  // Add a payout account — bank_code MUST come from the validated NEK_BANKS list,
+  // never a free-text institution name, or NekPay has no routing code to transfer to.
+  if (action === 'add-account') {
+    const { bank_code, account_number, account_name, is_default } = body;
+
+    if (!isValidBankCode(bank_code)) throw new Error('Select a valid bank from the list');
+    if (!account_number || !account_name) throw new Error('Account number and account name are required');
+
+    if (is_default) {
+      await supabase.from('withdrawal_accounts').update({ is_default: false }).eq('user_id', userId);
+    }
+
+    const bankMeta = NEK_BANKS.find(b => b.code === bank_code);
+    const { data, error } = await supabase.from('withdrawal_accounts').insert({
+      user_id: userId,
+      bank_code,
+      bank_name: bankMeta.name,
+      account_number,
+      account_name,
+      is_default: !!is_default
+    }).select().single();
+
+    if (error) throw error;
+    return res.status(200).json({ success: true, data });
+  }
 
   if (action === 'withdraw') {
     const { amount, payout_account_id } = body;
 
     if (!amount || isNaN(amount) || amount <= 0) throw new Error('Invalid withdrawal amount');
     if (!payout_account_id) throw new Error('Payout account is required');
+
+    // Confirm the selected account has a valid NekPay bank_code before we even try
+    const { data: account, error: acctErr } = await supabase
+      .from('withdrawal_accounts')
+      .select('bank_code')
+      .eq('id', payout_account_id)
+      .eq('user_id', userId)
+      .single();
+
+    if (acctErr || !account) throw new Error('Payout account not found');
+    if (!isValidBankCode(account.bank_code)) throw new Error('This payout account has no valid bank code on file — please re-add it');
 
     const { data, error } = await supabase.rpc('request_withdrawal_v2', {
       p_user_id: userId,
