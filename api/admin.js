@@ -117,8 +117,21 @@ async function handleAdmin({ method, action, query, body, adminId, res }) {
       });
 
       if (payout.success) {
-        await supabase.from('withdrawals').update({ status: 'PAID', payout_reference: payout.providerReference, processed_at: new Date().toISOString() }).eq('id', id);
-        return res.status(200).json({ success: true, message: 'Funds disbursed via NekPay' });
+        // IMPORTANT: NekPay's synchronous response only confirms the transfer
+        // REQUEST was accepted, not that money has moved. Only the withdrawal
+        // callback (webhook.js, type=withdrawal) may set the final PAID status.
+        // If the provider did report an immediate final success, honor that;
+        // otherwise leave it PROCESSING until the callback arrives.
+        const finalStatus = payout.status === 'paid' ? 'PAID' : 'PROCESSING';
+        await supabase.from('withdrawals').update({
+          status: finalStatus,
+          payout_reference: payout.providerReference,
+          processed_at: finalStatus === 'PAID' ? new Date().toISOString() : null
+        }).eq('id', id);
+        return res.status(200).json({
+          success: true,
+          message: finalStatus === 'PAID' ? 'Funds disbursed via NekPay' : 'Transfer submitted — awaiting NekPay confirmation'
+        });
       } else {
         await supabase.from('withdrawals').update({ status: 'FAILED' }).eq('id', id);
         throw new Error(payout.message);
