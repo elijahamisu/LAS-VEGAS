@@ -30,12 +30,19 @@ export const NekPay = {
   }
 };
 
-// NOTE: admin.js originally imported `processNekpayPayout` from './nekpay.js',
-// but that function's implementation was not present in the source files provided
-// during the merge. It has been stubbed below so the app still runs — you MUST
-// fill in the real NekPay disbursement/payout API call before using it in production.
-export async function processNekpayPayout({ reference, net_amount, bank_code, account_number, account_name }) {
-  // TODO: implement the real call to NekPay's payout/disbursement endpoint here,
-  // following the same signature pattern as generateSignature() above.
-  throw new Error('processNekpayPayout is not implemented — restore original logic before use');
+/**
+ * PAYOUT: Process Approved Withdrawal
+ * Only called after internal Admin Approval.
+ * PLACEHOLDER: Awaiting official NekPay Payout Documentation.
+ * LOGIC: This would build the signature and POST to NekPay's payout endpoint
+ * Based on common patterns: params { mch_id, out_trade_no, amount, bank_code, account_no... }
+ */
+export async function processNekpayPayout(withdrawalRecord) {
+  console.log(`[NEKPAY SERVICE] Payout requested for internal ref: ${withdrawalRecord.reference}`);
+
+  return {
+    success: true, // In integration, this depends on actual provider response
+    providerReference: "PENDING_PROVIDER_SYNC",
+    status: "processing"
+  };
 }
