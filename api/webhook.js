@@ -1,5 +1,5 @@
 import { createClient } from '@supabase/supabase-js';
-import { NekPay } from './nekpay.js';
+import { NekPay } from '../lib/nekpay.js';
 
 const supabase = createClient(process.env.VITE_SUPABASE_URL, process.env.SUPABASE_SERVICE_ROLE_KEY);
 
