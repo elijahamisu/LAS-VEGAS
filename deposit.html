@@ -13,24 +13,27 @@
         body { font-family: 'Quicksand', sans-serif; background: var(--bg); margin: 0; padding: 20px; }
         .card { background: white; border-radius: 20px; border: 1px solid #FFD1E3; padding: 25px; box-shadow: 0 10px 30px rgba(255,0,127,0.05); }
         .btn-pay { background: var(--pink); color: white; border: none; padding: 16px; border-radius: 50px; width: 100%; font-weight: 700; cursor: pointer; }
+        .btn-pay:disabled { opacity: 0.7; cursor: not-allowed; }
         .status-badge { display: inline-block; padding: 5px 15px; border-radius: 50px; font-size: 12px; font-weight: 800; }
         .status-pending { background: #FFF9E6; color: #D4A017; }
         .status-completed { background: #F0FFF4; color: var(--green); }
         .input-group { margin: 20px 0; }
         input { width: 100%; padding: 14px; border-radius: 12px; border: 1px solid #FFD1E3; font-size: 16px; box-sizing: border-box; }
+        .error-text { color: #D4183D; font-size: 13px; margin-top: 8px; display: none; }
     </style>
 </head>
 <body>
     <div class="card">
         <h2 style="color: var(--pink); margin-top: 0;">Deposit Funds</h2>
         <p style="color: #666; font-size: 14px;">Add funds securely via Bank Transfer.</p>
-        
+
         <div class="input-group">
             <label style="font-weight: 700; color: var(--pink);">Amount (₦)</label>
             <input type="number" id="deposit-amount" placeholder="Minimum 3,000" min="3000">
         </div>
 
         <button class="btn-pay" id="pay-btn">PAY NOW</button>
+        <div id="error-text" class="error-text"></div>
 
         <div id="status-area" style="margin-top: 30px; display: none;">
             <hr style="border: 0; border-top: 1px solid #eee; margin-bottom: 20px;">
@@ -43,26 +46,59 @@
 
     <script type="module">
         const payBtn = document.getElementById('pay-btn');
+        const errorText = document.getElementById('error-text');
+
+        function showError(msg) {
+            errorText.textContent = msg;
+            errorText.style.display = 'block';
+        }
+
+        function resetButton() {
+            payBtn.innerText = 'PAY NOW';
+            payBtn.disabled = false;
+        }
+
         payBtn.onclick = async () => {
-            const amount = document.getElementById('deposit-amount').value;
-            if (amount < 3000) return alert('Minimum deposit is ₦3,000');
+            errorText.style.display = 'none';
+
+            const amountInput = document.getElementById('deposit-amount');
+            const amount = Number(amountInput.value);
+
+            if (!amount || amount < 3000) {
+                showError('Minimum deposit is ₦3,000');
+                return;
+            }
 
             payBtn.innerText = 'REDIRECTING...';
             payBtn.disabled = true;
 
-            const res = await fetch('/api/payments', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ action: 'initiate-deposit', amount })
-            });
-            const data = await res.json();
-            
-            if (data.success) {
-                window.location.href = data.payInfo;
-            } else {
-                alert(data.message);
-                payBtn.innerText = 'PAY NOW';
-                payBtn.disabled = false;
+            try {
+                const res = await fetch('/api/payments', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ action: 'initiate-deposit', amount })
+                });
+
+                let data;
+                try {
+                    data = await res.json();
+                } catch (parseErr) {
+                    throw new Error(`Server returned an unexpected response (status ${res.status}). Check /api/payments logs.`);
+                }
+
+                if (!res.ok) {
+                    throw new Error(data?.message || `Server error (status ${res.status})`);
+                }
+
+                if (data.success && data.payInfo) {
+                    window.location.href = data.payInfo;
+                } else {
+                    throw new Error(data.message || 'No payment redirect URL was returned.');
+                }
+            } catch (err) {
+                console.error('Payment initiation failed:', err);
+                showError(err.message);
+                resetButton();
             }
         };
     </script>
