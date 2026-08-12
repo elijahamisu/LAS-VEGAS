@@ -29,3 +29,13 @@ export const NekPay = {
     return receivedSign === calculatedSign;
   }
 };
+
+// NOTE: admin.js originally imported `processNekpayPayout` from './nekpay.js',
+// but that function's implementation was not present in the source files provided
+// during the merge. It has been stubbed below so the app still runs — you MUST
+// fill in the real NekPay disbursement/payout API call before using it in production.
+export async function processNekpayPayout({ reference, net_amount, bank_code, account_number, account_name }) {
+  // TODO: implement the real call to NekPay's payout/disbursement endpoint here,
+  // following the same signature pattern as generateSignature() above.
+  throw new Error('processNekpayPayout is not implemented — restore original logic before use');
+}
