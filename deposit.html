@@ -45,6 +45,10 @@
     </div>
 
     <script type="module">
+        import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm'
+
+        const supabase = createClient(import.meta.env.VITE_SUPABASE_URL, import.meta.env.VITE_SUPABASE_ANON_KEY);
+
         const payBtn = document.getElementById('pay-btn');
         const errorText = document.getElementById('error-text');
 
@@ -69,21 +73,31 @@
                 return;
             }
 
+            // Must be logged in — this endpoint requires a Supabase session token
+            const { data: { session } } = await supabase.auth.getSession();
+            if (!session) {
+                showError('Your session has expired. Please log in again.');
+                return;
+            }
+
             payBtn.innerText = 'REDIRECTING...';
             payBtn.disabled = true;
 
             try {
-                const res = await fetch('/api/payments', {
+                const res = await fetch('/api/finance?resource=payments&action=initiate-deposit', {
                     method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ action: 'initiate-deposit', amount })
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${session.access_token}`
+                    },
+                    body: JSON.stringify({ amount })
                 });
 
                 let data;
                 try {
                     data = await res.json();
                 } catch (parseErr) {
-                    throw new Error(`Server returned an unexpected response (status ${res.status}). Check /api/payments logs.`);
+                    throw new Error(`Server returned an unexpected response (status ${res.status}). Check /api/finance logs.`);
                 }
 
                 if (!res.ok) {
