@@ -84,16 +84,6 @@
         .quick-actions::-webkit-scrollbar { display: none; }
         .qa-item { flex: 0 0 auto; background: white; padding: 12px 20px; border-radius: 100px; border: 1px solid var(--border-pink); font-size: 13px; font-weight: 700; display: flex; align-items: center; gap: 8px; box-shadow: var(--shadow-soft); }
 
-        /* --- CHECK-IN CARD --- */
-        .checkin-card {
-            background: white; padding: 20px; border-radius: 20px; border: 1px solid var(--border-pink);
-            display: flex; justify-content: space-between; align-items: center; margin-top: 20px;
-        }
-        .ci-info h3 { margin: 0; font-size: 16px; color: var(--text-main); }
-        .ci-info p { margin: 4px 0 0 0; font-size: 13px; color: var(--text-muted); }
-        .btn-claim { background: var(--secondary-green); color: white; border: none; padding: 10px 20px; border-radius: 100px; font-weight: 700; font-size: 13px; cursor: pointer; }
-        .btn-claimed { background: #f0f0f0; color: #999; cursor: not-allowed; }
-
         /* --- TRANSACTION TABLE --- */
         .table-card { background: white; border-radius: 20px; border: 1px solid var(--border-pink); overflow: hidden; box-shadow: var(--shadow-soft); }
         .tr-row { display: flex; justify-content: space-between; align-items: center; padding: 15px 20px; border-bottom: 1px solid var(--bg-soft-white); }
@@ -153,10 +143,11 @@
         <nav class="sb-nav">
             <a href="dashboard.html" class="sb-link">🏠 Dashboard</a>
             <a href="plans.html" class="sb-link">📈 Investment Plans</a>
-            <a href="investment.html" class="sb-link">💰 My Investments</a>
+            <a href="my-investments.html" class="sb-link">💰 My Investments</a>
             <a href="wallet.html" class="sb-link">👛 Wallet</a>
             <a href="deposit.html" class="sb-link">📥 Deposit Funds</a>
             <a href="withdraw.html" class="sb-link">📤 Withdraw</a>
+            <a href="daily-checkin.html" class="sb-link">📅 Daily Check-In</a>
             <a href="referrals.html" class="sb-link">👥 Referrals</a>
             <a href="notifications.html" class="sb-link">🔔 Notifications</a>
             <a href="profile.html" class="sb-link">👤 My Profile</a>
@@ -192,6 +183,7 @@
         <div class="quick-actions">
             <div class="qa-item" onclick="location.href='plans.html'">📈 Invest</div>
             <div class="qa-item" onclick="location.href='earnings.html'">💰 Earnings</div>
+            <div class="qa-item" onclick="location.href='daily-checkin.html'">📅 Daily Check-In</div>
             <div class="qa-item" onclick="location.href='gift-code.html'">🎁 Gift Code</div>
             <div class="qa-item" onclick="location.href='referrals.html'">👥 Refer</div>
         </div>
@@ -214,15 +206,6 @@
                 <span class="label">Withdrawals</span>
                 <div class="value" id="stat-withdrawals">₦0.00</div>
             </div>
-        </div>
-
-        <!-- Daily Check-In -->
-        <div class="checkin-card">
-            <div class="ci-info">
-                <h3>Daily Check-In</h3>
-                <p>Claim your daily ₦200.00 reward</p>
-            </div>
-            <button id="claim-btn" class="btn-claim">CLAIM</button>
         </div>
 
         <!-- Transactions -->
@@ -312,9 +295,6 @@
                     document.getElementById('copy-code').innerText = 'Copied!';
                     setTimeout(() => document.getElementById('copy-code').innerText = 'Copy', 2000);
                 };
-
-                // Check-in logic
-                document.getElementById('claim-btn').onclick = () => this.handleCheckIn();
             },
 
             async fetchData() {
@@ -341,17 +321,6 @@
                     const { data: txs } = await supabase.from('transactions').select('*').eq('user_id', this.user.id).order('created_at', { ascending: false }).limit(5);
                     this.renderTransactions(txs);
 
-                    // 3. Check-in status
-                    const today = new Date().toISOString().split('T')[0];
-                    const { data: checkin } = await supabase.from('transactions').select('*').eq('user_id', this.user.id).eq('type', 'DAILY_CHECKIN').gte('created_at', today);
-                    
-                    if (checkin && checkin.length > 0) {
-                        const btn = document.getElementById('claim-btn');
-                        btn.innerText = 'CLAIMED';
-                        btn.classList.add('btn-claimed');
-                        btn.disabled = true;
-                    }
-
                 } catch (e) {
                     console.error("Data fetch error", e);
                 }
@@ -375,40 +344,6 @@
                         </div>
                     </div>
                 `).join('');
-            },
-
-            async handleCheckIn() {
-                const btn = document.getElementById('claim-btn');
-                btn.innerText = '...';
-                btn.disabled = true;
-
-                try {
-                    // Logic: Add 200 to balance, update total earned, record transaction.
-                    // This should be an RPC or Trigger in production.
-                    const newBalance = Number(this.wallet.balance) + 200;
-                    const newEarned = Number(this.wallet.total_earned) + 200;
-
-                    await supabase.from('wallets').update({ 
-                        balance: newBalance, 
-                        total_earned: newEarned 
-                    }).eq('user_id', this.user.id);
-
-                    await supabase.from('transactions').insert({
-                        user_id: this.user.id,
-                        amount: 200.00,
-                        type: 'DAILY_CHECKIN',
-                        status: 'SUCCESS',
-                        description: 'Daily check-in reward'
-                    });
-
-                    btn.innerText = 'CLAIMED';
-                    btn.classList.add('btn-claimed');
-                    document.getElementById('main-balance').innerText = `₦${newBalance.toLocaleString()}`;
-                    
-                } catch (e) {
-                    btn.innerText = 'ERROR';
-                    btn.disabled = false;
-                }
             }
         };
 
