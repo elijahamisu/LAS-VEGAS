@@ -201,10 +201,13 @@ async function handlePayments({ method, action, body, userId, res }) {
       user_id: userId,
       mch_order_no: mchOrderNo,
       amount: parseFloat(amount),
-      status: 'pending',
+      status: 'PENDING',
       provider: 'nekpay'
     });
-    if (dbErr) return res.status(400).json({ success: false, message: 'DB Error' });
+    if (dbErr) {
+      console.error('[DEPOSIT DB ERROR]:', dbErr.message);
+      return res.status(400).json({ success: false, message: `DB Error: ${dbErr.message}` });
+    }
 
     const params = {
       version: "1.0",
