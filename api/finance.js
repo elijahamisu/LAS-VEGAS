@@ -221,11 +221,30 @@ async function handlePayments({ method, action, body, userId, res }) {
 
   const name = String(profile.full_name || '').trim();
   const email = String(profile.email || '').trim();
-  const mobile = String(profile.phone_number || '').trim();
-  if (!name || !email || !mobile) {
+  const rawMobile = String(profile.phone_number || '').trim();
+  if (!name || !email || !rawMobile) {
     return res.status(400).json({
       success: false,
       message: 'Complete your full name, email address, and phone number in Profile before depositing'
+    });
+  }
+
+  // GloPayment's own documented signature example uses a bare 10-digit mobile
+  // number with no leading zero and no country code (e.g. '9999999999').
+  // Nigerian numbers are commonly stored locally as 11 digits with a leading
+  // zero (e.g. '09079505686') — normalize just for this outgoing request,
+  // without touching what's actually stored on the profile.
+  const digitsOnly = rawMobile.replace(/\D/g, '');
+  let mobile = digitsOnly;
+  if (mobile.startsWith('234') && mobile.length === 13) {
+    mobile = mobile.slice(3); // strip country code -> 10 digits
+  } else if (mobile.startsWith('0') && mobile.length === 11) {
+    mobile = mobile.slice(1); // strip leading 0 -> 10 digits
+  }
+  if (mobile.length !== 10) {
+    return res.status(400).json({
+      success: false,
+      message: 'Your phone number in Profile is not a valid Nigerian mobile number'
     });
   }
 
