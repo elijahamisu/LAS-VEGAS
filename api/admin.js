@@ -1,5 +1,5 @@
 import { createClient } from '@supabase/supabase-js';
-import { processNekpayPayout } from '../lib/nekpay.js';
+import { buildGloPaymentPayoutRequest, processGloPaymentPayout } from '../lib/glopayment-withdrawal.js';
 
 const supabase = createClient(
   process.env.VITE_SUPABASE_URL,
@@ -103,39 +103,72 @@ async function handleAdmin({ method, action, query, body, adminId, res }) {
 
     if (action === 'payout-withdrawal') {
       const { id } = body;
-      const { data: wd } = await supabase.from('withdrawals').select('*, withdrawal_accounts(*)').eq('id', id).single();
+      const { data: wd, error: withdrawalError } = await supabase
+        .from('withdrawals')
+        .select('*, withdrawal_accounts(*)')
+        .eq('id', id)
+        .single();
+      if (withdrawalError || !wd) throw new Error('Withdrawal was not found');
       if (wd.status !== 'APPROVED') throw new Error('Disbursement requires previous admin approval');
+      if (!wd.withdrawal_accounts || wd.withdrawal_accounts.provider_name !== 'glopayment') {
+        throw new Error('The beneficiary must re-add a GloPayment payout account before this withdrawal can be sent');
+      }
 
-      await supabase.from('withdrawals').update({ status: 'PROCESSING' }).eq('id', id);
+      const { data: beneficiary, error: beneficiaryError } = await supabase
+        .from('profiles')
+        .select('email, phone_number')
+        .eq('id', wd.user_id)
+        .single();
+      if (beneficiaryError || !beneficiary?.email || !beneficiary?.phone_number) {
+        throw new Error('The beneficiary must have an email address and phone number before payout submission');
+      }
 
-      const payout = await processNekpayPayout({
-        reference: wd.reference,
-        net_amount: wd.net_amount,
-        bank_code: wd.withdrawal_accounts.bank_code,
-        account_number: wd.withdrawal_accounts.account_number,
-        account_name: wd.withdrawal_accounts.account_name
-      });
+      const payoutInput = {
+        merchantOrderId: wd.reference,
+        amount: Number(wd.net_amount ?? wd.amount).toFixed(2),
+        beneficiaryName: wd.withdrawal_accounts.account_name,
+        accountNumber: wd.withdrawal_accounts.account_number,
+        bankCode: wd.withdrawal_accounts.bank_code,
+        beneficiaryEmail: beneficiary.email,
+        beneficiaryMobile: beneficiary.phone_number
+      };
 
-      if (payout.success) {
-        // IMPORTANT: NekPay's synchronous response only confirms the transfer
-        // REQUEST was accepted, not that money has moved. Only the withdrawal
-        // callback (webhook.js, type=withdrawal) may set the final PAID status.
-        // If the provider did report an immediate final success, honor that;
-        // otherwise leave it PROCESSING until the callback arrives.
-        const finalStatus = payout.status === 'paid' ? 'PAID' : 'PROCESSING';
-        await supabase.from('withdrawals').update({
-          status: finalStatus,
-          payout_reference: payout.providerReference,
-          processed_at: finalStatus === 'PAID' ? new Date().toISOString() : null
-        }).eq('id', id);
-        return res.status(200).json({
-          success: true,
-          message: finalStatus === 'PAID' ? 'Funds disbursed via NekPay' : 'Transfer submitted — awaiting NekPay confirmation'
-        });
-      } else {
-        await supabase.from('withdrawals').update({ status: 'FAILED' }).eq('id', id);
+      // Validate merchant configuration, the Glo bank code, and the provider's
+      // required Nigeria `number` mapping before changing the database status.
+      buildGloPaymentPayoutRequest(payoutInput);
+
+      const { error: statusError } = await supabase
+        .from('withdrawals')
+        .update({ status: 'PROCESSING' })
+        .eq('id', id)
+        .eq('status', 'APPROVED');
+      if (statusError) throw statusError;
+
+      const payout = await processGloPaymentPayout(payoutInput);
+      if (!payout.success) {
+        if (payout.definitiveRejection) {
+          // A readable provider rejection means no accepted payout submission;
+          // return it to APPROVED so the administrator can correct and retry.
+          await supabase.from('withdrawals').update({ status: 'APPROVED' }).eq('id', id);
+          throw new Error(`GloPayment rejected the payout: ${payout.message}`);
+        }
+        // A timeout/malformed response is indeterminate: retain PROCESSING to
+        // prevent a duplicate payout while the provider result is reconciled.
         throw new Error(payout.message);
       }
+
+      await supabase.from('withdrawals').update({
+        status: 'PROCESSING',
+        payout_reference: payout.providerReference
+      }).eq('id', id);
+
+      // GloPayment's synchronous response only confirms request acceptance.
+      // The signed ?type=glopay-withdrawal callback is the sole authority that
+      // may mark this withdrawal PAID or FAILED.
+      return res.status(200).json({
+        success: true,
+        message: 'GloPayment payout submitted — awaiting verified provider confirmation'
+      });
     }
 
     if (action === 'update-settings') {
