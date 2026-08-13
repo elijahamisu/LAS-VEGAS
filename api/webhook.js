@@ -5,9 +5,10 @@ import { getGloPaymentConfig, verifyGloPaymentSignature } from '../lib/glopaymen
 const supabase = createClient(process.env.VITE_SUPABASE_URL, process.env.SUPABASE_SERVICE_ROLE_KEY);
 
 // Register these provider callback addresses:
-// - GloPayment deposit: https://YOUR-DOMAIN/api/webhook?type=glopay
-// - NekPay deposit:     https://YOUR-DOMAIN/api/webhook?type=deposit
-// - NekPay withdrawal:  https://YOUR-DOMAIN/api/webhook?type=withdrawal
+// - GloPayment deposit:     https://YOUR-DOMAIN/api/webhook?type=glopay
+// - GloPayment withdrawal:  https://YOUR-DOMAIN/api/webhook?type=glopay-withdrawal
+// - NekPay deposit:         https://YOUR-DOMAIN/api/webhook?type=deposit
+// - NekPay withdrawal:      https://YOUR-DOMAIN/api/webhook?type=withdrawal
 // GloPayment expects the literal lowercase acknowledgement body `ok`.
 export default async function handler(req, res) {
   if (req.method !== 'POST') return res.status(405).end();
@@ -18,10 +19,19 @@ export default async function handler(req, res) {
   try {
     if (type === 'glopay') {
       if (!verifyGloPaymentSignature(body)) {
-        console.error('[GLOPAYMENT WEBHOOK] Invalid signature');
+        console.error('[GLOPAYMENT DEPOSIT WEBHOOK] Invalid signature');
         return res.status(400).send('fail');
       }
       return await handleGloPaymentDepositCallback(body, res);
+    }
+
+    if (type === 'glopay-withdrawal') {
+      const paymentKey = process.env.GLOPAYMENT_PAYMENT_KEY;
+      if (!paymentKey || !verifyGloPaymentSignature(body, paymentKey)) {
+        console.error('[GLOPAYMENT WITHDRAWAL WEBHOOK] Invalid signature');
+        return res.status(400).send('fail');
+      }
+      return await handleGloPaymentWithdrawalCallback(body, res);
     }
 
     // Preserve the NekPay routes for historical or in-flight NekPay records.
@@ -89,6 +99,59 @@ async function handleGloPaymentDepositCallback(body, res) {
   if (error) throw error;
   if (data && data.success === false) {
     console.error('[GLOPAYMENT DEPOSIT WEBHOOK] RPC rejected callback:', data.message);
+    return res.status(400).send('fail');
+  }
+
+  res.setHeader('Content-Type', 'text/plain');
+  return res.status(200).send('ok');
+}
+
+// ---------------------------------------------------------------------------
+// GLOPAYMENT WITHDRAWAL CALLBACK
+// GloPayment signs this payload with the separate Payment Key. A synchronous
+// payout response is only acceptance; callback returnCode "00" marks PAID.
+// ---------------------------------------------------------------------------
+async function handleGloPaymentWithdrawalCallback(body, res) {
+  const requiredFields = [
+    'orderId',
+    'merchantId',
+    'merchantOrderId',
+    'amount',
+    'dateTime',
+    'returnCode',
+    'sign'
+  ];
+
+  for (const field of requiredFields) {
+    if (typeof body?.[field] !== 'string' || body[field].trim() === '') {
+      return res.status(400).send('fail');
+    }
+  }
+
+  const { merchantId, merchantOrderId, orderId, amount, returnCode } = body;
+  const amountNumber = Number(amount);
+  if (!Number.isFinite(amountNumber) || amountNumber <= 0) {
+    return res.status(400).send('fail');
+  }
+
+  const config = getGloPaymentConfig();
+  if (merchantId !== config.merchantId) {
+    console.error('[GLOPAYMENT WITHDRAWAL WEBHOOK] Merchant mismatch', { merchantOrderId });
+    return res.status(400).send('fail');
+  }
+
+  const { data, error } = await supabase.rpc('process_glopayment_withdrawal_callback', {
+    p_merchant_order_id: merchantOrderId,
+    p_provider_order_id: orderId,
+    p_merchant_id: merchantId,
+    p_amount: amountNumber,
+    p_return_code: returnCode,
+    p_callback: body
+  });
+
+  if (error) throw error;
+  if (data && data.success === false) {
+    console.error('[GLOPAYMENT WITHDRAWAL WEBHOOK] RPC rejected callback:', data.message);
     return res.status(400).send('fail');
   }
 
