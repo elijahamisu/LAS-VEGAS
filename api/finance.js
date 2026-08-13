@@ -1,6 +1,6 @@
 import { createClient } from '@supabase/supabase-js';
 import { createGloPaymentCollectionOrder } from '../lib/glopayment.js';
-import { isValidBankCode, NEK_BANKS } from '../lib/nek-banks.js';
+import { findGloPaymentNgnBank, GLOPAYMENT_NGN_BANKS, isValidGloPaymentNgnBankCode } from '../lib/glopayment-ngn-banks.js';
 
 const supabase = createClient(
   process.env.VITE_SUPABASE_URL,
@@ -202,14 +202,11 @@ async function handlePayments({ method, action, body, userId, res }) {
     return res.status(400).json({ success: false, message: 'Enter a valid Naira amount with at most two decimal places' });
   }
   const amountNumber = Number(rawAmount);
-  if (!Number.isFinite(amountNumber) || amountNumber < 1000) {
-    return res.status(400).json({ success: false, message: 'Minimum deposit is ₦1,000' });
+  if (!Number.isFinite(amountNumber) || amountNumber < 3000) {
+    return res.status(400).json({ success: false, message: 'Minimum deposit is ₦3,000' });
   }
   const amount = amountNumber.toFixed(2);
-  // GloPayment's own documented example uses a purely numeric orderId
-  // ('202211244508894019584') with no letter prefix. Match that exactly —
-  // an alphabetic prefix is a likely cause of their generic "params error".
-  const reference = `${Date.now()}${Math.floor(Math.random() * 1_000_000).toString().padStart(6, '0')}`;
+  const reference = `LVGLO${Date.now()}${Math.floor(Math.random() * 1_000_000).toString().padStart(6, '0')}`;
 
   // GloPayment requires customer details. Read them from the authenticated profile,
   // rather than trusting the browser to submit a name, email, or mobile number.
@@ -224,30 +221,11 @@ async function handlePayments({ method, action, body, userId, res }) {
 
   const name = String(profile.full_name || '').trim();
   const email = String(profile.email || '').trim();
-  const rawMobile = String(profile.phone_number || '').trim();
-  if (!name || !email || !rawMobile) {
+  const mobile = String(profile.phone_number || '').trim();
+  if (!name || !email || !mobile) {
     return res.status(400).json({
       success: false,
       message: 'Complete your full name, email address, and phone number in Profile before depositing'
-    });
-  }
-
-  // GloPayment's own documented signature example uses a bare 10-digit mobile
-  // number with no leading zero and no country code (e.g. '9999999999').
-  // Nigerian numbers are commonly stored locally as 11 digits with a leading
-  // zero (e.g. '09079505686') — normalize just for this outgoing request,
-  // without touching what's actually stored on the profile.
-  const digitsOnly = rawMobile.replace(/\D/g, '');
-  let mobile = digitsOnly;
-  if (mobile.startsWith('234') && mobile.length === 13) {
-    mobile = mobile.slice(3); // strip country code -> 10 digits
-  } else if (mobile.startsWith('0') && mobile.length === 11) {
-    mobile = mobile.slice(1); // strip leading 0 -> 10 digits
-  }
-  if (mobile.length !== 10) {
-    return res.status(400).json({
-      success: false,
-      message: 'Your phone number in Profile is not a valid Nigerian mobile number'
     });
   }
 
@@ -315,39 +293,40 @@ async function handlePayments({ method, action, body, userId, res }) {
 // this is just the user-facing "submit a request" step.
 // ---------------------------------------------------------------------------
 async function handleWithdrawals({ method, action, query, body, userId, res }) {
-  // GET: list saved payout accounts, or the allowed bank list for the add-account form
+  // GloPayment payout channel 506 uses a different Nigeria bank-code scheme.
+  // Existing NekPay payout accounts are intentionally excluded; users must re-add
+  // an account with a GloPayment code rather than sending a mismatched bank route.
   if (method === 'GET' && action === 'accounts') {
     const { data, error } = await supabase
       .from('withdrawal_accounts')
       .select('id, bank_code, bank_name, account_number, account_name, is_default')
       .eq('user_id', userId)
+      .eq('provider_name', 'glopayment')
       .order('is_default', { ascending: false });
     if (error) throw error;
     return res.status(200).json({ success: true, data });
   }
 
   if (method === 'GET' && action === 'bank-list') {
-    return res.status(200).json({ success: true, data: NEK_BANKS });
+    return res.status(200).json({ success: true, data: GLOPAYMENT_NGN_BANKS });
   }
 
   if (method !== 'POST') return res.status(405).json({ success: false, message: 'Method Not Allowed' });
 
-  // Add a payout account — bank_code MUST come from the validated NEK_BANKS list,
-  // never a free-text institution name, or NekPay has no routing code to transfer to.
   if (action === 'add-account') {
     const { bank_code, account_number, account_name, is_default } = body;
 
-    if (!isValidBankCode(bank_code)) throw new Error('Select a valid bank from the list');
+    if (!isValidGloPaymentNgnBankCode(bank_code)) throw new Error('Select a valid GloPayment Nigeria bank from the list');
     if (!account_number || !account_name) throw new Error('Account number and account name are required');
 
     if (is_default) {
       await supabase.from('withdrawal_accounts').update({ is_default: false }).eq('user_id', userId);
     }
 
-    const bankMeta = NEK_BANKS.find(b => b.code === bank_code);
+    const bankMeta = findGloPaymentNgnBank(bank_code);
     const { data, error } = await supabase.from('withdrawal_accounts').insert({
       user_id: userId,
-      provider_name: 'nekpay',
+      provider_name: 'glopayment',
       bank_code,
       bank_name: bankMeta.name,
       account_number,
@@ -365,16 +344,17 @@ async function handleWithdrawals({ method, action, query, body, userId, res }) {
     if (!amount || isNaN(amount) || amount <= 0) throw new Error('Invalid withdrawal amount');
     if (!payout_account_id) throw new Error('Payout account is required');
 
-    // Confirm the selected account has a valid NekPay bank_code before we even try
     const { data: account, error: acctErr } = await supabase
       .from('withdrawal_accounts')
-      .select('bank_code')
+      .select('bank_code, provider_name')
       .eq('id', payout_account_id)
       .eq('user_id', userId)
       .single();
 
     if (acctErr || !account) throw new Error('Payout account not found');
-    if (!isValidBankCode(account.bank_code)) throw new Error('This payout account has no valid bank code on file — please re-add it');
+    if (account.provider_name !== 'glopayment' || !isValidGloPaymentNgnBankCode(account.bank_code)) {
+      throw new Error('This payout account needs a valid GloPayment Nigeria bank code. Please add it again.');
+    }
 
     const { data, error } = await supabase.rpc('request_withdrawal_v2', {
       p_user_id: userId,
