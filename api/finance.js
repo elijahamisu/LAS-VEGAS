@@ -1,5 +1,5 @@
 import { createClient } from '@supabase/supabase-js';
-import { generateNekpaySignature } from '../lib/nekpay.js';
+import { createGloPaymentCollectionOrder } from '../lib/glopayment.js';
 import { isValidBankCode, NEK_BANKS } from '../lib/nek-banks.js';
 
 const supabase = createClient(
@@ -191,73 +191,100 @@ async function handleRewards({ method, action, query, body, userId, res }) {
 // ---------------------------------------------------------------------------
 async function handlePayments({ method, action, body, userId, res }) {
   if (method !== 'POST') return res.status(405).json({ success: false, message: 'Method Not Allowed' });
-
-  if (action === 'initiate-deposit') {
-    const { amount } = body;
-
-    const amountNumber = Number(amount);
-    if (!Number.isFinite(amountNumber) || amountNumber <= 0) {
-      return res.status(400).json({ success: false, message: 'Invalid deposit amount' });
-    }
-
-    const mchOrderNo = `LV${Date.now()}${Math.floor(Math.random() * 1000)}`;
-    const orderDate = new Date().toISOString().slice(0, 19).replace('T', ' '); // YYYY-MM-DD HH:mm:ss
-
-    // Create record in Supabase first
-    const { error: dbErr } = await supabase.from('deposits').insert({
-      user_id: userId,
-      reference: mchOrderNo,
-      amount: amountNumber,
-      status: 'PENDING',
-      provider: 'nekpay'
-    });
-    if (dbErr) {
-      console.error('[DEPOSIT DB ERROR]:', dbErr.message);
-      return res.status(400).json({ success: false, message: `DB Error: ${dbErr.message}` });
-    }
-
-    const params = {
-      version: "1.0",
-      mch_id: process.env.NEKPAYMENT_MCH_ID,
-      notify_url: process.env.NEKPAYMENT_NOTIFY_URL,
-      page_url: process.env.NEKPAYMENT_PAGE_URL,
-      mch_order_no: mchOrderNo,
-      pay_type: process.env.NEKPAYMENT_PAY_TYPE || "523",
-      trade_amount: amountNumber.toFixed(2),
-      order_date: orderDate,
-      bank_code: process.env.NEKPAYMENT_BANK_CODE || 'NGR044',
-      goods_name: "Wallet Topup",
-      mch_return_msg: "LAS VEGAS wallet top-up",
-      sign_type: "MD5"
-    };
-
-    let nekRes, result;
-    try {
-      params.sign = generateNekpaySignature(params);
-
-      nekRes = await fetch('https://api.nekpayment.com/pay/web', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-        body: new URLSearchParams(params)
-      });
-      result = await nekRes.json();
-    } catch (providerErr) {
-      // Provider call itself blew up (network, config, etc.) — don't leave the row stuck PENDING
-      await supabase.from('deposits').update({ status: 'FAILED' }).eq('reference', mchOrderNo);
-      console.error('[NEKPAY DEPOSIT REQUEST ERROR]:', providerErr.message);
-      return res.status(400).json({ success: false, message: 'Could not reach payment provider' });
-    }
-
-    if (result.respCode === "SUCCESS" && result.tradeResult === "1") {
-      return res.status(200).json({ success: true, payInfo: result.payInfo });
-    }
-
-    // Provider explicitly rejected the request — mark it FAILED, don't leave it PENDING forever
-    await supabase.from('deposits').update({ status: 'FAILED' }).eq('reference', mchOrderNo);
-    return res.status(400).json({ success: false, message: result.tradeMsg || 'Deposit request was rejected' });
+  if (action !== 'initiate-deposit') {
+    return res.status(400).json({ success: false, message: 'Invalid action' });
   }
 
-  return res.status(400).json({ success: false, message: 'Invalid action' });
+  // Preserve the client decimal string until it is validated; do not use binary
+  // floating-point arithmetic to decide what amount is submitted to the gateway.
+  const rawAmount = String(body?.amount ?? '').trim();
+  if (!/^\d+(?:\.\d{1,2})?$/.test(rawAmount)) {
+    return res.status(400).json({ success: false, message: 'Enter a valid Naira amount with at most two decimal places' });
+  }
+  const amountNumber = Number(rawAmount);
+  if (!Number.isFinite(amountNumber) || amountNumber < 3000) {
+    return res.status(400).json({ success: false, message: 'Minimum deposit is ₦3,000' });
+  }
+  const amount = amountNumber.toFixed(2);
+  const reference = `LVGLO${Date.now()}${Math.floor(Math.random() * 1_000_000).toString().padStart(6, '0')}`;
+
+  // GloPayment requires customer details. Read them from the authenticated profile,
+  // rather than trusting the browser to submit a name, email, or mobile number.
+  const { data: profile, error: profileError } = await supabase
+    .from('profiles')
+    .select('full_name, email, phone_number')
+    .eq('id', userId)
+    .single();
+  if (profileError || !profile) {
+    return res.status(400).json({ success: false, message: 'Could not load your payment profile' });
+  }
+
+  const name = String(profile.full_name || '').trim();
+  const email = String(profile.email || '').trim();
+  const mobile = String(profile.phone_number || '').trim();
+  if (!name || !email || !mobile) {
+    return res.status(400).json({
+      success: false,
+      message: 'Complete your full name, email address, and phone number in Profile before depositing'
+    });
+  }
+
+  // Persist before provider submission. The verified GloPayment callback later
+  // settles the row through an idempotent Supabase database function.
+  const { error: dbError } = await supabase.from('deposits').insert({
+    user_id: userId,
+    reference,
+    amount: amountNumber,
+    status: 'PENDING',
+    provider: 'glopayment'
+  });
+  if (dbError) {
+    console.error('[GLOPAYMENT DEPOSIT DB ERROR]', dbError.message);
+    return res.status(400).json({ success: false, message: 'Could not create the pending deposit record' });
+  }
+
+  let orderResult;
+  try {
+    orderResult = await createGloPaymentCollectionOrder({
+      orderId: reference,
+      amount,
+      name,
+      email,
+      mobile
+    });
+  } catch (providerError) {
+    // A timeout/network failure is not proof that GloPayment rejected the order.
+    // Preserve PENDING for reconciliation so a later callback can still be settled.
+    console.error('[GLOPAYMENT ORDER REQUEST ERROR]', { reference, message: providerError.message });
+    return res.status(502).json({
+      success: false,
+      reference,
+      message: 'We could not confirm checkout creation. Do not retry if your bank was charged; contact support with this reference.'
+    });
+  }
+
+  if (!orderResult.success) {
+    if (orderResult.definitivelyRejected) {
+      await supabase.from('deposits').update({ status: 'FAILED' }).eq('reference', reference);
+    }
+    console.error('[GLOPAYMENT ORDER NOT CONFIRMED]', {
+      reference,
+      definitivelyRejected: orderResult.definitivelyRejected,
+      httpStatus: orderResult.httpStatus,
+      providerResponse: orderResult.providerResponse
+    });
+    return res.status(orderResult.definitivelyRejected ? 400 : 502).json({
+      success: false,
+      reference,
+      message: orderResult.definitivelyRejected
+        ? 'The payment provider rejected checkout creation.'
+        : 'We could not confirm checkout creation. Do not retry if your bank was charged; contact support with this reference.'
+    });
+  }
+
+  // This only starts hosted checkout. Wallet credit comes exclusively from a
+  // verified callback whose returnCode is "00".
+  return res.status(200).json({ success: true, payInfo: orderResult.checkoutUrl, reference });
 }
 
 // ---------------------------------------------------------------------------
