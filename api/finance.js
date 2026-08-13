@@ -222,7 +222,7 @@ async function handlePayments({ method, action, body, userId, res }) {
       notify_url: process.env.NEKPAYMENT_NOTIFY_URL,
       page_url: process.env.NEKPAYMENT_PAGE_URL,
       mch_order_no: mchOrderNo,
-      pay_type: process.env.NEKPAYMENT_PAY_TYPE || "122",
+      pay_type: process.env.NEKPAYMENT_PAY_TYPE || "523",
       trade_amount: amountNumber.toFixed(2),
       order_date: orderDate,
       bank_code: process.env.NEKPAYMENT_BANK_CODE || 'NGR044',
