@@ -298,6 +298,7 @@ async function handleWithdrawals({ method, action, query, body, userId, res }) {
     const bankMeta = NEK_BANKS.find(b => b.code === bank_code);
     const { data, error } = await supabase.from('withdrawal_accounts').insert({
       user_id: userId,
+      provider_name: 'nekpay',
       bank_code,
       bank_name: bankMeta.name,
       account_number,
