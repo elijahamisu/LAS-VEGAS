@@ -206,7 +206,10 @@ async function handlePayments({ method, action, body, userId, res }) {
     return res.status(400).json({ success: false, message: 'Minimum deposit is ₦1,000' });
   }
   const amount = amountNumber.toFixed(2);
-  const reference = `LVGLO${Date.now()}${Math.floor(Math.random() * 1_000_000).toString().padStart(6, '0')}`;
+  // GloPayment's own documented example uses a purely numeric orderId
+  // ('202211244508894019584') with no letter prefix. Match that exactly —
+  // an alphabetic prefix is a likely cause of their generic "params error".
+  const reference = `${Date.now()}${Math.floor(Math.random() * 1_000_000).toString().padStart(6, '0')}`;
 
   // GloPayment requires customer details. Read them from the authenticated profile,
   // rather than trusting the browser to submit a name, email, or mobile number.
