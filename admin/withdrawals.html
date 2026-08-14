@@ -380,7 +380,7 @@
                 } else if (w.status === 'approved') {
                     actions.innerHTML = `
                         <div class="btn-group">
-                            <button class="btn btn-payout" onclick="window.WithManager.handlePayout('${w.id}')">DISBURSE VIA NEKPAY</button>
+                            <button class="btn btn-payout" onclick="window.WithManager.handlePayout('${w.id}')">DISBURSE VIA GLOPAYMENT</button>
                         </div>
                     `;
                 } else {
@@ -405,16 +405,16 @@
             },
 
             async handlePayout(id) {
-                if (!confirm("This will initiate real-money disbursement via NekPay. Proceed?")) return;
+                if (!confirm("This will initiate real-money disbursement via GloPayment. Proceed?")) return;
 
                 // 1. Move to Processing to prevent race conditions
                 await supabase.from('withdrawals').update({ status: 'processing' }).eq('id', id);
 
                 // 2. Call secure backend endpoint (Simulated for this foundation)
-                // In production: const { data } = await supabase.functions.invoke('nekpay-payout', { body: { id } });
+                // In production: const { data } = await supabase.functions.invoke('glopayment-payout', { body: { id } });
                 
                 setTimeout(async () => {
-                    const fakePayoutRef = 'NP-PAY-' + Math.random().toString(36).substring(2, 10).toUpperCase();
+                    const fakePayoutRef = 'GLO-PAY-' + Math.random().toString(36).substring(2, 10).toUpperCase();
                     
                     const { error } = await supabase.from('withdrawals')
                         .update({ status: 'paid', processed_at: new Date().toISOString(), payout_reference: fakePayoutRef })
