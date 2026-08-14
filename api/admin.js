@@ -1,5 +1,5 @@
 import { createClient } from '@supabase/supabase-js';
-import { buildGloPaymentPayoutRequest, processGloPaymentPayout } from '../lib/glopayment-withdrawal.js';
+import { buildGloPaymentPayoutRequest, processGloPaymentPayout } from '../lib/glopayment/withdrawal.js';
 
 const supabase = createClient(
   process.env.VITE_SUPABASE_URL,
