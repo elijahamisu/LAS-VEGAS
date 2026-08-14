@@ -202,8 +202,8 @@ async function handlePayments({ method, action, body, userId, res }) {
     return res.status(400).json({ success: false, message: 'Enter a valid Naira amount with at most two decimal places' });
   }
   const amountNumber = Number(rawAmount);
-  if (!Number.isFinite(amountNumber) || amountNumber < 3000) {
-    return res.status(400).json({ success: false, message: 'Minimum deposit is ₦3,000' });
+  if (!Number.isFinite(amountNumber) || amountNumber < 1000) {
+    return res.status(400).json({ success: false, message: 'Minimum deposit is ₦1,000' });
   }
   const amount = amountNumber.toFixed(2);
   const reference = `LVGLO${Date.now()}${Math.floor(Math.random() * 1_000_000).toString().padStart(6, '0')}`;
