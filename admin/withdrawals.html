@@ -68,11 +68,11 @@
         td { padding: 15px 20px; border-bottom: 1px solid var(--admin-bg); font-size: 13px; }
         
         .status-badge { padding: 4px 10px; border-radius: 50px; font-size: 9px; font-weight: 800; text-transform: uppercase; }
-        .status-PENDING { background: #FFF9E6; color: #D4A017; border: 1px solid #D4A017; }
-        .status-APPROVED { background: #E6F0FF; color: #0056D2; border: 1px solid #0056D2; }
-        .status-PROCESSING { background: #E0E0E0; color: #333; animation: pulse 1.5s infinite; }
-        .status-PAID { background: #F0FFF4; color: var(--secondary-green); border: 1px solid var(--secondary-green); }
-        .status-REJECTED { background: #FFF0F0; color: #D00000; border: 1px solid #D00000; }
+        .status-pending_approval { background: #FFF9E6; color: #D4A017; border: 1px solid #D4A017; }
+        .status-approved { background: #E6F0FF; color: #0056D2; border: 1px solid #0056D2; }
+        .status-processing { background: #E0E0E0; color: #333; animation: pulse 1.5s infinite; }
+        .status-paid { background: #F0FFF4; color: var(--secondary-green); border: 1px solid var(--secondary-green); }
+        .status-rejected { background: #FFF0F0; color: #D00000; border: 1px solid #D00000; }
 
         /* --- MOBILE LIST --- */
         .mobile-list { display: grid; gap: 15px; }
@@ -272,9 +272,9 @@
 
                 const t = { pending: 0, approved: 0, paid: 0, fees: 0 };
                 sums.forEach(w => {
-                    if (w.status === 'PENDING') t.pending += Number(w.amount);
-                    if (w.status === 'APPROVED' || w.status === 'PROCESSING') t.approved += Number(w.net_amount);
-                    if (w.status === 'PAID') {
+                    if (w.status === 'pending_approval') t.pending += Number(w.amount);
+                    if (w.status === 'approved' || w.status === 'processing') t.approved += Number(w.net_amount);
+                    if (w.status === 'paid') {
                         t.paid += Number(w.net_amount);
                         t.fees += Number(w.fee);
                     }
@@ -370,14 +370,14 @@
                     <div class="detail-row"><span class="detail-label">Request Date</span><span class="detail-value">${new Date(w.created_at).toLocaleString()}</span></div>
                 `;
 
-                if (w.status === 'PENDING') {
+                if (w.status === 'pending_approval') {
                     actions.innerHTML = `
                         <div class="btn-group">
-                            <button class="btn btn-reject" onclick="window.WithManager.handleStatusChange('${w.id}', 'REJECTED')">REJECT</button>
-                            <button class="btn btn-approve" onclick="window.WithManager.handleStatusChange('${w.id}', 'APPROVED')">APPROVE</button>
+                            <button class="btn btn-reject" onclick="window.WithManager.handleStatusChange('${w.id}', 'rejected')">REJECT</button>
+                            <button class="btn btn-approve" onclick="window.WithManager.handleStatusChange('${w.id}', 'approved')">APPROVE</button>
                         </div>
                     `;
-                } else if (w.status === 'APPROVED') {
+                } else if (w.status === 'approved') {
                     actions.innerHTML = `
                         <div class="btn-group">
                             <button class="btn btn-payout" onclick="window.WithManager.handlePayout('${w.id}')">DISBURSE VIA NEKPAY</button>
@@ -408,7 +408,7 @@
                 if (!confirm("This will initiate real-money disbursement via NekPay. Proceed?")) return;
 
                 // 1. Move to Processing to prevent race conditions
-                await supabase.from('withdrawals').update({ status: 'PROCESSING' }).eq('id', id);
+                await supabase.from('withdrawals').update({ status: 'processing' }).eq('id', id);
 
                 // 2. Call secure backend endpoint (Simulated for this foundation)
                 // In production: const { data } = await supabase.functions.invoke('nekpay-payout', { body: { id } });
@@ -417,7 +417,7 @@
                     const fakePayoutRef = 'NP-PAY-' + Math.random().toString(36).substring(2, 10).toUpperCase();
                     
                     const { error } = await supabase.from('withdrawals')
-                        .update({ status: 'PAID', processed_at: new Date().toISOString(), payout_reference: fakePayoutRef })
+                        .update({ status: 'paid', processed_at: new Date().toISOString(), payout_reference: fakePayoutRef })
                         .eq('id', id);
 
                     if (!error) {
