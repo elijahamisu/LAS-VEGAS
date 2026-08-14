@@ -92,10 +92,10 @@
         .admin-table td { padding: 12px; border-bottom: 1px solid var(--admin-bg); }
         .status-pill { padding: 4px 8px; border-radius: 50px; font-size: 10px; font-weight: 700; }
 
-        /* --- NEKPAY CARD --- */
-        .nekpay-card { background: #1a000d; color: white; border: none; }
-        .nekpay-card .label { color: var(--primary-magenta); }
-        .nekpay-card .value { color: white; font-size: 28px; }
+        /* --- GLOPAYMENT CARD --- */
+        .glopayment-card { background: #1a000d; color: white; border: none; }
+        .glopayment-card .label { color: var(--primary-magenta); }
+        .glopayment-card .value { color: white; font-size: 28px; }
 
         /* --- MOBILE NAV --- */
         .mobile-toggle { display: none; background: none; border: none; font-size: 24px; cursor: pointer; color: var(--sidebar-dark); }
@@ -132,7 +132,7 @@
                 <a href="referrals.html" class="nav-item">🔗 Referrals</a>
                 <a href="gift-codes.html" class="nav-item">🎁 Gift Codes</a>
                 <a href="notifications.html" class="nav-item">🔔 Notifications</a>
-                <a href="nekpay.html" class="nav-item">💳 Nekpay</a>
+                <a href="glopayment.html" class="nav-item">💳 GloPayment</a>
                 <a href="payout-accounts.html" class="nav-item">🏦 Payout Accounts</a>
                 <a href="reports.html" class="nav-item">📈 Reports</a>
                 <a href="settings.html" class="nav-item">⚙️ Settings</a>
@@ -177,9 +177,9 @@
 
             <!-- Financial Insights -->
             <div class="stats-grid">
-                <div class="stat-card nekpay-card">
-                    <span class="label">Nekpay Balance</span>
-                    <span class="value" id="stat-nekpay-balance">Loading...</span>
+                <div class="stat-card glopayment-card">
+                    <span class="label">GloPayment Balance</span>
+                    <span class="value" id="stat-glopayment-balance">Loading...</span>
                 </div>
                 <div class="stat-card">
                     <span class="label">Total Earnings Dist.</span>
@@ -318,19 +318,19 @@
                     this.renderTransactions(recentTx);
                     this.renderUsers(recentUsers);
 
-                    // Fetch Nekpay (Mocking secure backend call)
-                    this.loadNekpayBalance();
+                    // Fetch GloPayment (Mocking secure backend call)
+                    this.loadGloPaymentBalance();
 
                 } catch (e) {
                     console.error("Dashboard error:", e);
                 }
             },
 
-            async loadNekpayBalance() {
+            async loadGloPaymentBalance() {
                 // In production, this calls a secure API route that uses the secret key server-side
-                // const res = await fetch('/api/admin/nekpay-balance');
+                // const res = await fetch('/api/admin/glopayment-balance');
                 // const data = await res.json();
-                document.getElementById('stat-nekpay-balance').innerText = "₦0.00"; // Placeholder for API integration
+                document.getElementById('stat-glopayment-balance').innerText = "₦0.00"; // Placeholder for API integration
             },
 
             renderTransactions(data) {
