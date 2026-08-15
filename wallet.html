@@ -275,10 +275,10 @@
                     // here. Redirect to the admin balance-adjustment tool instead.
                     ['deposit-link', 'withdraw-link'].forEach(id => {
                         const el = document.getElementById(id);
-                        el.href = `user-details.html?id=${this.effectiveUserId}`;
+                        el.href = `admin/user-details.html?id=${this.effectiveUserId}`;
                         el.innerText = '⚙️ Adjust Balance';
                     });
-                    document.getElementById('view-all-tx').href = `transactions.html?user_id=${this.effectiveUserId}`;
+                    document.getElementById('view-all-tx').href = `admin/transactions.html?user_id=${this.effectiveUserId}`;
                 }
 
                 await this.fetchData();
