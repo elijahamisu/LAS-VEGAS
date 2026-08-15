@@ -1,0 +1,412 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>View Member Dashboard | LAS VEGAS Admin</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display&family=Quicksand:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+    <style>
+        :root {
+            --primary-magenta: #FF007F;
+            --primary-magenta-dark: #E60072;
+            --secondary-green: #006400;
+            --secondary-green-light: #008000;
+            --bg-soft-white: #FFF5F7;
+            --card-white: #FFFFFF;
+            --text-main: #1A1A1A;
+            --text-muted: #666666;
+            --border-pink: #FFD1E3;
+            --nav-black: #121212;
+            --shadow-soft: 0 4px 20px rgba(255, 0, 127, 0.06);
+            --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+
+        body {
+            margin: 0; padding: 0;
+            font-family: 'Quicksand', sans-serif;
+            background-color: var(--bg-soft-white);
+            color: var(--text-main);
+            background-image: radial-gradient(var(--border-pink) 0.5px, transparent 0.5px);
+            background-size: 30px 30px;
+            min-height: 100vh;
+            padding-bottom: 60px;
+        }
+
+        .skeleton { background: #eee; background: linear-gradient(110deg, #ececec 8%, #f5f5f5 18%, #ececec 33%); border-radius: 5px; background-size: 200% 100%; animation: 1.5s shine linear infinite; }
+        @keyframes shine { to { background-position-x: -200%; } }
+
+        /* --- ADMIN MODE BANNER --- */
+        .admin-banner {
+            background: var(--nav-black); color: white; padding: 10px 20px;
+            display: flex; justify-content: space-between; align-items: center;
+            font-size: 12px; font-weight: 700; position: sticky; top: 0; z-index: 2500;
+        }
+        .admin-banner .left { display: flex; align-items: center; gap: 8px; }
+        .admin-banner .dot { width: 8px; height: 8px; border-radius: 50%; background: var(--primary-magenta); animation: pulse 1.5s infinite; }
+        @keyframes pulse { 0%,100% { opacity: 1; } 50% { opacity: 0.3; } }
+        .admin-banner a { color: white; text-decoration: none; background: rgba(255,255,255,0.15); padding: 6px 12px; border-radius: 8px; }
+
+        .dashboard-container { max-width: 1200px; margin: 0 auto; padding: 20px; }
+
+        .top-bar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px; padding: 10px 0; }
+        .user-greeting h1 { font-family: 'DM Serif Display', serif; font-size: 24px; margin: 0; color: var(--text-main); }
+        .user-greeting p { font-size: 14px; color: var(--text-muted); margin: 5px 0 0 0; }
+
+        /* --- EDITABLE FIELD WRAPPER --- */
+        .editable { position: relative; }
+        .edit-pencil {
+            background: rgba(255,255,255,0.25); border: none; border-radius: 8px;
+            width: 26px; height: 26px; cursor: pointer; font-size: 12px;
+            display: inline-flex; align-items: center; justify-content: center;
+            margin-left: 8px; color: inherit;
+        }
+        .stat-card .edit-pencil { background: var(--bg-soft-white); color: var(--primary-magenta); }
+        .edit-input-row { display: flex; gap: 8px; align-items: center; margin-top: 6px; }
+        .edit-input-row input {
+            padding: 8px 10px; border-radius: 8px; border: 1px solid var(--border-pink);
+            font-family: 'Quicksand', sans-serif; font-weight: 700; font-size: 14px; width: 140px;
+        }
+        .edit-input-row button { border: none; border-radius: 8px; padding: 8px 12px; font-weight: 700; font-size: 12px; cursor: pointer; }
+        .edit-save { background: var(--secondary-green); color: white; }
+        .edit-cancel { background: #eee; color: #333; }
+
+        .balance-hero {
+            background: linear-gradient(135deg, var(--primary-magenta), #ff4d94);
+            border-radius: 25px; padding: 30px; color: white; margin-bottom: 25px;
+            box-shadow: 0 10px 25px rgba(255, 0, 127, 0.15);
+            position: relative; overflow: hidden;
+        }
+        .balance-hero::after { content: "✦"; position: absolute; right: 20px; top: 10px; font-size: 80px; opacity: 0.1; }
+        .balance-label { font-size: 12px; text-transform: uppercase; letter-spacing: 2px; font-weight: 700; opacity: 0.9; }
+        .balance-value { font-size: 36px; font-weight: 700; margin: 10px 0 25px 0; display: flex; align-items: center; }
+        .hero-actions { display: flex; gap: 12px; }
+        .action-btn { flex: 1; padding: 12px; border-radius: 12px; border: none; font-weight: 700; font-size: 13px; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; transition: var(--transition); }
+        .btn-white { background: white; color: var(--primary-magenta); }
+        .btn-outline-white { background: rgba(255,255,255,0.2); color: white; border: 1px solid rgba(255,255,255,0.4); }
+
+        .stats-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px; margin-bottom: 25px; }
+        .stat-card { background: white; padding: 20px; border-radius: 20px; border: 1px solid var(--border-pink); box-shadow: var(--shadow-soft); }
+        .stat-card .label { font-size: 10px; text-transform: uppercase; font-weight: 700; color: var(--text-muted); display: block; margin-bottom: 5px; }
+        .stat-card .value-row { display: flex; align-items: center; justify-content: space-between; }
+        .stat-card .value { font-size: 18px; font-weight: 700; color: var(--secondary-green); }
+
+        .sec-header { display: flex; justify-content: space-between; align-items: center; margin: 30px 0 15px 0; }
+        .sec-header h2 { font-family: 'DM Serif Display', serif; font-size: 20px; margin: 0; }
+        .sec-header a { font-size: 13px; color: var(--primary-magenta); font-weight: 700; text-decoration: none; }
+
+        .quick-actions { display: flex; gap: 10px; overflow-x: auto; padding-bottom: 10px; scrollbar-width: none; }
+        .quick-actions::-webkit-scrollbar { display: none; }
+        .qa-item { flex: 0 0 auto; background: white; padding: 12px 20px; border-radius: 100px; border: 1px solid var(--border-pink); font-size: 13px; font-weight: 700; display: flex; align-items: center; gap: 8px; box-shadow: var(--shadow-soft); cursor: pointer; }
+
+        .table-card { background: white; border-radius: 20px; border: 1px solid var(--border-pink); overflow: hidden; box-shadow: var(--shadow-soft); }
+        .tr-row { display: flex; justify-content: space-between; align-items: center; padding: 15px 20px; border-bottom: 1px solid var(--bg-soft-white); }
+        .tr-row:last-child { border-bottom: none; }
+        .tr-info h4 { margin: 0; font-size: 14px; font-weight: 700; text-transform: capitalize; }
+        .tr-info span { font-size: 11px; color: var(--text-muted); }
+        .tr-amt { font-weight: 700; font-size: 14px; }
+        .amt-pos { color: var(--secondary-green); }
+        .amt-neg { color: #d00000; }
+
+        .refer-card { background: #1a000d; color: white; padding: 25px; border-radius: 25px; margin-top: 30px; position: relative; }
+        .refer-card h3 { font-family: 'DM Serif Display', serif; margin: 0 0 10px 0; color: var(--primary-magenta); }
+        .refer-card p { font-size: 13px; opacity: 0.8; margin-bottom: 20px; }
+        .ref-code-box { background: rgba(255,255,255,0.1); padding: 15px; border-radius: 15px; display: flex; justify-content: space-between; align-items: center; border: 1px dashed rgba(255,255,255,0.3); }
+        .ref-code { font-family: monospace; font-size: 18px; font-weight: 700; letter-spacing: 2px; }
+        .copy-btn { color: var(--primary-magenta); font-weight: 700; font-size: 12px; cursor: pointer; background: none; border: none; text-transform: uppercase; }
+
+        .toast {
+            position: fixed; bottom: 20px; right: 20px; background: #121212; color: white;
+            padding: 14px 20px; border-radius: 12px; font-size: 13px; font-weight: 700; z-index: 3000;
+            opacity: 0; transform: translateY(10px); transition: var(--transition);
+        }
+        .toast.show { opacity: 1; transform: translateY(0); }
+        .toast.error { background: #D00000; }
+
+        @media (min-width: 1024px) {
+            .stats-grid { grid-template-columns: repeat(4, 1fr); }
+            .dashboard-container { padding: 40px; }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="admin-banner">
+        <div class="left"><span class="dot"></span> ADMIN VIEW — you are viewing this member's dashboard, not your own</div>
+        <a href="users.html">← Back to Users</a>
+    </div>
+
+    <div class="dashboard-container">
+        <header class="top-bar">
+            <div class="user-greeting">
+                <p>Viewing dashboard for</p>
+                <h1 id="user-name"><div class="skeleton" style="width: 160px; height: 24px;"></div></h1>
+            </div>
+        </header>
+
+        <!-- Balance Hero -->
+        <div class="balance-hero">
+            <div class="balance-label">Available Balance</div>
+            <div class="balance-value editable">
+                <span id="main-balance">₦0.00</span>
+                <button class="edit-pencil" id="edit-balance-btn">✎</button>
+            </div>
+            <div id="balance-edit-row" class="edit-input-row" style="display:none;">
+                <input type="number" step="0.01" id="balance-edit-input">
+                <button class="edit-save" id="balance-save">Save</button>
+                <button class="edit-cancel" id="balance-cancel">Cancel</button>
+            </div>
+            <div class="hero-actions">
+                <button class="action-btn btn-white" id="btn-add-investment">📈 Add Investment</button>
+                <button class="action-btn btn-outline-white" id="btn-edit-profile">✎ Edit Profile</button>
+            </div>
+        </div>
+
+        <!-- Stats Grid -->
+        <div class="stats-grid">
+            <div class="stat-card" data-field="investment_balance" data-label="Invested">
+                <span class="label">Invested</span>
+                <div class="value-row"><div class="value" id="stat-invested">₦0.00</div><button class="edit-pencil">✎</button></div>
+                <div class="edit-input-row" style="display:none;"><input type="number" step="0.01"><button class="edit-save">Save</button><button class="edit-cancel">Cancel</button></div>
+            </div>
+            <div class="stat-card" data-field="total_earned" data-label="Total Earned">
+                <span class="label">Total Earned</span>
+                <div class="value-row"><div class="value" id="stat-earned">₦0.00</div><button class="edit-pencil">✎</button></div>
+                <div class="edit-input-row" style="display:none;"><input type="number" step="0.01"><button class="edit-save">Save</button><button class="edit-cancel">Cancel</button></div>
+            </div>
+            <div class="stat-card" data-field="total_deposited" data-label="Total Deposits">
+                <span class="label">Total Deposits</span>
+                <div class="value-row"><div class="value" id="stat-deposits">₦0.00</div><button class="edit-pencil">✎</button></div>
+                <div class="edit-input-row" style="display:none;"><input type="number" step="0.01"><button class="edit-save">Save</button><button class="edit-cancel">Cancel</button></div>
+            </div>
+            <div class="stat-card" data-field="total_withdrawn" data-label="Withdrawals">
+                <span class="label">Withdrawals</span>
+                <div class="value-row"><div class="value" id="stat-withdrawals">₦0.00</div><button class="edit-pencil">✎</button></div>
+                <div class="edit-input-row" style="display:none;"><input type="number" step="0.01"><button class="edit-save">Save</button><button class="edit-cancel">Cancel</button></div>
+            </div>
+        </div>
+
+        <!-- Quick Actions (admin equivalents) -->
+        <div class="quick-actions">
+            <div class="qa-item" id="qa-investments">📈 Investments</div>
+            <div class="qa-item" id="qa-transactions">💰 All Transactions</div>
+            <div class="qa-item" id="qa-status">🔒 Suspend/Reactivate</div>
+        </div>
+
+        <!-- Transactions -->
+        <div class="sec-header">
+            <h2>Recent Transactions</h2>
+            <a href="transactions.html">View All</a>
+        </div>
+        <div class="table-card" id="transaction-list">
+            <div style="padding: 30px; text-align: center; color: #999;">Loading transactions...</div>
+        </div>
+
+        <!-- Referral -->
+        <div class="refer-card">
+            <h3>Referral Code</h3>
+            <p>This member's code — used for their downline network.</p>
+            <div class="ref-code-box">
+                <span class="ref-code" id="my-ref-code">------</span>
+                <button class="copy-btn" id="copy-code">Copy</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="toast" id="toast"></div>
+
+    <script type="module">
+        import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm'
+
+        const supabase = createClient(import.meta.env.VITE_SUPABASE_URL, import.meta.env.VITE_SUPABASE_ANON_KEY);
+
+        const AdminUserView = {
+            targetUserId: null,
+            session: null,
+            profile: null,
+            wallet: null,
+
+            async init() {
+                const { data: { session } } = await supabase.auth.getSession();
+                if (!session) return window.location.href = 'login.html';
+                this.session = session;
+
+                const { data: adminProfile } = await supabase.from('profiles').select('is_admin').eq('id', session.user.id).single();
+                if (!adminProfile || !adminProfile.is_admin) return window.location.href = 'login.html';
+
+                const params = new URLSearchParams(window.location.search);
+                this.targetUserId = params.get('id');
+                if (!this.targetUserId) return alert('No user id provided.');
+
+                this.setupUI();
+                await this.fetchData();
+            },
+
+            setupUI() {
+                document.getElementById('copy-code').onclick = () => {
+                    const code = document.getElementById('my-ref-code').innerText;
+                    navigator.clipboard.writeText(code);
+                    document.getElementById('copy-code').innerText = 'Copied!';
+                    setTimeout(() => document.getElementById('copy-code').innerText = 'Copy', 2000);
+                };
+
+                document.getElementById('qa-investments').onclick = () => window.location.href = `investments.html?user_id=${this.targetUserId}`;
+                document.getElementById('qa-transactions').onclick = () => window.location.href = `transactions.html?user_id=${this.targetUserId}`;
+                document.getElementById('qa-status').onclick = () => this.toggleStatus();
+                document.getElementById('btn-add-investment').onclick = () => window.location.href = `user-details.html?id=${this.targetUserId}`;
+                document.getElementById('btn-edit-profile').onclick = () => window.location.href = `user-details.html?id=${this.targetUserId}`;
+
+                // Balance hero inline edit
+                document.getElementById('edit-balance-btn').onclick = () => {
+                    document.getElementById('balance-edit-input').value = this.wallet?.balance ?? 0;
+                    document.getElementById('balance-edit-row').style.display = 'flex';
+                };
+                document.getElementById('balance-cancel').onclick = () => {
+                    document.getElementById('balance-edit-row').style.display = 'none';
+                };
+                document.getElementById('balance-save').onclick = () => this.saveField('balance', document.getElementById('balance-edit-input').value, 'main-balance');
+
+                // Stat card inline edits
+                document.querySelectorAll('.stat-card').forEach(card => {
+                    const field = card.dataset.field;
+                    const pencil = card.querySelector('.edit-pencil');
+                    const row = card.querySelector('.edit-input-row');
+                    const input = row.querySelector('input');
+                    const saveBtn = row.querySelector('.edit-save');
+                    const cancelBtn = row.querySelector('.edit-cancel');
+                    const valueEl = card.querySelector('.value');
+
+                    pencil.onclick = () => {
+                        input.value = this.wallet?.[field] ?? 0;
+                        row.style.display = 'flex';
+                    };
+                    cancelBtn.onclick = () => { row.style.display = 'none'; };
+                    saveBtn.onclick = () => this.saveField(field, input.value, valueEl.id, () => { row.style.display = 'none'; });
+                });
+            },
+
+            // -------------------------------------------------------------
+            // Admin API helper — every write goes through /api/admin
+            // -------------------------------------------------------------
+            async adminCall(action, body) {
+                const res = await fetch(`/api/admin?resource=admin&action=${action}`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${this.session.access_token}` },
+                    body: JSON.stringify(body)
+                });
+                const json = await res.json();
+                if (!res.ok || !json.success) throw new Error(json.message || 'Request failed');
+                return json;
+            },
+
+            showToast(message, isError = false) {
+                const t = document.getElementById('toast');
+                t.innerText = message;
+                t.className = `toast show ${isError ? 'error' : ''}`;
+                setTimeout(() => t.classList.remove('show'), 3000);
+            },
+
+            async saveField(field, rawValue, displayElId, onSuccess) {
+                const value = Number(rawValue);
+                if (isNaN(value) || value < 0) return this.showToast('Enter a valid amount', true);
+                try {
+                    // `balance` uses the existing credit/debit action so it's captured
+                    // in the audit trail and stays consistent with user-details.html.
+                    if (field === 'balance') {
+                        const current = Number(this.wallet.balance || 0);
+                        const diff = value - current;
+                        if (diff === 0) { document.getElementById('balance-edit-row').style.display = 'none'; return; }
+                        await this.adminCall('adjust-balance', {
+                            user_id: this.targetUserId,
+                            amount: Math.abs(diff),
+                            direction: diff > 0 ? 'CREDIT' : 'DEBIT',
+                            reason: 'Admin edit via View Member Dashboard'
+                        });
+                        document.getElementById('balance-edit-row').style.display = 'none';
+                    } else {
+                        // Other wallet stat fields (investment_balance, total_earned,
+                        // total_deposited, total_withdrawn) — requires an
+                        // `update-wallet-field` action on your /api/admin endpoint
+                        // that does: update wallets set <field> = <value> where user_id = ...
+                        await this.adminCall('update-wallet-field', {
+                            user_id: this.targetUserId, field, value
+                        });
+                        if (onSuccess) onSuccess();
+                    }
+                    this.showToast('Updated');
+                    await this.fetchData();
+                } catch (e) {
+                    this.showToast(e.message, true);
+                }
+            },
+
+            async toggleStatus() {
+                const current = this.profile?.status || 'ACTIVE';
+                const next = current === 'ACTIVE' ? 'SUSPENDED' : 'ACTIVE';
+                if (!confirm(`Change this user's status from ${current} to ${next}?`)) return;
+                try {
+                    await this.adminCall('update-user-status', { user_id: this.targetUserId, status: next });
+                    this.showToast(`Status set to ${next}`);
+                    await this.fetchData();
+                } catch (e) {
+                    this.showToast(e.message, true);
+                }
+            },
+
+            async fetchData() {
+                try {
+                    const { data: profile } = await supabase.from('profiles').select('*').eq('id', this.targetUserId).single();
+                    const { data: wallet } = await supabase.from('wallets').select('*').eq('user_id', this.targetUserId).single();
+
+                    if (profile) {
+                        this.profile = profile;
+                        document.getElementById('user-name').innerText = profile.full_name || 'Unknown';
+                        document.getElementById('my-ref-code').innerText = profile.referral_code || '------';
+                    }
+
+                    if (wallet) {
+                        this.wallet = wallet;
+                        document.getElementById('main-balance').innerText = `₦${Number(wallet.balance || 0).toLocaleString()}`;
+                        document.getElementById('stat-invested').innerText = `₦${Number(wallet.investment_balance || 0).toLocaleString()}`;
+                        document.getElementById('stat-earned').innerText = `₦${Number(wallet.total_earned || 0).toLocaleString()}`;
+                        document.getElementById('stat-deposits').innerText = `₦${Number(wallet.total_deposited || 0).toLocaleString()}`;
+                        document.getElementById('stat-withdrawals').innerText = `₦${Number(wallet.total_withdrawn || 0).toLocaleString()}`;
+                    }
+
+                    const { data: txs } = await supabase.from('transactions').select('*').eq('user_id', this.targetUserId).order('created_at', { ascending: false }).limit(5);
+                    this.renderTransactions(txs);
+                } catch (e) {
+                    console.error('Data fetch error', e);
+                    this.showToast('Failed to load member data', true);
+                }
+            },
+
+            renderTransactions(txs) {
+                const container = document.getElementById('transaction-list');
+                if (!txs || txs.length === 0) {
+                    container.innerHTML = '<div style="padding: 40px; text-align: center; color: #999;">No transactions yet.</div>';
+                    return;
+                }
+                container.innerHTML = txs.map(tx => `
+                    <div class="tr-row">
+                        <div class="tr-info">
+                            <h4>${(tx.type || '').replace(/_/g, ' ')}</h4>
+                            <span>${new Date(tx.created_at).toLocaleDateString()}</span>
+                        </div>
+                        <div class="tr-amt ${tx.amount > 0 ? 'amt-pos' : 'amt-neg'}">
+                            ${tx.amount > 0 ? '+' : ''}₦${Math.abs(tx.amount).toLocaleString()}
+                        </div>
+                    </div>
+                `).join('');
+            }
+        };
+
+        document.addEventListener('DOMContentLoaded', () => AdminUserView.init());
+    </script>
+</body>
+</html>
