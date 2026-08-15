@@ -43,6 +43,7 @@ export default defineConfig({
         admin_payout_accounts: resolve(__dirname, 'admin/payout-accounts.html'),
         admin_reports: resolve(__dirname, 'admin/reports.html'),
         admin_settings: resolve(__dirname, 'admin/settings.html'),
+        admin_view_member_dashboard: resolve(__dirname, 'admin/view-member-dashboard.html'),
       }
     }
   }
