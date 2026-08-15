@@ -35,17 +35,14 @@
             background-image: radial-gradient(var(--border-pink) 0.5px, transparent 0.5px);
             background-size: 30px 30px;
             min-height: 100vh;
-            padding-bottom: 100px; /* Space for mobile nav island */
+            padding-bottom: 100px;
         }
 
-        /* --- SKELETON LOADING --- */
         .skeleton { background: #eee; background: linear-gradient(110deg, #ececec 8%, #f5f5f5 18%, #ececec 33%); border-radius: 5px; background-size: 200% 100%; animation: 1.5s shine linear infinite; }
         @keyframes shine { to { background-position-x: -200%; } }
 
-        /* --- LAYOUT --- */
         .dashboard-container { max-width: 1200px; margin: 0 auto; padding: 20px; }
         
-        /* --- HEADER --- */
         .top-bar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px; padding: 10px 0; }
         .user-greeting h1 { font-family: 'DM Serif Display', serif; font-size: 24px; margin: 0; color: var(--text-main); }
         .user-greeting p { font-size: 14px; color: var(--text-muted); margin: 5px 0 0 0; }
@@ -53,7 +50,6 @@
         .icon-btn { width: 40px; height: 40px; border-radius: 50%; background: white; border: 1px solid var(--border-pink); display: flex; align-items: center; justify-content: center; color: var(--primary-magenta); cursor: pointer; position: relative; }
         .badge { position: absolute; top: -2px; right: -2px; width: 8px; height: 8px; background: var(--primary-magenta); border-radius: 50%; border: 2px solid white; }
 
-        /* --- HERO CARD --- */
         .balance-hero {
             background: linear-gradient(135deg, var(--primary-magenta), #ff4d94);
             border-radius: 25px; padding: 30px; color: white; margin-bottom: 25px;
@@ -68,23 +64,19 @@
         .btn-white { background: white; color: var(--primary-magenta); }
         .btn-outline-white { background: rgba(255,255,255,0.2); color: white; border: 1px solid rgba(255,255,255,0.4); }
 
-        /* --- STATS GRID --- */
         .stats-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px; margin-bottom: 25px; }
         .stat-card { background: white; padding: 20px; border-radius: 20px; border: 1px solid var(--border-pink); box-shadow: var(--shadow-soft); }
         .stat-card .label { font-size: 10px; text-transform: uppercase; font-weight: 700; color: var(--text-muted); display: block; margin-bottom: 5px; }
         .stat-card .value { font-size: 18px; font-weight: 700; color: var(--secondary-green); }
 
-        /* --- SECTION TITLES --- */
         .sec-header { display: flex; justify-content: space-between; align-items: center; margin: 30px 0 15px 0; }
         .sec-header h2 { font-family: 'DM Serif Display', serif; font-size: 20px; margin: 0; }
         .sec-header a { font-size: 13px; color: var(--primary-magenta); font-weight: 700; text-decoration: none; }
 
-        /* --- QUICK ACTIONS --- */
         .quick-actions { display: flex; gap: 10px; overflow-x: auto; padding-bottom: 10px; scrollbar-width: none; }
         .quick-actions::-webkit-scrollbar { display: none; }
         .qa-item { flex: 0 0 auto; background: white; padding: 12px 20px; border-radius: 100px; border: 1px solid var(--border-pink); font-size: 13px; font-weight: 700; display: flex; align-items: center; gap: 8px; box-shadow: var(--shadow-soft); }
 
-        /* --- TRANSACTION TABLE --- */
         .table-card { background: white; border-radius: 20px; border: 1px solid var(--border-pink); overflow: hidden; box-shadow: var(--shadow-soft); }
         .tr-row { display: flex; justify-content: space-between; align-items: center; padding: 15px 20px; border-bottom: 1px solid var(--bg-soft-white); }
         .tr-row:last-child { border-bottom: none; }
@@ -94,7 +86,6 @@
         .amt-pos { color: var(--secondary-green); }
         .amt-neg { color: #d00000; }
 
-        /* --- REFERRAL BOX --- */
         .refer-card { background: #1a000d; color: white; padding: 25px; border-radius: 25px; margin-top: 30px; position: relative; }
         .refer-card h3 { font-family: 'DM Serif Display', serif; margin: 0 0 10px 0; color: var(--primary-magenta); }
         .refer-card p { font-size: 13px; opacity: 0.8; margin-bottom: 20px; }
@@ -102,7 +93,6 @@
         .ref-code { font-family: monospace; font-size: 18px; font-weight: 700; letter-spacing: 2px; }
         .copy-btn { color: var(--primary-magenta); font-weight: 700; font-size: 12px; cursor: pointer; background: none; border: none; text-transform: uppercase; }
 
-        /* --- MOBILE NAV ISLAND --- */
         .nav-island {
             position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%);
             background: var(--nav-black); height: 65px; width: 90%; max-width: 400px;
@@ -114,7 +104,6 @@
         .nav-item span { font-size: 10px; font-weight: 700; text-transform: uppercase; }
         .nav-icon { font-size: 20px; }
 
-        /* --- SIDEBAR --- */
         .sidebar { position: fixed; top: 0; left: -100%; width: 280px; height: 100%; background: white; z-index: 2000; transition: var(--transition); padding: 30px; box-shadow: 10px 0 40px rgba(0,0,0,0.1); }
         .sidebar.active { left: 0; }
         .sidebar-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 1500; display: none; }
@@ -123,6 +112,9 @@
         .sb-link { display: flex; align-items: center; gap: 12px; text-decoration: none; color: var(--text-main); font-weight: 600; font-size: 15px; padding: 10px; border-radius: 10px; transition: var(--transition); }
         .sb-link:hover { background: var(--bg-soft-white); color: var(--primary-magenta); }
         .sb-link.logout { color: #d00000; margin-top: 20px; border-top: 1px solid #eee; padding-top: 20px; }
+
+        /* --- ADMIN BANNER (injected by admin-view.js, styled to match brand) --- */
+        #admin-mode-banner a { transition: var(--transition); }
 
         @media (min-width: 1024px) {
             .stats-grid { grid-template-columns: repeat(4, 1fr); }
@@ -145,8 +137,8 @@
             <a href="plans.html" class="sb-link">📈 Investment Plans</a>
             <a href="my-investments.html" class="sb-link">💰 My Investments</a>
             <a href="wallet.html" class="sb-link">👛 Wallet</a>
-            <a href="deposit.html" class="sb-link">📥 Deposit Funds</a>
-            <a href="withdraw.html" class="sb-link">📤 Withdraw</a>
+            <a href="deposit.html" class="sb-link" id="sb-deposit">📥 Deposit Funds</a>
+            <a href="withdraw.html" class="sb-link" id="sb-withdraw">📤 Withdraw</a>
             <a href="daily-checkin.html" class="sb-link">📅 Daily Check-In</a>
             <a href="referrals.html" class="sb-link">👥 Referrals</a>
             <a href="notifications.html" class="sb-link">🔔 Notifications</a>
@@ -157,10 +149,9 @@
     </aside>
 
     <div class="dashboard-container">
-        <!-- Top Bar -->
         <header class="top-bar">
             <div class="user-greeting">
-                <p>Welcome back,</p>
+                <p id="greeting-label">Welcome back,</p>
                 <h1 id="user-name"><div class="skeleton" style="width: 120px; height: 24px;"></div></h1>
             </div>
             <div class="top-icons">
@@ -169,17 +160,15 @@
             </div>
         </header>
 
-        <!-- Balance Hero -->
         <div class="balance-hero">
             <div class="balance-label">Available Balance</div>
             <div class="balance-value" id="main-balance">₦0.00</div>
-            <div class="hero-actions">
-                <button class="action-btn btn-white" onclick="location.href='deposit.html'">📥 Deposit</button>
-                <button class="action-btn btn-outline-white" onclick="location.href='withdraw.html'">📤 Withdraw</button>
+            <div class="hero-actions" id="hero-actions">
+                <button class="action-btn btn-white" id="hero-deposit-btn">📥 Deposit</button>
+                <button class="action-btn btn-outline-white" id="hero-withdraw-btn">📤 Withdraw</button>
             </div>
         </div>
 
-        <!-- Quick Actions -->
         <div class="quick-actions">
             <div class="qa-item" onclick="location.href='plans.html'">📈 Invest</div>
             <div class="qa-item" onclick="location.href='earnings.html'">💰 Earnings</div>
@@ -188,7 +177,6 @@
             <div class="qa-item" onclick="location.href='referrals.html'">👥 Refer</div>
         </div>
 
-        <!-- Stats Grid -->
         <div class="stats-grid">
             <div class="stat-card">
                 <span class="label">Invested</span>
@@ -208,16 +196,14 @@
             </div>
         </div>
 
-        <!-- Transactions -->
         <div class="sec-header">
             <h2>Recent Transactions</h2>
-            <a href="transactions.html">View All</a>
+            <a href="transactions.html" id="view-all-tx">View All</a>
         </div>
         <div class="table-card" id="transaction-list">
             <div style="padding: 30px; text-align: center; color: #999;">Loading transactions...</div>
         </div>
 
-        <!-- Referral -->
         <div class="refer-card">
             <h3>Invite & Earn</h3>
             <p>Earn up to 20% on Level 1 and 5% on Level 2 referrals.</p>
@@ -228,7 +214,6 @@
         </div>
     </div>
 
-    <!-- Mobile Nav Island -->
     <nav class="nav-island">
         <a href="dashboard.html" class="nav-item active">
             <div class="nav-icon">🏠</div>
@@ -250,11 +235,14 @@
 
     <script type="module">
         import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm'
+        import { resolveEffectiveUser, injectAdminBanner, adminizeLinks, adminCall } from './admin-view.js'
 
         const supabase = createClient(import.meta.env.VITE_SUPABASE_URL, import.meta.env.VITE_SUPABASE_ANON_KEY);
 
         const Dashboard = {
-            user: null,
+            session: null,
+            effectiveUserId: null,
+            isAdminMode: false,
             wallet: null,
 
             async init() {
@@ -263,13 +251,35 @@
                     window.location.href = 'login.html';
                     return;
                 }
-                this.user = session.user;
+                this.session = session;
+
+                const { isAdminMode, effectiveUserId } = await resolveEffectiveUser(supabase, session);
+                this.isAdminMode = isAdminMode;
+                this.effectiveUserId = effectiveUserId;
+
                 this.setupUI();
+
+                if (this.isAdminMode) {
+                    injectAdminBanner();
+                    adminizeLinks(this.effectiveUserId);
+                    document.getElementById('greeting-label').innerText = 'Viewing dashboard for';
+                    document.getElementById('view-all-tx').href = `transactions.html?user_id=${this.effectiveUserId}`;
+                    // Deposit/withdraw are self-service money-movement actions —
+                    // route to the admin balance adjuster instead of the user flow.
+                    document.getElementById('hero-deposit-btn').onclick = () => location.href = `user-details.html?id=${this.effectiveUserId}`;
+                    document.getElementById('hero-withdraw-btn').onclick = () => location.href = `user-details.html?id=${this.effectiveUserId}`;
+                    document.getElementById('hero-deposit-btn').innerText = '⚙️ Adjust Balance';
+                    document.getElementById('hero-withdraw-btn').innerText = '🔒 Suspend / Reactivate';
+                    document.getElementById('hero-withdraw-btn').onclick = () => this.toggleStatus();
+                } else {
+                    document.getElementById('hero-deposit-btn').onclick = () => location.href = 'deposit.html';
+                    document.getElementById('hero-withdraw-btn').onclick = () => location.href = 'withdraw.html';
+                }
+
                 await this.fetchData();
             },
 
             setupUI() {
-                // Sidebar Logic
                 const open = document.getElementById('open-sb');
                 const close = document.getElementById('close-sb');
                 const sidebar = document.getElementById('sidebar');
@@ -282,13 +292,11 @@
 
                 [open, close, overlay].forEach(el => el.addEventListener('click', toggle));
 
-                // Logout
                 document.getElementById('logout-btn').onclick = async () => {
                     await supabase.auth.signOut();
                     window.location.href = 'index.html';
                 };
 
-                // Copy Logic
                 document.getElementById('copy-code').onclick = () => {
                     const code = document.getElementById('my-ref-code').innerText;
                     navigator.clipboard.writeText(code);
@@ -297,14 +305,26 @@
                 };
             },
 
+            async toggleStatus() {
+                const { data: profile } = await supabase.from('profiles').select('status').eq('id', this.effectiveUserId).single();
+                const current = profile?.status || 'ACTIVE';
+                const next = current === 'ACTIVE' ? 'SUSPENDED' : 'ACTIVE';
+                if (!confirm(`Change this user's status from ${current} to ${next}?`)) return;
+                try {
+                    await adminCall(this.session, 'update-user-status', { user_id: this.effectiveUserId, status: next });
+                    alert(`Status set to ${next}`);
+                } catch (e) {
+                    alert(e.message);
+                }
+            },
+
             async fetchData() {
                 try {
-                    // 1. Profile & Wallet
-                    const { data: profile } = await supabase.from('profiles').select('*').eq('id', this.user.id).single();
-                    const { data: wallet } = await supabase.from('wallets').select('*').eq('user_id', this.user.id).single();
+                    const { data: profile } = await supabase.from('profiles').select('*').eq('id', this.effectiveUserId).single();
+                    const { data: wallet } = await supabase.from('wallets').select('*').eq('user_id', this.effectiveUserId).single();
                     
                     if (profile) {
-                        document.getElementById('user-name').innerText = profile.full_name.split(' ')[0];
+                        document.getElementById('user-name').innerText = this.isAdminMode ? profile.full_name : profile.full_name.split(' ')[0];
                         document.getElementById('my-ref-code').innerText = profile.referral_code;
                     }
 
@@ -317,8 +337,7 @@
                         document.getElementById('stat-withdrawals').innerText = `₦${Number(wallet.total_withdrawn).toLocaleString()}`;
                     }
 
-                    // 2. Transactions
-                    const { data: txs } = await supabase.from('transactions').select('*').eq('user_id', this.user.id).order('created_at', { ascending: false }).limit(5);
+                    const { data: txs } = await supabase.from('transactions').select('*').eq('user_id', this.effectiveUserId).order('created_at', { ascending: false }).limit(5);
                     this.renderTransactions(txs);
 
                 } catch (e) {
