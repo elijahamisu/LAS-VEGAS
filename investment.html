@@ -253,6 +253,7 @@
                 const { data: { session } } = await supabase.auth.getSession();
                 if (!session) return window.location.href = 'login.html';
                 this.user = session.user;
+                this.session = session;
 
                 const params = new URLSearchParams(window.location.search);
                 const planId = params.get('plan');
@@ -333,46 +334,30 @@
             },
 
             async handleInvestment() {
-                const amount = this.fixedAmount; // FIX: always the plan's fixed amount, never user input
+                const amount = this.fixedAmount; // always the plan's fixed amount, never user input
                 const submitBtn = document.getElementById('btn-submit');
 
                 submitBtn.disabled = true;
                 submitBtn.innerText = "PROCESSING...";
 
                 try {
-                    // Security Check: Re-verify balance (amount itself can no longer be tampered with client-side beyond this fixed value)
-                    if (amount > Number(this.wallet.balance)) throw new Error("Insufficient wallet balance.");
-
-                    // Transactional Block (Simulation of RPC logic)
-                    // 1. Deduct from wallet
-                    const newBalance = Number(this.wallet.balance) - amount;
-                    const { error: wErr } = await supabase.from('wallets')
-                        .update({ balance: newBalance })
-                        .eq('user_id', this.user.id);
-                    if (wErr) throw new Error("Balance update failed.");
-
-                    // 2. Create investment record
-                    const dailyProfit = this.plan.daily_percent; // fixed NGN amount per day
-                    const { error: iErr } = await supabase.from('investments').insert({
-                        user_id: this.user.id,
-                        plan_id: this.plan.id,
-                        amount: amount,
-                        daily_profit: dailyProfit,
-                        duration_days: this.plan.duration_days,
-                        total_return: amount + (dailyProfit * this.plan.duration_days),
-                        status: 'ACTIVE',
-                        started_at: new Date().toISOString()
+                    // Route through the real secured endpoint — process_investment_purchase
+                    // runs server-side with the service role key, so it isn't subject to
+                    // the RLS restrictions that silently blocked direct client-side wallet
+                    // updates before, and it enforces plan validation atomically.
+                    const res = await fetch('/api/finance?resource=investments&action=purchase', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'Authorization': `Bearer ${this.session.access_token}`
+                        },
+                        body: JSON.stringify({ plan_id: this.plan.id, amount })
                     });
-                    if (iErr) throw new Error("Could not create investment record: " + iErr.message);
 
-                    // 3. Log transaction
-                    await supabase.from('transactions').insert({
-                        user_id: this.user.id,
-                        amount: -amount,
-                        type: 'INVESTMENT',
-                        status: 'SUCCESS',
-                        description: `Investment in ${this.plan.name}`
-                    });
+                    const json = await res.json();
+                    if (!res.ok || !json.success) {
+                        throw new Error(json.message || 'Investment could not be processed');
+                    }
 
                     this.showSuccess();
                 } catch (err) {
