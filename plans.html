@@ -319,7 +319,7 @@
                 if (this.isAdminMode) {
                     // Route to the admin "Add Investment" flow, pre-selected to
                     // this plan, rather than the self-service checkout flow.
-                    window.location.href = `user-details.html?id=${this.effectiveUserId}&plan=${id}`;
+                    window.location.href = `admin/user-details.html?id=${this.effectiveUserId}&plan=${id}`;
                 } else {
                     window.location.href = `investment.html?plan=${id}`;
                 }
