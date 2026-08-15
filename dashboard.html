@@ -263,11 +263,11 @@
                     injectAdminBanner();
                     adminizeLinks(this.effectiveUserId);
                     document.getElementById('greeting-label').innerText = 'Viewing dashboard for';
-                    document.getElementById('view-all-tx').href = `transactions.html?user_id=${this.effectiveUserId}`;
+                    document.getElementById('view-all-tx').href = `admin/transactions.html?user_id=${this.effectiveUserId}`;
                     // Deposit/withdraw are self-service money-movement actions —
                     // route to the admin balance adjuster instead of the user flow.
-                    document.getElementById('hero-deposit-btn').onclick = () => location.href = `user-details.html?id=${this.effectiveUserId}`;
-                    document.getElementById('hero-withdraw-btn').onclick = () => location.href = `user-details.html?id=${this.effectiveUserId}`;
+                    document.getElementById('hero-deposit-btn').onclick = () => location.href = `admin/user-details.html?id=${this.effectiveUserId}`;
+                    document.getElementById('hero-withdraw-btn').onclick = () => location.href = `admin/user-details.html?id=${this.effectiveUserId}`;
                     document.getElementById('hero-deposit-btn').innerText = '⚙️ Adjust Balance';
                     document.getElementById('hero-withdraw-btn').innerText = '🔒 Suspend / Reactivate';
                     document.getElementById('hero-withdraw-btn').onclick = () => this.toggleStatus();
