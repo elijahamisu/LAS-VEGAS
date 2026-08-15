@@ -38,19 +38,15 @@
             padding-bottom: 100px;
         }
 
-        /* --- LAYOUT --- */
         .plans-container { max-width: 1200px; margin: 0 auto; padding: 20px; }
         
-        /* --- HEADER & TITLES --- */
         .page-header { margin-bottom: 30px; padding-top: 20px; }
         .page-header h1 { font-family: 'DM Serif Display', serif; font-size: 28px; margin: 0; color: var(--text-main); }
         .page-header p { font-size: 15px; color: var(--text-muted); margin: 8px 0 0 0; max-width: 500px; }
         .brand-accent { color: var(--primary-magenta); font-size: 14px; margin-left: 5px; }
 
-        /* --- PLAN GRID --- */
         .plan-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 20px; }
 
-        /* --- PLAN CARD --- */
         .plan-card {
             background: var(--card-white);
             border-radius: 25px; border: 1px solid var(--border-pink);
@@ -67,7 +63,6 @@
         .stat-label { font-size: 13px; font-weight: 700; color: var(--text-muted); }
         .stat-value { font-size: 15px; font-weight: 700; color: var(--secondary-green); }
 
-        /* --- BUTTONS --- */
         .btn-group { display: grid; grid-template-columns: 1fr 1.2fr; gap: 10px; margin-top: auto; }
         .btn { padding: 14px; border-radius: 12px; font-weight: 700; font-size: 13px; cursor: pointer; border: none; transition: var(--transition); text-decoration: none; text-align: center; }
         .btn-outline { background: white; color: var(--primary-magenta); border: 1px solid var(--primary-magenta); }
@@ -75,7 +70,6 @@
         .btn:active { transform: scale(0.98); }
         .btn-locked { background: #f0f0f0; color: #999; cursor: not-allowed; border: none; box-shadow: none; }
 
-        /* --- TABLE SYSTEM --- */
         .table-section { margin-top: 50px; }
         .table-container { width: 100%; overflow-x: auto; border-radius: 20px; border: 1px solid var(--border-pink); background: white; box-shadow: var(--shadow-soft); }
         table { width: 100%; border-collapse: collapse; min-width: 700px; }
@@ -85,13 +79,11 @@
         tr:nth-child(even) { background: #FFF9FB; }
         .badge-circle { width: 30px; height: 30px; background: white; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; color: var(--primary-magenta); font-weight: 800; margin-right: 10px; }
 
-        /* --- MODAL --- */
         .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); backdrop-filter: blur(5px); z-index: 3000; display: none; align-items: center; justify-content: center; padding: 20px; }
         .modal-card { background: white; width: 100%; max-width: 500px; border-radius: 30px; padding: 30px; position: relative; animation: modalIn 0.3s ease-out; }
         .modal-close { position: absolute; top: 20px; right: 20px; font-size: 24px; cursor: pointer; color: var(--text-muted); }
         @keyframes modalIn { from { opacity: 0; transform: translateY(30px); } to { opacity: 1; transform: translateY(0); } }
 
-        /* --- SIDEBAR & NAV --- */
         .sidebar { position: fixed; top: 0; left: -100%; width: 280px; height: 100%; background: white; z-index: 2500; transition: var(--transition); padding: 30px; box-shadow: 10px 0 40px rgba(0,0,0,0.1); }
         .sidebar.active { left: 0; }
         .sidebar-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 2400; display: none; }
@@ -99,7 +91,6 @@
         .nav-item { color: #666; text-decoration: none; font-size: 10px; font-weight: 700; text-align: center; }
         .nav-item.active { color: var(--primary-magenta); }
 
-        /* --- SKELETON --- */
         .skeleton { background: linear-gradient(90deg, #f0f0f0 25%, #f8f8f8 50%, #f0f0f0 75%); background-size: 200% 100%; animation: loading 1.5s infinite; border-radius: 10px; }
         @keyframes loading { from { background-position: 200% 0; } to { background-position: -200% 0; } }
 
@@ -133,21 +124,18 @@
             <div style="display: flex; justify-content: space-between; align-items: flex-start;">
                 <div>
                     <h1>Investment Plans <span class="brand-accent">✦</span></h1>
-                    <p>Choose an available plan that matches your goals. High-yield opportunities updated daily.</p>
+                    <p id="page-sub">Choose an available plan that matches your goals. High-yield opportunities updated daily.</p>
                 </div>
                 <button id="open-sb" style="width: 45px; height: 45px; border-radius: 50%; border: 1px solid var(--border-pink); background: white; color: var(--primary-magenta); cursor: pointer;">☰</button>
             </div>
         </header>
 
-        <!-- Plans Grid -->
         <div class="plan-grid" id="plans-wrapper">
-            <!-- Skeletons -->
             <div class="plan-card" style="height: 350px;"><div class="skeleton" style="height: 100%;"></div></div>
             <div class="plan-card" style="height: 350px;"><div class="skeleton" style="height: 100%;"></div></div>
             <div class="plan-card" style="height: 350px;"><div class="skeleton" style="height: 100%;"></div></div>
         </div>
 
-        <!-- Comparison Table -->
         <section class="table-section">
             <div class="page-header">
                 <h2>Plan Comparison</h2>
@@ -172,7 +160,6 @@
         </section>
     </div>
 
-    <!-- Details Modal -->
     <div class="modal-overlay" id="modal">
         <div class="modal-card">
             <span class="modal-close" id="modal-close">✕</span>
@@ -185,7 +172,6 @@
         </div>
     </div>
 
-    <!-- Mobile Nav Island -->
     <nav class="nav-island">
         <a href="dashboard.html" class="nav-item"><div>🏠</div><span>Home</span></a>
         <a href="plans.html" class="nav-item active"><div>📈</div><span>Plans</span></a>
@@ -195,17 +181,33 @@
 
     <script type="module">
         import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm'
+        import { resolveEffectiveUser, injectAdminBanner, adminizeLinks } from './admin-view.js'
 
         const supabase = createClient(import.meta.env.VITE_SUPABASE_URL, import.meta.env.VITE_SUPABASE_ANON_KEY);
 
         const PlansApp = {
             plans: [],
+            session: null,
+            effectiveUserId: null,
+            isAdminMode: false,
             
             async init() {
                 const { data: { session } } = await supabase.auth.getSession();
                 if (!session) return window.location.href = 'login.html';
+                this.session = session;
+
+                const { isAdminMode, effectiveUserId } = await resolveEffectiveUser(supabase, session);
+                this.isAdminMode = isAdminMode;
+                this.effectiveUserId = effectiveUserId;
 
                 this.setupNavigation();
+
+                if (this.isAdminMode) {
+                    injectAdminBanner();
+                    adminizeLinks(this.effectiveUserId);
+                    document.getElementById('page-sub').innerText = "Plans available to this member. Use 'INVEST' to grant a plan directly on their behalf.";
+                }
+
                 await this.fetchPlans();
             },
 
@@ -255,7 +257,8 @@
                     return;
                 }
 
-                // Render Cards
+                const investLabel = this.isAdminMode ? 'GRANT PLAN' : 'INVEST NOW';
+
                 wrapper.innerHTML = this.plans.map(plan => `
                     <div class="plan-card">
                         <h3 class="plan-title"><span>✦</span> ${plan.name}</h3>
@@ -277,12 +280,11 @@
                         </div>
                         <div class="btn-group">
                             <button class="btn btn-outline" onclick="window.PlansApp.showDetails('${plan.id}')">DETAILS</button>
-                            <button class="btn btn-primary" onclick="window.PlansApp.invest('${plan.id}')">INVEST NOW</button>
+                            <button class="btn btn-primary" onclick="window.PlansApp.invest('${plan.id}')">${investLabel}</button>
                         </div>
                     </div>
                 `).join('');
 
-                // Render Table
                 tbody.innerHTML = this.plans.map(plan => `
                     <tr>
                         <td style="font-weight: 700; color: var(--primary-magenta);"><span class="badge-circle">P</span> ${plan.name}</td>
@@ -290,7 +292,7 @@
                         <td>${this.formatNGN(plan.daily_percent)}</td>
                         <td>${plan.duration_days} Days</td>
                         <td style="font-weight: 700; color: var(--secondary-green);">${this.formatNGN(plan.min_amount + (plan.daily_percent * plan.duration_days))}</td>
-                        <td><button class="btn btn-primary" style="padding: 8px 15px;" onclick="window.PlansApp.invest('${plan.id}')">INVEST</button></td>
+                        <td><button class="btn btn-primary" style="padding: 8px 15px;" onclick="window.PlansApp.invest('${plan.id}')">${investLabel}</button></td>
                     </tr>
                 `).join('');
             },
@@ -308,12 +310,19 @@
                     <div class="plan-stat"><span class="stat-label">Duration</span><span class="stat-value">${plan.duration_days} Days</span></div>
                 `;
 
+                document.getElementById('modal-invest-btn').innerText = this.isAdminMode ? 'GRANT THIS PLAN' : 'INVEST IN THIS PLAN';
                 document.getElementById('modal-invest-btn').onclick = () => this.invest(plan.id);
                 document.getElementById('modal').style.display = 'flex';
             },
 
             invest(id) {
-                window.location.href = `investment.html?plan=${id}`;
+                if (this.isAdminMode) {
+                    // Route to the admin "Add Investment" flow, pre-selected to
+                    // this plan, rather than the self-service checkout flow.
+                    window.location.href = `user-details.html?id=${this.effectiveUserId}&plan=${id}`;
+                } else {
+                    window.location.href = `investment.html?plan=${id}`;
+                }
             }
         };
 
