@@ -370,14 +370,14 @@
                     <div class="detail-row"><span class="detail-label">Request Date</span><span class="detail-value">${new Date(w.created_at).toLocaleString()}</span></div>
                 `;
 
-                if (w.status === 'pending_approval') {
+                if (String(w.status).toUpperCase() === 'PENDING_APPROVAL' || String(w.status).toUpperCase() === 'PENDING') {
                     actions.innerHTML = `
                         <div class="btn-group">
-                            <button class="btn btn-reject" onclick="window.WithManager.handleStatusChange('${w.id}', 'rejected')">REJECT</button>
-                            <button class="btn btn-approve" onclick="window.WithManager.handleStatusChange('${w.id}', 'approved')">APPROVE</button>
+                            <button class="btn btn-reject" onclick="window.WithManager.handleReject('${w.id}')">REJECT</button>
+                            <button class="btn btn-approve" onclick="window.WithManager.handleApprove('${w.id}')">APPROVE</button>
                         </div>
                     `;
-                } else if (w.status === 'approved') {
+                } else if (String(w.status).toUpperCase() === 'APPROVED') {
                     actions.innerHTML = `
                         <div class="btn-group">
                             <button class="btn btn-payout" onclick="window.WithManager.handlePayout('${w.id}')">DISBURSE VIA GLOPAYMENT</button>
@@ -390,53 +390,91 @@
                 document.getElementById('review-modal').style.display = 'flex';
             },
 
-            async handleStatusChange(id, nextStatus) {
-                if (!confirm(`Are you sure you want to mark this request as ${nextStatus}?`)) return;
+            // Returns the Authorization header for calling the secure /api/admin
+            // backend, which uses the Supabase service role key server-side and
+            // runs the admin_approve_withdrawal / admin_reject_withdrawal RPCs
+            // and the real GloPayment payout call — never done from the browser.
+            async getAuthHeader() {
+                const { data: { session } } = await supabase.auth.getSession();
+                if (!session) throw new Error('Session expired. Please log in again.');
+                return { 'Authorization': `Bearer ${session.access_token}`, 'Content-Type': 'application/json' };
+            },
 
-                const { error } = await supabase.from('withdrawals')
-                    .update({ status: nextStatus, reviewed_at: new Date().toISOString() })
-                    .eq('id', id);
+            async callAdminApi(action, body) {
+                const headers = await this.getAuthHeader();
+                const res = await fetch(`/api/admin?resource=admin&action=${action}`, {
+                    method: 'POST',
+                    headers,
+                    body: JSON.stringify(body)
+                });
+                const result = await res.json();
+                if (!res.ok || !result.success) {
+                    throw new Error(result.message || 'Request failed');
+                }
+                return result;
+            },
 
-                if (!error) {
-                    await this.logAudit(`WITHDRAWAL_${nextStatus}`, id);
-                    alert(`Request has been ${nextStatus}.`);
+            async handleApprove(id) {
+                if (!confirm('Are you sure you want to approve this withdrawal?')) return;
+                const btn = event.target;
+                btn.disabled = true;
+                btn.innerText = 'PROCESSING...';
+
+                try {
+                    const result = await this.callAdminApi('approve-withdrawal', { id });
+                    alert(result.message || 'Withdrawal approved.');
                     location.reload();
-                } else {
-                    alert(`Could not update withdrawal: ${error.message}`);
-                    console.error('Withdrawal status update failed:', error);
+                } catch (e) {
+                    alert(`Could not approve withdrawal: ${e.message}`);
+                    console.error('Approve withdrawal failed:', e);
+                    btn.disabled = false;
+                    btn.innerText = 'APPROVE';
+                }
+            },
+
+            async handleReject(id) {
+                const reason = prompt('Enter a reason for rejecting this withdrawal (shown to the user):');
+                if (reason === null) return; // cancelled
+                if (!reason.trim()) return alert('A rejection reason is required.');
+
+                const btn = event.target;
+                btn.disabled = true;
+                btn.innerText = 'PROCESSING...';
+
+                try {
+                    const result = await this.callAdminApi('reject-withdrawal', { id, reason: reason.trim() });
+                    alert(result.message || 'Withdrawal rejected and funds released.');
+                    location.reload();
+                } catch (e) {
+                    alert(`Could not reject withdrawal: ${e.message}`);
+                    console.error('Reject withdrawal failed:', e);
+                    btn.disabled = false;
+                    btn.innerText = 'REJECT';
                 }
             },
 
             async handlePayout(id) {
                 if (!confirm("This will initiate real-money disbursement via GloPayment. Proceed?")) return;
 
-                // 1. Move to Processing to prevent race conditions
-                const { error: processingErr } = await supabase.from('withdrawals').update({ status: 'processing' }).eq('id', id);
-                if (processingErr) {
-                    alert(`Could not start payout: ${processingErr.message}`);
-                    console.error('Withdrawal -> processing update failed:', processingErr);
-                    return;
+                const btn = event.target;
+                btn.disabled = true;
+                btn.innerText = 'SUBMITTING TO GLOPAYMENT...';
+
+                try {
+                    // Calls the secure backend, which validates the approved status,
+                    // the beneficiary's payout account, signs the request, and sends
+                    // it to GloPayment. The synchronous response only confirms GloPayment
+                    // accepted the request — the withdrawal status becomes PROCESSING,
+                    // and only the signed webhook callback marks it PAID or FAILED.
+                    const result = await this.callAdminApi('payout-withdrawal', { id });
+                    alert(result.message || 'Payout submitted to GloPayment — awaiting confirmation.');
+                    location.reload();
+                } catch (e) {
+                    alert(`Payout failed: ${e.message}`);
+                    console.error('GloPayment payout failed:', e);
+                    btn.disabled = false;
+                    btn.innerText = 'DISBURSE VIA GLOPAYMENT';
                 }
-
-                // 2. Call secure backend endpoint (Simulated for this foundation)
-                // In production: const { data } = await supabase.functions.invoke('glopayment-payout', { body: { id } });
-                
-                setTimeout(async () => {
-                    const fakePayoutRef = 'GLO-PAY-' + Math.random().toString(36).substring(2, 10).toUpperCase();
-                    
-                    const { error } = await supabase.from('withdrawals')
-                        .update({ status: 'paid', processed_at: new Date().toISOString(), payout_reference: fakePayoutRef })
-                        .eq('id', id);
-
-                    if (!error) {
-                        await this.logAudit('PAYOUT_DISBURSED', id, { ref: fakePayoutRef });
-                        alert("Payout successful! Wallet ledger updated.");
-                        location.reload();
-                    } else {
-                        alert(`Payout failed: ${error.message}`);
-                        console.error('Withdrawal -> paid update failed:', error);
-                    }
-                }, 1500);
             },
 
             async logAudit(action, targetId, details = {}) {
