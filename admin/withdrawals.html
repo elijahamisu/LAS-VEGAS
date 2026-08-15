@@ -401,6 +401,9 @@
                     await this.logAudit(`WITHDRAWAL_${nextStatus}`, id);
                     alert(`Request has been ${nextStatus}.`);
                     location.reload();
+                } else {
+                    alert(`Could not update withdrawal: ${error.message}`);
+                    console.error('Withdrawal status update failed:', error);
                 }
             },
 
@@ -408,7 +411,12 @@
                 if (!confirm("This will initiate real-money disbursement via GloPayment. Proceed?")) return;
 
                 // 1. Move to Processing to prevent race conditions
-                await supabase.from('withdrawals').update({ status: 'processing' }).eq('id', id);
+                const { error: processingErr } = await supabase.from('withdrawals').update({ status: 'processing' }).eq('id', id);
+                if (processingErr) {
+                    alert(`Could not start payout: ${processingErr.message}`);
+                    console.error('Withdrawal -> processing update failed:', processingErr);
+                    return;
+                }
 
                 // 2. Call secure backend endpoint (Simulated for this foundation)
                 // In production: const { data } = await supabase.functions.invoke('glopayment-payout', { body: { id } });
@@ -424,6 +432,9 @@
                         await this.logAudit('PAYOUT_DISBURSED', id, { ref: fakePayoutRef });
                         alert("Payout successful! Wallet ledger updated.");
                         location.reload();
+                    } else {
+                        alert(`Payout failed: ${error.message}`);
+                        console.error('Withdrawal -> paid update failed:', error);
                     }
                 }, 1500);
             },
