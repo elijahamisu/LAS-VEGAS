@@ -318,14 +318,14 @@
                             <td>${this.formatCurrency(balance)}</td>
                             <td style="font-family:monospace;">${u.referral_code || '—'}</td>
                             <td>${u.created_at ? new Date(u.created_at).toLocaleDateString() : '—'}</td>
-                            <td><a class="btn-action ghost" href="review-member.html?id=${u.id}">View →</a></td>
+                            <td><a class="btn-action ghost" href="user-details.html?id=${u.id}">View →</a></td>
                         </tr>`;
                     }).join('');
 
                     list.querySelectorAll('tr[data-id]').forEach(row => {
                         row.addEventListener('click', (e) => {
                             if (e.target.closest('a')) return; // let the link handle its own click
-                            window.location.href = `review-member.html?id=${row.dataset.id}`;
+                            window.location.href = `user-details.html?id=${row.dataset.id}`;
                         });
                     });
                 }
