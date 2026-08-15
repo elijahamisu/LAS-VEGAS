@@ -162,6 +162,14 @@ async function handleAdmin({ method, action, query, body, adminId, res }) {
         payout_reference: payout.providerReference
       }).eq('id', id);
 
+      await supabase.from('admin_audit_logs').insert({
+        admin_id: adminId,
+        action: 'WITHDRAWAL_PAYOUT_SUBMITTED',
+        target_type: 'WITHDRAWAL',
+        target_id: id,
+        details: { payout_reference: payout.providerReference }
+      });
+
       // GloPayment's synchronous response only confirms request acceptance.
       // The signed ?type=glopay-withdrawal callback is the sole authority that
       // may mark this withdrawal PAID or FAILED.
