@@ -44,18 +44,15 @@
         .page-header h1 { font-family: 'DM Serif Display', serif; font-size: 26px; margin: 0; color: var(--text-main); }
         .page-header p { font-size: 14px; color: var(--text-muted); margin: 5px 0 0 0; }
 
-        /* --- SUMMARY STATS --- */
         .summary-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 12px; margin-bottom: 25px; }
         .summary-card { background: white; border: 1px solid var(--border-pink); border-radius: 16px; padding: 16px; text-align: center; box-shadow: var(--shadow-soft); }
         .summary-label { font-size: 10px; font-weight: 800; color: var(--text-muted); text-transform: uppercase; display: block; margin-bottom: 6px; }
         .summary-value { font-size: 17px; font-weight: 700; }
 
-        /* --- FILTER TABS --- */
         .filter-tabs { display: flex; gap: 8px; margin-bottom: 20px; overflow-x: auto; padding-bottom: 4px; }
         .filter-tab { padding: 8px 18px; border-radius: 100px; border: 1px solid var(--border-pink); background: white; color: var(--text-muted); font-size: 12px; font-weight: 700; cursor: pointer; white-space: nowrap; transition: var(--transition); }
         .filter-tab.active { background: var(--primary-magenta); color: white; border-color: var(--primary-magenta); }
 
-        /* --- INVESTMENT CARDS --- */
         .invest-list { display: grid; gap: 16px; }
         .invest-card { background: white; border-radius: 20px; border: 1px solid var(--border-pink); padding: 22px; box-shadow: var(--shadow-soft); position: relative; overflow: hidden; }
         .invest-card-top { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 15px; }
@@ -72,7 +69,6 @@
         .mini-stat-label { display: block; font-size: 10px; color: var(--text-muted); font-weight: 700; text-transform: uppercase; margin-bottom: 4px; }
         .mini-stat-value { font-size: 14px; font-weight: 700; color: var(--text-main); }
 
-        /* --- PROGRESS BAR --- */
         .progress-wrap { margin-bottom: 15px; }
         .progress-labels { display: flex; justify-content: space-between; font-size: 11px; color: var(--text-muted); font-weight: 600; margin-bottom: 6px; }
         .progress-track { width: 100%; height: 8px; background: #F5F5F5; border-radius: 10px; overflow: hidden; }
@@ -82,19 +78,16 @@
         .earnings-label { font-size: 12px; color: var(--text-muted); font-weight: 700; }
         .earnings-value { font-size: 16px; font-weight: 800; color: var(--secondary-green); }
 
-        /* --- EMPTY STATE --- */
         .empty-state { text-align: center; padding: 60px 20px; }
         .empty-icon { font-size: 50px; margin-bottom: 15px; opacity: 0.4; }
         .empty-state h3 { font-family: 'DM Serif Display', serif; margin: 0 0 8px 0; }
         .empty-state p { color: var(--text-muted); font-size: 14px; margin-bottom: 25px; }
         .btn-cta { display: inline-block; background: var(--primary-magenta); color: white; padding: 14px 30px; border-radius: 50px; text-decoration: none; font-weight: 700; font-size: 14px; box-shadow: 0 4px 15px rgba(255, 0, 127, 0.2); }
 
-        /* --- LOADING --- */
         .loading-screen { text-align: center; padding: 100px 20px; }
         .spinner { width: 40px; height: 40px; border: 4px solid var(--border-pink); border-top: 4px solid var(--primary-magenta); border-radius: 50%; animation: spin 1s linear infinite; margin: 0 auto 20px; }
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
 
-        /* --- SIDEBAR & NAV --- */
         .sidebar { position: fixed; top: 0; left: -100%; width: 280px; height: 100%; background: white; z-index: 2500; transition: var(--transition); padding: 30px; box-shadow: 10px 0 40px rgba(0,0,0,0.1); }
         .sidebar.active { left: 0; }
         .sidebar-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 2400; display: none; }
@@ -127,20 +120,18 @@
         <header class="page-header">
             <div style="display: flex; justify-content: space-between; align-items: flex-start;">
                 <div>
-                    <h1>My Investments</h1>
-                    <p>Track your active plans and earnings in real time.</p>
+                    <h1 id="page-title">My Investments</h1>
+                    <p id="page-sub">Track your active plans and earnings in real time.</p>
                 </div>
                 <button class="top-open-btn" id="open-sb">☰</button>
             </div>
         </header>
 
-        <!-- Loading -->
         <div id="view-loading" class="loading-screen">
             <div class="spinner"></div>
-            <p>Loading your investments...</p>
+            <p>Loading investments...</p>
         </div>
 
-        <!-- Content -->
         <div id="view-content" style="display:none;">
 
             <div class="summary-grid">
@@ -166,17 +157,15 @@
 
             <div class="invest-list" id="invest-list"></div>
 
-            <!-- Empty state (hidden by default, shown if no investments) -->
             <div class="empty-state" id="empty-state" style="display:none;">
                 <div class="empty-icon">💼</div>
                 <h3>No Investments Yet</h3>
-                <p>You haven't invested in any plan. Explore our plans and start earning today.</p>
-                <a href="plans.html" class="btn-cta">BROWSE PLANS</a>
+                <p id="empty-desc">This member hasn't invested in any plan yet.</p>
+                <a href="plans.html" class="btn-cta" id="empty-cta">BROWSE PLANS</a>
             </div>
         </div>
     </div>
 
-    <!-- Mobile Nav Island -->
     <nav class="nav-island">
         <a href="dashboard.html" class="nav-item"><div>🏠</div><span>Home</span></a>
         <a href="plans.html" class="nav-item"><div>📈</div><span>Plans</span></a>
@@ -186,20 +175,37 @@
 
     <script type="module">
         import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm'
+        import { resolveEffectiveUser, injectAdminBanner, adminizeLinks } from './admin-view.js'
 
         const supabase = createClient(import.meta.env.VITE_SUPABASE_URL, import.meta.env.VITE_SUPABASE_ANON_KEY);
 
         const MyInvestments = {
-            user: null,
+            session: null,
+            effectiveUserId: null,
+            isAdminMode: false,
             investments: [],
             currentFilter: 'ALL',
 
             async init() {
                 const { data: { session } } = await supabase.auth.getSession();
                 if (!session) return window.location.href = 'login.html';
-                this.user = session.user;
+                this.session = session;
+
+                const { isAdminMode, effectiveUserId } = await resolveEffectiveUser(supabase, session);
+                this.isAdminMode = isAdminMode;
+                this.effectiveUserId = effectiveUserId;
 
                 this.setupNav();
+
+                if (this.isAdminMode) {
+                    injectAdminBanner();
+                    adminizeLinks(this.effectiveUserId);
+                    document.getElementById('page-title').innerText = "Member's Investments";
+                    document.getElementById('page-sub').innerText = "Viewing this member's active plans and earnings.";
+                    document.getElementById('empty-desc').innerText = "This member hasn't invested in any plan yet.";
+                    document.getElementById('empty-cta').innerText = 'GRANT A PLAN';
+                }
+
                 await this.fetchInvestments();
             },
 
@@ -228,11 +234,10 @@
 
             async fetchInvestments() {
                 try {
-                    // Join plan name via plans table for display
                     const { data, error } = await supabase
                         .from('investments')
                         .select('*, plans(name)')
-                        .eq('user_id', this.user.id)
+                        .eq('user_id', this.effectiveUserId)
                         .order('started_at', { ascending: false });
 
                     if (error) throw error;
@@ -246,7 +251,6 @@
                 }
             },
 
-            // Computes days elapsed, days remaining, progress %, and amount earned so far
             computeProgress(inv) {
                 const start = new Date(inv.started_at);
                 const now = new Date();
