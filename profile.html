@@ -40,12 +40,10 @@
 
         .container { max-width: 800px; margin: 0 auto; padding: 20px; }
 
-        /* --- HEADER --- */
         .page-header { margin-bottom: 25px; padding-top: 10px; display: flex; justify-content: space-between; align-items: center; }
         .page-header h1 { font-family: 'DM Serif Display', serif; font-size: 28px; margin: 0; }
         .btn-icon { width: 45px; height: 45px; border-radius: 50%; border: 1px solid var(--border-pink); background: white; color: var(--primary-magenta); cursor: pointer; display: flex; align-items: center; justify-content: center; }
 
-        /* --- PROFILE HERO --- */
         .profile-hero {
             background: white; border-radius: 30px; padding: 30px; text-align: center;
             border: 1px solid var(--border-pink); box-shadow: var(--shadow-soft); margin-bottom: 25px;
@@ -57,24 +55,21 @@
         .hero-name { font-family: 'DM Serif Display', serif; font-size: 22px; margin: 0 0 5px 0; }
         .hero-meta { font-size: 12px; color: var(--text-muted); font-weight: 600; text-transform: uppercase; letter-spacing: 1px; }
         .status-badge { display: inline-flex; align-items: center; gap: 6px; font-size: 11px; font-weight: 800; color: var(--secondary-green); background: #F0FFF4; padding: 4px 12px; border-radius: 50px; margin-top: 10px; }
+        .status-badge.suspended { color: #D00000; background: #FFF0F0; }
 
-        /* --- CARDS --- */
         .card { background: white; border-radius: 25px; border: 1px solid var(--border-pink); padding: 25px; box-shadow: var(--shadow-soft); margin-bottom: 20px; }
         .card-title { font-family: 'DM Serif Display', serif; font-size: 18px; color: var(--primary-magenta); margin: 0 0 20px 0; border-bottom: 1px solid var(--bg-soft-white); padding-bottom: 10px; display: flex; justify-content: space-between; align-items: center; }
         
-        /* --- FORM ELEMENTS --- */
         .form-group { margin-bottom: 18px; }
         .label { display: block; font-size: 11px; font-weight: 800; color: var(--text-muted); text-transform: uppercase; margin-bottom: 6px; letter-spacing: 0.5px; }
         .value-display { font-size: 15px; font-weight: 700; color: var(--text-main); padding: 12px 0; display: block; border-bottom: 1px solid #f9f9f9; }
         .input-field { width: 100%; padding: 12px 15px; border-radius: 12px; border: 1px solid var(--border-pink); font-family: inherit; font-size: 15px; background: #FFF9FB; outline: none; transition: var(--transition); display: none; }
         .input-field:focus { border-color: var(--primary-magenta); background: white; }
         
-        /* --- REFERRAL BOX --- */
         .ref-box { background: var(--bg-soft-white); padding: 15px; border-radius: 15px; border: 1px dashed var(--border-pink); margin-top: 10px; display: flex; justify-content: space-between; align-items: center; }
         .ref-text { font-family: monospace; font-size: 16px; font-weight: 700; color: var(--primary-magenta); }
         .copy-link { color: var(--primary-magenta); font-weight: 700; font-size: 12px; cursor: pointer; text-decoration: underline; }
 
-        /* --- PREFERENCES --- */
         .pref-row { display: flex; justify-content: space-between; align-items: center; padding: 12px 0; border-bottom: 1px solid #f9f9f9; }
         .pref-info h4 { margin: 0; font-size: 14px; }
         .pref-info p { margin: 2px 0 0 0; font-size: 11px; color: var(--text-muted); }
@@ -85,27 +80,22 @@
         input:checked + .slider { background-color: var(--primary-magenta); }
         input:checked + .slider:before { transform: translateX(20px); }
 
-        /* --- BUTTONS --- */
         .btn-edit { background: none; border: none; color: var(--primary-magenta); font-weight: 700; font-size: 13px; cursor: pointer; }
         .btn-save { width: 100%; padding: 16px; border-radius: 50px; background: var(--primary-magenta); color: white; border: none; font-weight: 700; cursor: pointer; display: none; margin-top: 10px; }
         .btn-logout { width: 100%; padding: 16px; border-radius: 50px; background: white; color: #d00000; border: 2px solid #d00000; font-weight: 700; cursor: pointer; margin-top: 20px; transition: var(--transition); }
         .btn-logout:hover { background: #FFF0F0; }
 
-        /* --- NAV ISLAND --- */
         .nav-island { position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%); background: var(--nav-black); height: 65px; width: 92%; max-width: 400px; border-radius: 100px; display: flex; justify-content: space-around; align-items: center; z-index: 1000; box-shadow: 0 10px 30px rgba(0,0,0,0.3); }
         .nav-item { color: #666; text-decoration: none; font-size: 10px; font-weight: 700; display: flex; flex-direction: column; align-items: center; gap: 4px; }
         .nav-item.active { color: var(--primary-magenta); }
 
-        /* --- SIDEBAR --- */
         .sidebar { position: fixed; top: 0; left: -100%; width: 280px; height: 100%; background: white; z-index: 2000; transition: var(--transition); padding: 30px; }
         .sidebar.active { left: 0; }
         .sb-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 1500; display: none; }
 
-        /* --- SKELETON --- */
         .skeleton { height: 20px; background: #eee; border-radius: 5px; animation: pulse 1.5s infinite; }
         @keyframes pulse { 0% { opacity: 0.6; } 50% { opacity: 1; } 100% { opacity: 0.6; } }
 
-        /* --- MODAL --- */
         .modal-overlay { position: fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.7); display:none; align-items:center; justify-content:center; z-index:3000; padding:20px; }
         .modal-card { background:white; border-radius:30px; padding:30px; text-align:center; max-width:400px; width:100%; }
     </style>
@@ -129,19 +119,17 @@
 
     <div class="container">
         <header class="page-header">
-            <h1>Settings</h1>
+            <h1 id="page-title">Settings</h1>
             <button class="btn-icon" id="open-sb">☰</button>
         </header>
 
-        <!-- Profile Hero -->
         <div class="profile-hero">
             <div class="avatar-circle" id="avatar-initial">U</div>
             <h2 class="hero-name" id="hero-fullname"><div class="skeleton" style="width:150px; margin:0 auto;"></div></h2>
             <div class="hero-meta" id="hero-member-since">Member Since ...</div>
-            <div class="status-badge">● Account Active</div>
+            <div class="status-badge" id="status-badge">● Account Active</div>
         </div>
 
-        <!-- Personal Info -->
         <div class="card" id="profile-section">
             <div class="card-title">
                 Personal Information
@@ -167,7 +155,6 @@
             </form>
         </div>
 
-        <!-- Payout Info -->
         <div class="card" id="payout-section">
             <div class="card-title">
                 Withdrawal Details
@@ -193,11 +180,10 @@
             </form>
         </div>
 
-        <!-- Referral Info -->
         <div class="card">
             <div class="card-title">Referral Program</div>
             <div class="form-group">
-                <span class="label">Your Referral Code</span>
+                <span class="label">Referral Code</span>
                 <div class="ref-box">
                     <span class="ref-text" id="ref-code">------</span>
                     <span class="copy-link" id="copy-code">Copy Code</span>
@@ -209,8 +195,7 @@
             </div>
         </div>
 
-        <!-- Notifications -->
-        <div class="card">
+        <div class="card" id="prefs-card">
             <div class="card-title">Preferences</div>
             <div class="pref-row">
                 <div class="pref-info">
@@ -234,10 +219,9 @@
             </div>
         </div>
 
-        <!-- Security -->
-        <div class="card">
-            <div class="card-title">Security & Session</div>
-            <div class="form-group">
+        <div class="card" id="security-card">
+            <div class="card-title" id="security-title">Security & Session</div>
+            <div class="form-group" id="session-info-group">
                 <span class="label">Current Session</span>
                 <p style="font-size:13px; font-weight:600;">Active now • This Device</p>
             </div>
@@ -245,7 +229,6 @@
         </div>
     </div>
 
-    <!-- Modals -->
     <div class="modal-overlay" id="logout-modal">
         <div class="modal-card">
             <h3 class="brand-font">Sign Out?</h3>
@@ -257,7 +240,6 @@
         </div>
     </div>
 
-    <!-- Nav Island -->
     <nav class="nav-island">
         <a href="dashboard.html" class="nav-item"><span>🏠</span><span>Home</span></a>
         <a href="plans.html" class="nav-item"><span>📈</span><span>Plans</span></a>
@@ -267,20 +249,38 @@
 
     <script type="module">
         import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm'
+        import { resolveEffectiveUser, injectAdminBanner, adminizeLinks, adminCall } from './admin-view.js'
 
         const supabase = createClient(import.meta.env.VITE_SUPABASE_URL, import.meta.env.VITE_SUPABASE_ANON_KEY);
 
         const ProfileApp = {
-            user: null,
+            session: null,
+            effectiveUserId: null,
+            isAdminMode: false,
             profile: null,
             payout: null,
 
             async init() {
                 const { data: { session } } = await supabase.auth.getSession();
                 if (!session) return window.location.href = 'login.html';
-                this.user = session.user;
+                this.session = session;
+
+                const { isAdminMode, effectiveUserId } = await resolveEffectiveUser(supabase, session);
+                this.isAdminMode = isAdminMode;
+                this.effectiveUserId = effectiveUserId;
 
                 this.setupUI();
+
+                if (this.isAdminMode) {
+                    injectAdminBanner();
+                    adminizeLinks(this.effectiveUserId);
+                    document.getElementById('page-title').innerText = "Member Profile";
+                    document.getElementById('security-title').innerText = 'Session Info';
+                    document.getElementById('session-info-group').style.display = 'none';
+                    document.getElementById('logout-trigger').style.display = 'none';
+                    document.getElementById('prefs-card').style.display = 'none'; // notification prefs are the user's own, not admin-editable here
+                }
+
                 await this.loadData();
             },
 
@@ -291,22 +291,18 @@
                 document.getElementById('close-sb').onclick = () => { sb.classList.remove('active'); ov.style.display = 'none'; };
                 ov.onclick = () => { sb.classList.remove('active'); ov.style.display = 'none'; };
                 
-                // Toggle Edit Modes
                 document.getElementById('edit-profile-btn').onclick = () => this.toggleEdit('profile');
                 document.getElementById('edit-payout-btn').onclick = () => this.toggleEdit('payout');
 
-                // Forms
                 document.getElementById('profile-form').onsubmit = (e) => { e.preventDefault(); this.updateProfile(); };
                 document.getElementById('payout-form').onsubmit = (e) => { e.preventDefault(); this.updatePayout(); };
 
-                // Logout
                 document.getElementById('logout-trigger').onclick = () => document.getElementById('logout-modal').style.display = 'flex';
                 document.getElementById('confirm-logout').onclick = async () => {
                     await supabase.auth.signOut();
                     window.location.href = 'index.html';
                 };
 
-                // Copy
                 document.getElementById('copy-code').onclick = () => {
                     navigator.clipboard.writeText(this.profile.referral_code);
                     alert("Referral code copied!");
@@ -336,24 +332,32 @@
 
             async loadData() {
                 try {
-                    // 1. Profile
-                    const { data: profile } = await supabase.from('profiles').select('*').eq('id', this.user.id).single();
+                    const { data: profile } = await supabase.from('profiles').select('*').eq('id', this.effectiveUserId).single();
                     this.profile = profile;
                     if (profile) {
                         document.getElementById('hero-fullname').innerText = profile.full_name;
-                        document.getElementById('avatar-initial').innerText = profile.full_name.charAt(0);
+                        document.getElementById('avatar-initial').innerText = (profile.full_name || '?').charAt(0);
                         document.getElementById('hero-member-since').innerText = `Member Since ${new Date(profile.created_at).toLocaleDateString()}`;
                         document.getElementById('disp-name').innerText = profile.full_name;
-                        document.getElementById('disp-email').innerText = this.user.email;
+                        document.getElementById('disp-email').innerText = profile.email || (this.isAdminMode ? '' : this.session.user.email);
                         document.getElementById('disp-phone').innerText = profile.phone_number || 'Not set';
                         document.getElementById('ref-code').innerText = profile.referral_code;
 
                         document.getElementById('input-name').value = profile.full_name;
                         document.getElementById('input-phone').value = profile.phone_number || '';
+
+                        const status = profile.status || 'ACTIVE';
+                        const badge = document.getElementById('status-badge');
+                        if (status === 'SUSPENDED') {
+                            badge.innerText = '● Account Suspended';
+                            badge.classList.add('suspended');
+                        } else {
+                            badge.innerText = '● Account Active';
+                            badge.classList.remove('suspended');
+                        }
                     }
 
-                    // 2. Payout Details
-                    const { data: payout } = await supabase.from('withdrawal_accounts').select('*').eq('user_id', this.user.id).eq('is_default', true).maybeSingle();
+                    const { data: payout } = await supabase.from('withdrawal_accounts').select('*').eq('user_id', this.effectiveUserId).eq('is_default', true).maybeSingle();
                     this.payout = payout;
                     if (payout) {
                         document.getElementById('disp-bank').innerText = payout.provider_name;
@@ -373,14 +377,28 @@
                 const name = document.getElementById('input-name').value.trim();
                 const phone = document.getElementById('input-phone').value.trim();
 
-                const { error } = await supabase.from('profiles')
-                    .update({ full_name: name, phone_number: phone })
-                    .eq('id', this.user.id);
-
-                if (!error) {
+                try {
+                    if (this.isAdminMode) {
+                        // Editing another user's row — goes through the audited
+                        // admin endpoint rather than a direct client write, since
+                        // there's intentionally no admin UPDATE policy on profiles
+                        // for the anon/authenticated role.
+                        await adminCall(this.session, 'update-profile', {
+                            user_id: this.effectiveUserId,
+                            full_name: name,
+                            phone_number: phone
+                        });
+                    } else {
+                        const { error } = await supabase.from('profiles')
+                            .update({ full_name: name, phone_number: phone })
+                            .eq('id', this.effectiveUserId);
+                        if (error) throw error;
+                    }
                     alert("Profile updated!");
-                    this.loadData();
+                    await this.loadData();
                     this.toggleEdit('profile');
+                } catch (e) {
+                    alert(`Failed to update profile: ${e.message}`);
                 }
             },
 
@@ -391,24 +409,37 @@
 
                 if (num.length < 10) return alert("Account number must be at least 10 digits.");
 
-                let error;
-                if (this.payout) {
-                    // Update
-                    const res = await supabase.from('withdrawal_accounts')
-                        .update({ provider_name: bank, account_name: name, account_number: num })
-                        .eq('id', this.payout.id);
-                    error = res.error;
-                } else {
-                    // Insert
-                    const res = await supabase.from('withdrawal_accounts')
-                        .insert({ user_id: this.user.id, provider_name: bank, account_name: name, account_number: num, is_default: true });
-                    error = res.error;
-                }
-
-                if (!error) {
+                try {
+                    if (this.isAdminMode) {
+                        // Requires a matching `update-withdrawal-account` action on
+                        // your /api/admin endpoint (upsert into
+                        // withdrawal_accounts for user_id). Not yet implemented
+                        // server-side — this call will fail until it is.
+                        await adminCall(this.session, 'update-withdrawal-account', {
+                            user_id: this.effectiveUserId,
+                            provider_name: bank,
+                            account_name: name,
+                            account_number: num
+                        });
+                    } else {
+                        let error;
+                        if (this.payout) {
+                            const res = await supabase.from('withdrawal_accounts')
+                                .update({ provider_name: bank, account_name: name, account_number: num })
+                                .eq('id', this.payout.id);
+                            error = res.error;
+                        } else {
+                            const res = await supabase.from('withdrawal_accounts')
+                                .insert({ user_id: this.effectiveUserId, provider_name: bank, account_name: name, account_number: num, is_default: true });
+                            error = res.error;
+                        }
+                        if (error) throw error;
+                    }
                     alert("Payout details saved!");
-                    this.loadData();
+                    await this.loadData();
                     this.toggleEdit('payout');
+                } catch (e) {
+                    alert(`Failed to save payout details: ${e.message}`);
                 }
             }
         };
