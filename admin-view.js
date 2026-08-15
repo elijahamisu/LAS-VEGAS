@@ -40,7 +40,7 @@ export function injectAdminBanner() {
     banner.style.cssText = 'background:#121212;color:#fff;padding:10px 20px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;font-size:12px;font-weight:700;position:sticky;top:0;z-index:5000;font-family:"Quicksand",sans-serif;';
     banner.innerHTML = `
         <span>🔴 ADMIN VIEW — viewing this member's live account. Any changes you save here are real.</span>
-        <a href="users.html" style="color:#fff;background:rgba(255,255,255,0.15);padding:6px 12px;border-radius:8px;text-decoration:none;">← Back to Users</a>
+        <a href="admin/users.html" style="color:#fff;background:rgba(255,255,255,0.15);padding:6px 12px;border-radius:8px;text-decoration:none;">← Back to Users</a>
     `;
     document.body.prepend(banner);
 }
@@ -73,7 +73,7 @@ export function adminizeLinks(effectiveUserId) {
         btn.textContent = btn.tagName === 'BUTTON' ? '🚪 Exit Admin View' : btn.textContent;
         btn.onclick = (e) => {
             e.preventDefault();
-            window.location.href = 'users.html';
+            window.location.href = 'admin/users.html';
         };
     });
 }
