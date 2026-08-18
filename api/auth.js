@@ -68,7 +68,7 @@ export default async function handler(req, res) {
         p_email: email,
         p_ref_code: myRefCode,
         p_referred_by: referredById,
-        p_welcome_bonus: 1000.00
+        p_welcome_bonus: 500.00
       });
 
       if (setupError) throw setupError;
