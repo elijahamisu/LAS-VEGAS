@@ -128,7 +128,7 @@ async function handleRewards({ method, action, query, body, userId, res }) {
     if (error) throw error;
     return res.status(200).json({
       success: true,
-      data: { checkedInToday: !!data, reward: 200 }
+      data: { checkedInToday: !!data, reward: 50 }
     });
   }
 
@@ -136,7 +136,7 @@ async function handleRewards({ method, action, query, body, userId, res }) {
     const { data, error } = await supabase.rpc('claim_daily_checkin');
     if (error) throw error;
     if (!data.success) throw new Error(data.message);
-    return res.status(200).json({ success: true, message: '\u20a6200 reward credited successfully', data });
+    return res.status(200).json({ success: true, message: '\u20a650 reward credited successfully', data });
   }
 
   if (method === 'POST' && action === 'redeem-gift') {
