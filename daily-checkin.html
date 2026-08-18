@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Daily Check-In | LAS VEGAS</title>
+    <title>Telegram Task | LAS VEGAS</title>
     
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -114,7 +114,7 @@
         <nav style="display: flex; flex-direction: column; gap: 15px;">
             <a href="dashboard.html" style="text-decoration: none; color: var(--text-main); font-weight: 600;">🏠 Dashboard</a>
             <a href="wallet.html" style="text-decoration: none; color: var(--text-main); font-weight: 600;">👛 Wallet</a>
-            <a href="daily-checkin.html" style="text-decoration: none; color: var(--primary-magenta); font-weight: 700;">📅 Daily Check-In</a>
+            <a href="daily-checkin.html" style="text-decoration: none; color: var(--primary-magenta); font-weight: 700;">📨 Telegram Task</a>
             <a href="earnings.html" style="text-decoration: none; color: var(--text-main); font-weight: 600;">💰 My Earnings</a>
             <button id="logout-btn" style="margin-top: 30px; text-align: left; border: none; background: none; color: #d00000; font-weight: 700; cursor: pointer;">🚪 Logout</button>
         </nav>
@@ -123,18 +123,18 @@
     <div class="container">
         <header class="page-header">
             <div>
-                <h1>Daily Check-In</h1>
-                <p>Claim your daily ₦200 reward.</p>
+                <h1 id="task-title">Telegram Task</h1>
+                <p id="task-desc">Join our Telegram group/channel and earn ₦50 — once a day.</p>
             </div>
             <button id="open-sb" style="width:45px; height:45px; border-radius:50%; border:1px solid var(--border-pink); background:white; color:var(--primary-magenta);">☰</button>
         </header>
 
         <!-- Hero Card -->
         <div class="reward-hero">
-            <span class="reward-label">Today's Reward</span>
-            <span class="reward-value" id="reward-amt">₦200.00</span>
-            <button class="btn-claim anim-pulse" id="btn-claim">CHECK IN NOW</button>
-            <p id="status-text" style="margin-top: 15px; font-size: 13px; font-weight: 600;"></p>
+            <span class="reward-label">Today's Task Reward</span>
+            <span class="reward-value" id="reward-amt">₦--</span>
+            <button class="btn-claim" id="btn-claim" disabled>LOADING...</button>
+            <p id="status-text" style="margin-top: 15px; font-size: 13px; font-weight: 600;">Checking today's task...</p>
         </div>
 
         <!-- Stats -->
@@ -144,7 +144,7 @@
                 <div class="value" id="stat-streak">0 Days</div>
             </div>
             <div class="stat-card">
-                <span class="label">Check-ins</span>
+                <span class="label">Tasks Done</span>
                 <div class="value" id="stat-total">0</div>
             </div>
             <div class="stat-card">
@@ -163,7 +163,7 @@
 
         <!-- History -->
         <div class="history-section">
-            <h3>Check-In History</h3>
+            <h3>Task History</h3>
             <div class="history-list" id="history-list">
                 <p style="padding: 20px; text-align: center; color: #999;">Loading history...</p>
             </div>
@@ -175,17 +175,20 @@
         <a href="dashboard.html" class="nav-item"><span>🏠</span><span>Home</span></a>
         <a href="plans.html" class="nav-item"><span>📈</span><span>Plans</span></a>
         <a href="wallet.html" class="nav-item"><span>👛</span><span>Wallet</span></a>
-        <a href="daily-checkin.html" class="nav-item active"><span>📅</span><span>Checkin</span></a>
+        <a href="daily-checkin.html" class="nav-item active"><span>📨</span><span>Task</span></a>
     </nav>
 
     <script type="module">
         import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm'
 
         const supabase = createClient(import.meta.env.VITE_SUPABASE_URL, import.meta.env.VITE_SUPABASE_ANON_KEY);
+        const TELEGRAM_LINK = import.meta.env.VITE_TELEGRAM_LINK;
 
         const CheckInApp = {
             user: null,
             history: [],
+            reward: 50,
+            taskActiveToday: false,
 
             async init() {
                 const { data: { session } } = await supabase.auth.getSession();
@@ -213,7 +216,28 @@
 
             async loadData() {
                 try {
-                    // 1. Fetch History
+                    // 1. Fetch today's task config (reward + whether admin has
+                    // activated a task for today). Public endpoint, no auth needed.
+                    try {
+                        const res = await fetch('/api/admin?resource=settings&action=public');
+                        const result = await res.json();
+                        if (result.success) {
+                            this.reward = Number(result.data.daily_checkin_reward) || 50;
+                            const today = new Date().toISOString().split('T')[0];
+                            this.taskActiveToday = result.data.daily_task_active_date === today;
+
+                            if (result.data.daily_task_title) {
+                                document.getElementById('task-title').innerText = result.data.daily_task_title;
+                            }
+                            if (result.data.daily_task_description) {
+                                document.getElementById('task-desc').innerText = result.data.daily_task_description;
+                            }
+                        }
+                    } catch (e) {
+                        console.error('Could not load task config', e);
+                    }
+
+                    // 2. Fetch History
                     const { data, error } = await supabase.from('daily_checkins')
                         .select('*')
                         .eq('user_id', this.user.id)
@@ -246,15 +270,23 @@
                 const btn = document.getElementById('btn-claim');
                 const status = document.getElementById('status-text');
 
+                document.getElementById('reward-amt').innerText = `₦${Number(this.reward).toLocaleString()}.00`;
+
                 if (alreadyClaimed) {
-                    btn.innerText = "ALREADY CLAIMED";
+                    btn.innerText = "✓ TASK COMPLETED";
                     btn.disabled = true;
                     btn.classList.remove('anim-pulse');
-                    status.innerText = "✓ You've claimed today's reward. Come back tomorrow!";
+                    status.innerText = "You've earned today's reward. A new task unlocks once the admin activates it.";
+                } else if (!this.taskActiveToday) {
+                    btn.innerText = "🔒 LOCKED";
+                    btn.disabled = true;
+                    btn.classList.remove('anim-pulse');
+                    status.innerText = "Today's task isn't active yet. Check back once the admin activates it.";
                 } else {
-                    btn.innerText = "CHECK IN NOW";
+                    btn.innerText = "JOIN TELEGRAM & EARN";
                     btn.disabled = false;
-                    status.innerText = "Your daily reward is waiting.";
+                    btn.classList.add('anim-pulse');
+                    status.innerText = "Tap to join our Telegram group/channel and claim today's reward.";
                 }
 
                 // Stats
@@ -322,7 +354,7 @@
             renderHistory() {
                 const list = document.getElementById('history-list');
                 if (this.history.length === 0) {
-                    list.innerHTML = `<p style="padding: 20px; text-align: center; color: #999;">No check-ins yet.</p>`;
+                    list.innerHTML = `<p style="padding: 20px; text-align: center; color: #999;">No tasks completed yet.</p>`;
                     return;
                 }
                 list.innerHTML = this.history.slice(0, 5).map(h => `
@@ -334,20 +366,31 @@
             },
 
             async handleClaim() {
+                if (!this.taskActiveToday) return;
+
                 const btn = document.getElementById('btn-claim');
                 btn.disabled = true;
+                btn.innerText = "OPENING TELEGRAM...";
+
+                // Send them to the Telegram group/channel first.
+                if (TELEGRAM_LINK) {
+                    window.open(TELEGRAM_LINK, '_blank', 'noopener');
+                } else {
+                    console.error('VITE_TELEGRAM_LINK is not set.');
+                }
+
                 btn.innerText = "PROCESSING...";
 
                 try {
-                    const { data, error } = await supabase.rpc('claim_daily_checkin');
-                    
+                    const { data, error } = await supabase.rpc('claim_telegram_task');
+
                     if (error) throw error;
                     if (!data.success) throw new Error(data.message);
 
                     // Success UI
                     btn.innerText = "✓ SUCCESS";
-                    document.getElementById('status-text').innerText = "₦200 reward credited to your wallet!";
-                    
+                    document.getElementById('status-text').innerText = `₦${Number(data.reward || this.reward).toLocaleString()} reward credited to your wallet!`;
+
                     // Reload data to update UI
                     setTimeout(() => this.loadData(), 1500);
 
