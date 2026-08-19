@@ -353,7 +353,8 @@ async function handlePublicSettings(res) {
   try {
     const publicKeys = [
       'platform_name', 'minimum_deposit', 'minimum_withdrawal',
-      'welcome_bonus', 'daily_checkin_reward', 'referral_l1_percent',
+      'welcome_bonus', 'daily_checkin_reward', 'daily_task_active_date',
+      'daily_task_title', 'daily_task_description', 'referral_l1_percent',
       'referral_l2_percent', 'withdrawal_fee_percent', 'currency_symbol', 'platform_status'
     ];
 
