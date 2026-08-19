@@ -87,6 +87,29 @@ async function handleAdmin({ method, action, query, body, adminId, res }) {
   }
 
   if (method === 'POST') {
+    if (action === 'approve-manual-deposit') {
+      const { id } = body;
+      if (!id) throw new Error('Deposit ID is required');
+      const { data, error } = await supabase.rpc('admin_approve_manual_deposit', {
+        p_admin_id: adminId,
+        p_deposit_id: id
+      });
+      if (error || !data?.success) throw new Error(error?.message || data?.message || 'Deposit approval failed');
+      return res.status(200).json({ success: true, message: data.message || 'Deposit approved and credited.' });
+    }
+
+    if (action === 'reject-manual-deposit') {
+      const { id, reason } = body;
+      if (!id) throw new Error('Deposit ID is required');
+      const { data, error } = await supabase.rpc('admin_reject_manual_deposit', {
+        p_admin_id: adminId,
+        p_deposit_id: id,
+        p_reason: String(reason || '').trim() || null
+      });
+      if (error || !data?.success) throw new Error(error?.message || data?.message || 'Deposit rejection failed');
+      return res.status(200).json({ success: true, message: data.message || 'Deposit rejected.' });
+    }
+
     if (action === 'approve-withdrawal') {
       const { id } = body;
       const { data, error } = await supabase.rpc('admin_approve_withdrawal', { p_admin_id: adminId, p_withdrawal_id: id });
