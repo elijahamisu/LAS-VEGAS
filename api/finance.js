@@ -203,6 +203,49 @@ async function handleRewards({ method, action, query, body, userId, res }) {
 // ---------------------------------------------------------------------------
 async function handlePayments({ method, action, body, userId, res }) {
   if (method !== 'POST') return res.status(405).json({ success: false, message: 'Method Not Allowed' });
+
+  if (action === 'submit-manual-deposit') {
+    const rawAmount = String(body?.amount ?? '').trim();
+    const bankName = String(body?.bank_name ?? '').trim();
+    const accountName = String(body?.account_name ?? '').trim();
+
+    if (!/^\d+(?:\.\d{1,2})?$/.test(rawAmount)) {
+      return res.status(400).json({ success: false, message: 'Enter a valid Naira amount with at most two decimal places' });
+    }
+    const amount = Number(rawAmount);
+    if (!Number.isFinite(amount) || amount < 1000) {
+      return res.status(400).json({ success: false, message: 'Minimum deposit is ₦1,000' });
+    }
+    if (!bankName || bankName.length > 120 || !accountName || accountName.length > 120) {
+      return res.status(400).json({ success: false, message: 'Bank name and account name are required and must be 120 characters or fewer' });
+    }
+
+    const reference = `LVMAN${Date.now()}${Math.floor(Math.random() * 1_000_000).toString().padStart(6, '0')}`;
+    const { error } = await supabase.from('deposits').insert({
+      user_id: userId,
+      reference,
+      amount,
+      status: 'PENDING',
+      provider: 'manual',
+      depositor_bank_name: bankName,
+      depositor_account_name: accountName
+    });
+
+    if (error) {
+      console.error('[MANUAL DEPOSIT DB ERROR]', error.message);
+      return res.status(400).json({ success: false, message: 'Could not create the pending deposit record' });
+    }
+
+    await supabase.from('notifications').insert({
+      user_id: userId,
+      title: 'Manual Deposit Submitted',
+      message: `Your manual deposit ${reference} is pending administrator approval.`,
+      type: 'DEPOSIT'
+    });
+
+    return res.status(200).json({ success: true, reference, message: 'Deposit submitted for administrator approval' });
+  }
+
   if (action !== 'initiate-deposit') {
     return res.status(400).json({ success: false, message: 'Invalid action' });
   }
