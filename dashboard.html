@@ -121,9 +121,100 @@
             .dashboard-container { padding: 40px; }
             .nav-island { display: none; }
         }
+        /* --- TELEGRAM PROMPT --- */
+        .tg-modal-backdrop {
+            display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.6);
+            z-index: 3000; align-items: center; justify-content: center; padding: 20px;
+            backdrop-filter: blur(2px);
+        }
+        .tg-modal-backdrop.active { display: flex; }
+        .tg-modal-box {
+            background: linear-gradient(160deg, #FFFFFF 0%, #FFF5F9 100%);
+            border-radius: 24px; padding: 30px 26px; width: 100%; max-width: 380px;
+            box-shadow: 0 20px 60px rgba(255,0,127,0.25);
+            border: 1px solid var(--border-pink, #FFD1E3);
+            text-align: center; position: relative;
+            animation: tgPopIn 0.35s ease;
+        }
+        @keyframes tgPopIn {
+            from { opacity: 0; transform: scale(0.92) translateY(10px); }
+            to { opacity: 1; transform: scale(1) translateY(0); }
+        }
+        .tg-icon {
+            width: 64px; height: 64px; border-radius: 50%;
+            background: linear-gradient(135deg, #FF007F, #E60072);
+            display: flex; align-items: center; justify-content: center;
+            margin: 0 auto 16px auto; box-shadow: 0 8px 20px rgba(255,0,127,0.35);
+        }
+        .tg-icon svg { width: 30px; height: 30px; fill: white; }
+        .tg-modal-box h3 {
+            font-family: 'DM Serif Display', serif; color: var(--primary-magenta, #FF007F);
+            font-size: 22px; margin: 0 0 8px 0;
+        }
+        .tg-modal-box .tg-sub {
+            font-size: 13px; color: #666; margin: 0 0 22px 0; line-height: 1.5;
+        }
+        .tg-btn-row { display: flex; flex-direction: column; gap: 10px; }
+        .tg-btn {
+            display: flex; align-items: center; justify-content: center; gap: 8px;
+            padding: 14px; border-radius: 50px; font-weight: 700; font-size: 14px;
+            text-decoration: none; cursor: pointer; border: none;
+            transition: transform 0.15s ease;
+        }
+        .tg-btn:active { transform: scale(0.97); }
+        .tg-btn-group {
+            background: linear-gradient(135deg, #FF007F, #E60072); color: white;
+            box-shadow: 0 6px 16px rgba(255,0,127,0.3);
+        }
+        .tg-btn-channel {
+            background: white; color: var(--primary-magenta, #FF007F);
+            border: 1.5px solid var(--border-pink, #FFD1E3);
+        }
+        .tg-skip {
+            display: block; margin: 18px auto 0 auto; background: none; border: none;
+            color: #999; font-size: 12px; font-weight: 600; cursor: pointer;
+            text-decoration: underline;
+        }
     </style>
 </head>
 <body>
+
+    <!-- Telegram Community Prompt — shown once per session after login/signup -->
+    <div class="tg-modal-backdrop" id="tg-modal-backdrop">
+        <div class="tg-modal-box">
+            <div class="tg-icon">
+                <svg viewBox="0 0 24 24"><path d="M9.78 18.65l.28-4.23 7.68-6.92c.34-.31-.07-.46-.52-.19L7.74 13.3 3.64 12c-.88-.25-.89-.86.2-1.3l15.97-6.16c.73-.33 1.43.18 1.15 1.3l-2.72 12.81c-.19.91-.74 1.13-1.5.71l-4.14-3.05-2 1.92c-.23.23-.42.42-.82.42z"/></svg>
+            </div>
+            <h3>Join Our Telegram!</h3>
+            <p class="tg-sub">
+                Get instant updates on new plans, bonuses, payout alerts, and platform news.
+                Join our community and never miss an update from LAS VEGAS.
+            </p>
+            <div class="tg-btn-row">
+                <a href="https://t.me/+6b5DIM_RyrllMzE0" target="_blank" rel="noopener" class="tg-btn tg-btn-group" onclick="closeTelegramPrompt()">
+                    💬 Join Our Group
+                </a>
+                <a href="https://t.me/lasvegaschann" target="_blank" rel="noopener" class="tg-btn tg-btn-channel" onclick="closeTelegramPrompt()">
+                    📢 Join Our Channel
+                </a>
+            </div>
+            <button class="tg-skip" onclick="closeTelegramPrompt()">Maybe later</button>
+        </div>
+    </div>
+
+    <script>
+        function closeTelegramPrompt() {
+            document.getElementById('tg-modal-backdrop').classList.remove('active');
+        }
+        function maybeShowTelegramPrompt() {
+            // Show once per browser session, not on every dashboard visit
+            if (sessionStorage.getItem('tg_prompt_shown')) return;
+            sessionStorage.setItem('tg_prompt_shown', '1');
+            setTimeout(() => {
+                document.getElementById('tg-modal-backdrop').classList.add('active');
+            }, 600); // slight delay so it doesn't compete with the dashboard's own load-in
+        }
+    </script>
 
     <div class="sidebar-overlay" id="overlay"></div>
     
@@ -258,6 +349,12 @@
                 this.effectiveUserId = effectiveUserId;
 
                 this.setupUI();
+
+                // Show the Telegram prompt for real user sessions only —
+                // not when an admin is viewing this dashboard on someone else's behalf
+                if (!this.isAdminMode) {
+                    maybeShowTelegramPrompt();
+                }
 
                 if (this.isAdminMode) {
                     injectAdminBanner();
