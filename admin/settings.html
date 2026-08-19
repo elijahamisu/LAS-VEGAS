@@ -124,7 +124,7 @@
                 <a href="deposits.html" class="nav-item">📥 Deposits</a>
                 <a href="withdrawals.html" class="nav-item">📤 Withdrawals</a>
                 <a href="transactions.html" class="nav-item">📜 Transactions</a>
-                <a href="daily-checkins.html" class="nav-item">📅 Daily Check-ins</a>
+                <a href="daily-checkins.html" class="nav-item">📨 Telegram Tasks</a>
                 <a href="referrals.html" class="nav-item">🔗 Referrals</a>
                 <a href="gift-codes.html" class="nav-item">🎁 Gift Codes</a>
                 <a href="notifications.html" class="nav-item">🔔 Notifications</a>
@@ -158,7 +158,7 @@
                 <span id="sum-welcome">₦0.00</span>
             </div>
             <div class="summary-card">
-                <label>Daily Check-in</label>
+                <label>Telegram Task</label>
                 <span id="sum-checkin">₦0.00</span>
             </div>
             <div class="summary-card">
@@ -201,7 +201,7 @@
                         </div>
                     </div>
                     <div class="form-group">
-                        <label class="form-label">Daily Check-in Amount</label>
+                        <label class="form-label">Telegram Task Reward</label>
                         <div class="input-wrapper">
                             <span class="currency-symbol">₦</span>
                             <input type="number" class="form-input has-symbol" id="daily_checkin_reward" min="0">
@@ -309,7 +309,7 @@
                 document.getElementById('loader').style.display = 'flex';
                 try {
                     // Call the secure Admin Settings API
-                    const res = await fetch('/api/settings?action=admin', {
+                    const res = await fetch('/api/admin?resource=settings&action=admin', {
                         headers: { 'Authorization': `Bearer ${(await supabase.auth.getSession()).data.session.access_token}` }
                     });
                     const result = await res.json();
@@ -371,7 +371,7 @@
 
                 try {
                     const session = await supabase.auth.getSession();
-                    const res = await fetch('/api/settings', {
+                    const res = await fetch('/api/admin?resource=settings', {
                         method: 'POST',
                         headers: { 
                             'Content-Type': 'application/json',
