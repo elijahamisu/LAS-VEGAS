@@ -211,6 +211,10 @@
             <span class="modal-close" id="modal-close">✕</span>
             <h3 class="brand-font" style="margin-top: 0; color: var(--primary-magenta);">Deposit Audit Trail</h3>
             <div id="modal-content"></div>
+            <div id="deposit-actions" style="margin-top: 25px; display: none; gap: 10px;">
+                <button class="page-btn" id="btn-approve-deposit" style="background: var(--secondary-green); color: white; border: none;">APPROVE &amp; CREDIT DEPOSIT</button>
+                <button class="page-btn" id="btn-reject-deposit" style="background: #D4183D; color: white; border: none;">REJECT DEPOSIT</button>
+            </div>
             <div style="margin-top: 25px; display: grid; gap: 10px;">
                 <button class="page-btn" id="btn-view-user" style="background: var(--sidebar-dark); color: white; border: none;">VIEW USER DETAILS</button>
                 <button class="page-btn" onclick="document.getElementById('detail-modal').style.display='none'">CLOSE</button>
@@ -327,8 +331,8 @@
                         <td><a href="user-details.html?id=${d.user_id}" class="user-link">${d.profiles?.full_name || 'User'}</a></td>
                         <td style="font-family:monospace; font-weight:700;">DEP-${d.id.substring(0,6).toUpperCase()}</td>
                         <td style="font-weight:700;">${this.formatCurrency(d.amount)}</td>
-                        <td>${d.gateway || 'GloPayment'}</td>
-                        <td style="font-family:monospace; font-size:11px;">${d.gateway_ref || '---'}</td>
+                        <td>${d.provider === 'manual' ? 'Manual Bank Transfer' : (d.gateway || 'GloPayment')}</td>
+                        <td style="font-family:monospace; font-size:11px;">${d.gateway_ref || d.reference || '---'}</td>
                         <td><span class="status-badge status-${d.status}">${d.status}</span></td>
                         <td>${new Date(d.created_at).toLocaleDateString()}</td>
                         <td><button class="page-btn" style="padding:5px 12px; font-size:10px;" onclick="window.DepManager.showDetails('${d.id}')">VIEW</button></td>
@@ -340,6 +344,7 @@
                         <div class="card-row"><span>User</span> <a href="user-details.html?id=${d.user_id}" class="user-link">${d.profiles?.full_name}</a></div>
                         <div class="card-row"><span>Reference</span> <b>DEP-${d.id.substring(0,6).toUpperCase()}</b></div>
                         <div class="card-row"><span>Amount</span> <b>${this.formatCurrency(d.amount)}</b></div>
+                        <div class="card-row"><span>Source</span> <span>${d.provider === 'manual' ? 'Manual Bank Transfer' : (d.gateway || 'GloPayment')}</span></div>
                         <div class="card-row"><span>Status</span> <span class="status-badge status-${d.status}">${d.status}</span></div>
                         <button class="page-btn" style="width:100%; margin-top:10px;" onclick="window.DepManager.showDetails('${d.id}')">AUDIT DEPOSIT</button>
                     </div>
@@ -355,16 +360,75 @@
                 document.getElementById('modal-content').innerHTML = `
                     <div class="detail-row"><span class="detail-label">Internal Ref</span><span class="detail-value">DEP-${d.id.toUpperCase()}</span></div>
                     <div class="detail-row"><span class="detail-label">Payment Ref</span><span class="detail-value">${d.reference}</span></div>
-                    <div class="detail-row"><span class="detail-label">Gateway (GloPayment) Ref</span><span class="detail-value" style="color:var(--primary-magenta);">${d.gateway_ref || 'Wait for Payment'}</span></div>
-                    <div class="detail-row"><span class="detail-label">Amount Paid</span><span class="detail-value green">${this.formatCurrency(d.amount)}</span></div>
-                    <div class="detail-row"><span class="detail-label">Gateway Method</span><span class="detail-value">${d.gateway || 'GLOPAYMENT'}</span></div>
+                    <div class="detail-row"><span class="detail-label">Gateway / Provider Ref</span><span class="detail-value" style="color:var(--primary-magenta);">${d.gateway_ref || d.reference || '---'}</span></div>
+                    <div class="detail-row"><span class="detail-label">Amount</span><span class="detail-value green">${this.formatCurrency(d.amount)}</span></div>
+                    <div class="detail-row"><span class="detail-label">Payment Method</span><span class="detail-value">${d.provider === 'manual' ? 'Manual Bank Transfer' : (d.gateway || 'GLOPAYMENT')}</span></div>
+                    ${d.provider === 'manual' ? `
+                    <div class="detail-row"><span class="detail-label">Depositor Bank</span><span class="detail-value">${d.depositor_bank_name || 'Not provided'}</span></div>
+                    <div class="detail-row"><span class="detail-label">Name on Bank Account</span><span class="detail-value">${d.depositor_account_name || 'Not provided'}</span></div>
+                    <div class="detail-row"><span class="detail-label">Review</span><span class="detail-value">${d.reviewed_at ? new Date(d.reviewed_at).toLocaleString() : 'Awaiting admin review'}</span></div>
+                    ${d.rejection_reason ? `<div class="detail-row"><span class="detail-label">Rejection Reason</span><span class="detail-value">${d.rejection_reason}</span></div>` : ''}` : `
+                    <div class="detail-row"><span class="detail-label">Reconciliation</span><span class="detail-value" style="color:var(--secondary-green);">MATCHED BY WEBHOOK</span></div>`}
                     <div class="detail-row"><span class="detail-label">Status</span><span class="status-badge status-${d.status}">${d.status}</span></div>
                     <div class="detail-row"><span class="detail-label">Created At</span><span class="detail-value">${new Date(d.created_at).toLocaleString()}</span></div>
-                    <div class="detail-row"><span class="detail-label">Reconciliation</span><span class="detail-value" style="color:var(--secondary-green);">MATCHED BY WEBHOOK</span></div>
                 `;
 
                 document.getElementById('btn-view-user').onclick = () => window.location.href = `user-details.html?id=${d.user_id}`;
+
+                const actionArea = document.getElementById('deposit-actions');
+                const approveBtn = document.getElementById('btn-approve-deposit');
+                const rejectBtn = document.getElementById('btn-reject-deposit');
+                const isPendingManual = d.provider === 'manual' && d.status === 'PENDING';
+                actionArea.style.display = isPendingManual ? 'grid' : 'none';
+                if (isPendingManual) {
+                    approveBtn.onclick = () => this.approveManualDeposit(d.id);
+                    rejectBtn.onclick = () => this.rejectManualDeposit(d.id);
+                }
+
                 document.getElementById('detail-modal').style.display = 'flex';
+            },
+
+            async callAdminApi(action, body) {
+                const { data: { session } } = await supabase.auth.getSession();
+                if (!session) throw new Error('Your session has expired. Please log in again.');
+                const response = await fetch(`/api/admin?resource=admin&action=${action}`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${session.access_token}`
+                    },
+                    body: JSON.stringify(body)
+                });
+                const data = await response.json();
+                if (!response.ok || !data.success) throw new Error(data.message || 'Admin request failed');
+                return data;
+            },
+
+            async approveManualDeposit(id) {
+                if (!confirm('Approve this manual deposit and credit the user wallet?')) return;
+                try {
+                    await this.callAdminApi('approve-manual-deposit', { id });
+                    alert('Deposit approved and credited.');
+                    document.getElementById('detail-modal').style.display = 'none';
+                    await this.fetchStats();
+                    await this.fetchDeposits();
+                } catch (error) {
+                    alert(`Could not approve deposit: ${error.message}`);
+                }
+            },
+
+            async rejectManualDeposit(id) {
+                const reason = prompt('Enter a rejection reason (optional):');
+                if (reason === null) return;
+                try {
+                    await this.callAdminApi('reject-manual-deposit', { id, reason: reason.trim() });
+                    alert('Deposit rejected.');
+                    document.getElementById('detail-modal').style.display = 'none';
+                    await this.fetchStats();
+                    await this.fetchDeposits();
+                } catch (error) {
+                    alert(`Could not reject deposit: ${error.message}`);
+                }
             },
 
             handleSync() {
