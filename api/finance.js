@@ -126,17 +126,29 @@ async function handleRewards({ method, action, query, body, userId, res }) {
       .maybeSingle();
 
     if (error) throw error;
+
+    const { data: settingsRows } = await supabase
+      .from('settings')
+      .select('key, value')
+      .in('key', ['daily_checkin_reward', 'daily_task_active_date']);
+
+    const settingsMap = (settingsRows || []).reduce((acc, r) => ({ ...acc, [r.key]: r.value }), {});
+    const reward = Number(settingsMap.daily_checkin_reward) || 50;
+    const taskActiveToday = settingsMap.daily_task_active_date === today;
+
     return res.status(200).json({
       success: true,
-      data: { checkedInToday: !!data, reward: 50 }
+      data: { checkedInToday: !!data, reward, taskActiveToday }
     });
   }
 
+  // Joining the Telegram group/channel is the "task"; this credits the reward
+  // once per day, but only while an admin has activated today's task.
   if (method === 'POST' && action === 'checkin') {
-    const { data, error } = await supabase.rpc('claim_daily_checkin');
+    const { data, error } = await supabase.rpc('claim_telegram_task');
     if (error) throw error;
     if (!data.success) throw new Error(data.message);
-    return res.status(200).json({ success: true, message: '\u20a650 reward credited successfully', data });
+    return res.status(200).json({ success: true, message: `\u20a6${data.reward || 50} reward credited successfully`, data });
   }
 
   if (method === 'POST' && action === 'redeem-gift') {
