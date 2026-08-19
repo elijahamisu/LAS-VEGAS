@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Daily Check-In Audit | LAS VEGAS Admin</title>
+    <title>Telegram Task Audit | LAS VEGAS Admin</title>
     
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -76,6 +76,8 @@
         .status-badge { padding: 4px 10px; border-radius: 50px; font-size: 9px; font-weight: 800; text-transform: uppercase; }
         .status-COMPLETED { background: #F0FFF4; color: var(--secondary-green); }
         .status-DUPLICATE { background: #F0F0F0; color: #999; }
+        .status-ACTIVE { background: #F0FFF4; color: var(--secondary-green); }
+        .status-LOCKED { background: #FFF0F0; color: #d00000; }
 
         /* --- MOBILE LIST --- */
         .mobile-list { display: grid; gap: 15px; }
@@ -124,7 +126,7 @@
                 <a href="deposits.html" class="nav-item">📥 Deposits</a>
                 <a href="withdrawals.html" class="nav-item">📤 Withdrawals</a>
                 <a href="transactions.html" class="nav-item">📜 Transactions</a>
-                <a href="daily-checkins.html" class="nav-item active">📅 Daily Check-ins</a>
+                <a href="daily-checkins.html" class="nav-item active">📨 Telegram Tasks</a>
                 <a href="#" id="logoutBtn" class="nav-item" style="margin-top: 20px; color: #ff4d4d;">🚪 Logout</a>
             </nav>
         </aside>
@@ -133,14 +135,37 @@
             <header class="top-bar">
                 <div style="display: flex; align-items: center; gap: 15px;">
                     <button class="mobile-toggle" id="menuBtn">☰</button>
-                    <h1 style="margin: 0; font-family: 'DM Serif Display', serif;">Daily Check-In Audit</h1>
+                    <h1 style="margin: 0; font-family: 'DM Serif Display', serif;">Telegram Task Audit</h1>
                 </div>
                 <button class="page-btn" onclick="location.reload()">🔄 Refresh</button>
             </header>
 
+            <!-- Task Activation Control -->
+            <div class="controls-card">
+                <div style="display:flex; flex-wrap:wrap; align-items:center; justify-content:space-between; gap:15px; margin-bottom:20px;">
+                    <div>
+                        <span class="stat-label" style="display:block; margin-bottom:6px;">Today's Task Status</span>
+                        <span class="status-badge" id="task-status-badge" style="font-size:11px; padding:6px 14px;">Checking...</span>
+                        <p style="margin:8px 0 0 0; font-size:12px; color: var(--text-muted);" id="task-status-note"></p>
+                    </div>
+                    <button class="page-btn" id="activate-task-btn" style="background: var(--secondary-green); color: white; border: none;">✅ Activate Today's Task</button>
+                </div>
+                <div class="filter-grid" style="grid-template-columns: 1fr !important;">
+                    <div>
+                        <label style="display:block; font-size:11px; font-weight:700; color: var(--text-muted); margin-bottom:6px;">Task Title</label>
+                        <input type="text" id="task-title-input" class="input-field" placeholder="Join our Telegram Group/Channel">
+                    </div>
+                    <div>
+                        <label style="display:block; font-size:11px; font-weight:700; color: var(--text-muted); margin-bottom:6px;">Task Description</label>
+                        <input type="text" id="task-desc-input" class="input-field" placeholder="Tap the button, join our Telegram group/channel, and earn your daily reward.">
+                    </div>
+                </div>
+                <button class="page-btn" id="save-task-text-btn" style="margin-top:12px; background: var(--sidebar-dark); color: white; border: none;">💾 Save Task Text</button>
+            </div>
+
             <div class="stats-grid">
                 <div class="stat-card">
-                    <span class="stat-label">Today's Check-ins</span>
+                    <span class="stat-label">Today's Completions</span>
                     <span class="stat-value" id="stat-today">--</span>
                 </div>
                 <div class="stat-card">
@@ -152,8 +177,8 @@
                     <span class="stat-value green" id="stat-total-reward">₦0.00</span>
                 </div>
                 <div class="stat-card">
-                    <span class="stat-label">Daily Reward Set</span>
-                    <span class="stat-value pink">₦200.00</span>
+                    <span class="stat-label">Task Reward Set</span>
+                    <span class="stat-value pink" id="stat-reward-set">₦--</span>
                 </div>
             </div>
 
@@ -184,7 +209,7 @@
                     <thead>
                         <tr>
                             <th>User</th>
-                            <th>Check-In ID</th>
+                            <th>Task ID</th>
                             <th>Date</th>
                             <th>Time</th>
                             <th>Reward</th>
@@ -241,7 +266,9 @@
                 const { data: profile } = await supabase.from('profiles').select('is_admin').eq('id', session.user.id).single();
                 if (!profile || !profile.is_admin) return window.location.href = 'login.html';
 
+                this.session = session;
                 this.setupUI();
+                await this.fetchTaskStatus();
                 await this.fetchStats();
                 await this.fetchCheckins();
             },
@@ -250,6 +277,8 @@
                 document.getElementById('menuBtn').onclick = () => document.getElementById('adminSidebar').classList.toggle('active');
                 document.getElementById('logoutBtn').onclick = () => supabase.auth.signOut().then(() => window.location.href = 'login.html');
                 document.getElementById('modal-close').onclick = () => document.getElementById('detail-modal').style.display = 'none';
+                document.getElementById('activate-task-btn').onclick = () => this.activateTask();
+                document.getElementById('save-task-text-btn').onclick = () => this.saveTaskText();
 
                 const reload = () => { this.currentPage = 0; this.fetchCheckins(); };
                 document.getElementById('searchInput').oninput = this.debounce(reload, 500);
@@ -279,6 +308,7 @@
 
                 document.getElementById('stat-today').innerText = t.todayCount;
                 document.getElementById('stat-today-reward').innerText = this.formatCurrency(t.today);
+                this.todaysCompletions = t.todayCount;
                 document.getElementById('stat-total-reward').innerText = this.formatCurrency(t.total);
 
                 this.renderChart(sums);
@@ -305,6 +335,96 @@
                         <span class="bar-label">${d.date.slice(8)}</span>
                     </div>
                 `).join('');
+            },
+
+            async adminApi(action, method = 'GET', body = null) {
+                const res = await fetch(`/api/admin?resource=settings&action=${action}`, {
+                    method,
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${this.session.access_token}`
+                    },
+                    body: body ? JSON.stringify(body) : undefined
+                });
+                return res.json();
+            },
+
+            async fetchTaskStatus() {
+                const today = new Date().toISOString().split('T')[0];
+                const result = await this.adminApi('admin');
+                if (!result.success) return;
+
+                const map = result.data.reduce((acc, r) => ({ ...acc, [r.key]: r.value }), {});
+                const activeDate = map.daily_task_active_date;
+                const reward = map.daily_checkin_reward || '50';
+                this.todaysActiveDate = activeDate;
+
+                document.getElementById('stat-reward-set').innerText = `₦${Number(reward).toLocaleString()}`;
+                document.getElementById('task-title-input').value = map.daily_task_title || '';
+                document.getElementById('task-desc-input').value = map.daily_task_description || '';
+
+                const badge = document.getElementById('task-status-badge');
+                const note = document.getElementById('task-status-note');
+                const btn = document.getElementById('activate-task-btn');
+
+                if (activeDate === today) {
+                    badge.innerText = 'ACTIVE TODAY';
+                    badge.className = 'status-badge status-ACTIVE';
+                    note.innerText = "Members can join the Telegram task and earn today's reward.";
+                    btn.innerText = '✅ Task Already Active';
+                    btn.disabled = true;
+                } else {
+                    badge.innerText = 'LOCKED';
+                    badge.className = 'status-badge status-LOCKED';
+                    note.innerText = activeDate
+                        ? `Last activated for ${activeDate}. Members see the task as locked until you activate it for today.`
+                        : 'No task has been activated yet. Members see the task as locked.';
+                    btn.innerText = "✅ Activate Today's Task";
+                    btn.disabled = false;
+                }
+            },
+
+            async activateTask() {
+                const today = new Date().toISOString().split('T')[0];
+                const btn = document.getElementById('activate-task-btn');
+                btn.disabled = true;
+                btn.innerText = 'ACTIVATING...';
+
+                try {
+                    const result = await this.adminApi('update', 'POST', {
+                        action: 'update',
+                        updates: [{ key: 'daily_task_active_date', value: today }]
+                    });
+                    if (!result.success) throw new Error(result.message);
+                    await this.fetchTaskStatus();
+                } catch (e) {
+                    alert(e.message);
+                    btn.disabled = false;
+                    btn.innerText = "✅ Activate Today's Task";
+                }
+            },
+
+            async saveTaskText() {
+                const btn = document.getElementById('save-task-text-btn');
+                btn.disabled = true;
+                btn.innerText = 'SAVING...';
+
+                try {
+                    const result = await this.adminApi('update', 'POST', {
+                        action: 'update',
+                        updates: [
+                            { key: 'daily_task_title', value: document.getElementById('task-title-input').value },
+                            { key: 'daily_task_description', value: document.getElementById('task-desc-input').value }
+                        ]
+                    });
+                    if (!result.success) throw new Error(result.message);
+                    btn.innerText = '✓ SAVED';
+                    setTimeout(() => { btn.innerText = '💾 Save Task Text'; btn.disabled = false; }, 1500);
+                } catch (e) {
+                    alert(e.message);
+                    btn.innerText = '💾 Save Task Text';
+                    btn.disabled = false;
+                }
             },
 
             async fetchCheckins() {
