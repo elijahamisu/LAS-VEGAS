@@ -313,6 +313,10 @@
                     this.totalCount = count;
                     this.renderDeposits(data);
                     this.updatePagination();
+                } else {
+                    console.error('[FETCH DEPOSITS ERROR]', error.message);
+                    document.getElementById('deposits-table-body').innerHTML =
+                        `<tr><td colspan="8" style="text-align:center; color:#d00000; padding:20px;">Could not load deposits: ${error.message}</td></tr>`;
                 }
             },
 
