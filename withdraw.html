@@ -198,6 +198,7 @@
 
             const amount = Number(document.getElementById('withdraw-amount').value);
             if (!amount || amount <= 0) return showError('Enter a valid amount');
+            if (amount < 1000) return showError('Minimum withdrawal is ₦1,000');
             if (!selectedAccountId) return showError('Select or add a payout account first');
 
             withdrawBtn.disabled = true;
