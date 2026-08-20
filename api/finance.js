@@ -1,6 +1,5 @@
 import { createClient } from '@supabase/supabase-js';
 import { createGloPaymentCollectionOrder } from '../lib/glopayment.js';
-import { findGloPaymentNgnBank, GLOPAYMENT_NGN_BANKS, isValidGloPaymentNgnBankCode } from '../lib/glopayment-ngn-banks.js';
 
 const supabase = createClient(
   process.env.VITE_SUPABASE_URL,
@@ -31,8 +30,6 @@ export default async function handler(req, res) {
         return await handleRewards({ method, action, query, body, userId, res });
       case 'payments':
         return await handlePayments({ method, action, body, userId, res });
-      case 'withdrawals':
-        return await handleWithdrawals({ method, action, query, body, userId, res });
       default:
         return res.status(400).json({ success: false, message: 'Invalid or missing resource' });
     }
@@ -342,92 +339,3 @@ async function handlePayments({ method, action, body, userId, res }) {
   return res.status(200).json({ success: true, payInfo: orderResult.checkoutUrl, reference });
 }
 
-// ---------------------------------------------------------------------------
-// WITHDRAWALS  (new — user-initiated withdrawal request)
-// Approval, rejection, and payout still live in admin.js (resource=admin),
-// this is just the user-facing "submit a request" step.
-// ---------------------------------------------------------------------------
-async function handleWithdrawals({ method, action, query, body, userId, res }) {
-  // GloPayment payout channel 506 uses a different Nigeria bank-code scheme.
-  // Existing NekPay payout accounts are intentionally excluded; users must re-add
-  // an account with a GloPayment code rather than sending a mismatched bank route.
-  if (method === 'GET' && action === 'accounts') {
-    const { data, error } = await supabase
-      .from('withdrawal_accounts')
-      .select('id, bank_code, bank_name, account_number, account_name, is_default')
-      .eq('user_id', userId)
-      .eq('provider_name', 'glopayment')
-      .order('is_default', { ascending: false });
-    if (error) throw error;
-    return res.status(200).json({ success: true, data });
-  }
-
-  if (method === 'GET' && action === 'bank-list') {
-    return res.status(200).json({ success: true, data: GLOPAYMENT_NGN_BANKS });
-  }
-
-  if (method !== 'POST') return res.status(405).json({ success: false, message: 'Method Not Allowed' });
-
-  if (action === 'add-account') {
-    const { bank_code, account_number, account_name, is_default } = body;
-
-    if (!isValidGloPaymentNgnBankCode(bank_code)) throw new Error('Select a valid GloPayment Nigeria bank from the list');
-    if (!account_number || !account_name) throw new Error('Account number and account name are required');
-
-    if (is_default) {
-      await supabase.from('withdrawal_accounts').update({ is_default: false }).eq('user_id', userId);
-    }
-
-    const bankMeta = findGloPaymentNgnBank(bank_code);
-    const { data, error } = await supabase.from('withdrawal_accounts').insert({
-      user_id: userId,
-      provider_name: 'glopayment',
-      bank_code,
-      bank_name: bankMeta.name,
-      account_number,
-      account_name,
-      is_default: !!is_default
-    }).select().single();
-
-    if (error) throw error;
-    return res.status(200).json({ success: true, data });
-  }
-
-  if (action === 'withdraw') {
-    const { amount, payout_account_id } = body;
-
-    if (!amount || isNaN(amount) || amount <= 0) throw new Error('Invalid withdrawal amount');
-    if (!payout_account_id) throw new Error('Payout account is required');
-
-    const { data: account, error: acctErr } = await supabase
-      .from('withdrawal_accounts')
-      .select('bank_code, provider_name')
-      .eq('id', payout_account_id)
-      .eq('user_id', userId)
-      .single();
-
-    if (acctErr || !account) throw new Error('Payout account not found');
-    if (account.provider_name !== 'glopayment' || !isValidGloPaymentNgnBankCode(account.bank_code)) {
-      throw new Error('This payout account needs a valid GloPayment Nigeria bank code. Please add it again.');
-    }
-
-    const { data, error } = await supabase.rpc('request_withdrawal_v2', {
-      p_user_id: userId,
-      p_amount: parseFloat(amount),
-      p_account_id: payout_account_id
-    });
-    if (error || !data.success) throw new Error(error?.message || data?.message || 'Withdrawal failed');
-
-    // Trigger internal notification
-    await supabase.from('notifications').insert({
-      user_id: userId,
-      title: "Withdrawal Pending",
-      message: `Your request for \u20a6${amount} is pending admin review.`,
-      type: "WITHDRAWAL"
-    });
-
-    return res.status(200).json({ success: true, message: 'Request submitted' });
-  }
-
-  return res.status(400).json({ success: false, message: 'Invalid action' });
-}
