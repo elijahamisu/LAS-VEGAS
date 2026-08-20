@@ -364,7 +364,7 @@
                     <h4 style="margin:20px 0 10px 0; font-size:13px; color:var(--primary-magenta);">PAYOUT DESTINATION</h4>
                     <div class="detail-row"><span class="detail-label">Bank/Provider</span><span class="detail-value">${w.withdrawal_accounts?.provider_name || 'N/A'}</span></div>
                     <div class="detail-row"><span class="detail-label">Account Name</span><span class="detail-value">${w.withdrawal_accounts?.account_name || 'N/A'}</span></div>
-                    <div class="detail-row"><span class="detail-label">Account Number</span><span class="detail-value">•••• ${w.withdrawal_accounts?.account_number?.slice(-4) || '0000'}</span></div>
+                    <div class="detail-row"><span class="detail-label">Account Number</span><span class="detail-value">${w.withdrawal_accounts?.account_number || '—'}</span></div>
                     
                     <div class="detail-row"><span class="detail-label">Status</span><span class="status-badge status-${w.status}">${w.status}</span></div>
                     <div class="detail-row"><span class="detail-label">Request Date</span><span class="detail-value">${new Date(w.created_at).toLocaleString()}</span></div>
