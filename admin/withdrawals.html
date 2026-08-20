@@ -380,7 +380,7 @@
                 } else if (String(w.status).toUpperCase() === 'APPROVED') {
                     actions.innerHTML = `
                         <div class="btn-group">
-                            <button class="btn btn-payout" onclick="window.WithManager.handlePayout('${w.id}')">DISBURSE VIA GLOPAYMENT</button>
+                            <button class="btn btn-payout" onclick="window.WithManager.handlePayout('${w.id}')">MARK AS PAID</button>
                         </div>
                     `;
                 } else {
@@ -454,26 +454,25 @@
             },
 
             async handlePayout(id) {
-                if (!confirm("This will initiate real-money disbursement via GloPayment. Proceed?")) return;
+                const reference = prompt('Enter the payout reference for this transfer (e.g. your bank transfer ID or receipt number):');
+                if (reference === null) return; // cancelled
+                if (!reference.trim()) return alert('A payout reference is required.');
+
+                if (!confirm('Confirm you have manually sent this payment to the beneficiary. Mark as paid?')) return;
 
                 const btn = event.target;
                 btn.disabled = true;
-                btn.innerText = 'SUBMITTING TO GLOPAYMENT...';
+                btn.innerText = 'SAVING...';
 
                 try {
-                    // Calls the secure backend, which validates the approved status,
-                    // the beneficiary's payout account, signs the request, and sends
-                    // it to GloPayment. The synchronous response only confirms GloPayment
-                    // accepted the request — the withdrawal status becomes PROCESSING,
-                    // and only the signed webhook callback marks it PAID or FAILED.
-                    const result = await this.callAdminApi('payout-withdrawal', { id });
-                    alert(result.message || 'Payout submitted to GloPayment — awaiting confirmation.');
+                    const result = await this.callAdminApi('mark-withdrawal-paid', { id, payout_reference: reference.trim() });
+                    alert(result.message || 'Withdrawal marked as paid.');
                     location.reload();
                 } catch (e) {
-                    alert(`Payout failed: ${e.message}`);
-                    console.error('GloPayment payout failed:', e);
+                    alert(`Could not mark as paid: ${e.message}`);
+                    console.error('Mark withdrawal paid failed:', e);
                     btn.disabled = false;
-                    btn.innerText = 'DISBURSE VIA GLOPAYMENT';
+                    btn.innerText = 'MARK AS PAID';
                 }
             },
 
