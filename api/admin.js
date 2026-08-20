@@ -1,5 +1,4 @@
 import { createClient } from '@supabase/supabase-js';
-import { buildGloPaymentPayoutRequest, processGloPaymentPayout } from '../lib/glopayment/withdrawal.js';
 
 const supabase = createClient(
   process.env.VITE_SUPABASE_URL,
@@ -124,82 +123,20 @@ async function handleAdmin({ method, action, query, body, adminId, res }) {
       return res.status(200).json({ success: true, message: 'Withdrawal rejected and funds released.' });
     }
 
-    if (action === 'payout-withdrawal') {
-      const { id } = body;
-      const { data: wd, error: withdrawalError } = await supabase
-        .from('withdrawals')
-        .select('*, withdrawal_accounts(*)')
-        .eq('id', id)
-        .single();
-      if (withdrawalError || !wd) throw new Error('Withdrawal was not found');
-      if (wd.status !== 'APPROVED') throw new Error('Disbursement requires previous admin approval');
-      if (!wd.withdrawal_accounts || wd.withdrawal_accounts.provider_name !== 'glopayment') {
-        throw new Error('The beneficiary must re-add a GloPayment payout account before this withdrawal can be sent');
+    if (action === 'mark-withdrawal-paid') {
+      const { id, payout_reference } = body;
+      if (!id) throw new Error('Withdrawal ID is required');
+      if (!payout_reference || !String(payout_reference).trim()) {
+        throw new Error('A payout reference is required (e.g. your bank transfer reference)');
       }
 
-      const { data: beneficiary, error: beneficiaryError } = await supabase
-        .from('profiles')
-        .select('email, phone_number')
-        .eq('id', wd.user_id)
-        .single();
-      if (beneficiaryError || !beneficiary?.email || !beneficiary?.phone_number) {
-        throw new Error('The beneficiary must have an email address and phone number before payout submission');
-      }
-
-      const payoutInput = {
-        merchantOrderId: wd.reference,
-        amount: Number(wd.net_amount ?? wd.amount).toFixed(2),
-        beneficiaryName: wd.withdrawal_accounts.account_name,
-        accountNumber: wd.withdrawal_accounts.account_number,
-        bankCode: wd.withdrawal_accounts.bank_code,
-        beneficiaryEmail: beneficiary.email,
-        beneficiaryMobile: beneficiary.phone_number
-      };
-
-      // Validate merchant configuration, the Glo bank code, and the provider's
-      // required Nigeria `number` mapping before changing the database status.
-      buildGloPaymentPayoutRequest(payoutInput);
-
-      const { error: statusError } = await supabase
-        .from('withdrawals')
-        .update({ status: 'PROCESSING' })
-        .eq('id', id)
-        .eq('status', 'APPROVED');
-      if (statusError) throw statusError;
-
-      const payout = await processGloPaymentPayout(payoutInput);
-      if (!payout.success) {
-        if (payout.definitiveRejection) {
-          // A readable provider rejection means no accepted payout submission;
-          // return it to APPROVED so the administrator can correct and retry.
-          await supabase.from('withdrawals').update({ status: 'APPROVED' }).eq('id', id);
-          throw new Error(`GloPayment rejected the payout: ${payout.message}`);
-        }
-        // A timeout/malformed response is indeterminate: retain PROCESSING to
-        // prevent a duplicate payout while the provider result is reconciled.
-        throw new Error(payout.message);
-      }
-
-      await supabase.from('withdrawals').update({
-        status: 'PROCESSING',
-        payout_reference: payout.providerReference
-      }).eq('id', id);
-
-      await supabase.from('admin_audit_logs').insert({
-        admin_id: adminId,
-        action: 'WITHDRAWAL_PAYOUT_SUBMITTED',
-        target_type: 'WITHDRAWAL',
-        target_id: id,
-        details: { payout_reference: payout.providerReference }
+      const { data, error } = await supabase.rpc('admin_mark_withdrawal_paid', {
+        p_admin_id: adminId,
+        p_withdrawal_id: id,
+        p_payout_reference: String(payout_reference).trim()
       });
-
-      // GloPayment's synchronous response only confirms request acceptance.
-      // The signed ?type=glopay-withdrawal callback is the sole authority that
-      // may mark this withdrawal PAID or FAILED.
-      return res.status(200).json({
-        success: true,
-        message: 'GloPayment payout submitted — awaiting verified provider confirmation'
-      });
+      if (error || !data?.success) throw new Error(error?.message || data?.message || 'Could not mark withdrawal as paid');
+      return res.status(200).json({ success: true, message: data.message || 'Withdrawal marked as paid.' });
     }
 
     if (action === 'update-settings') {
