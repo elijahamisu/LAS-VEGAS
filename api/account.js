@@ -109,9 +109,9 @@ async function handleProfile({ method, action, body, userId, res }) {
       l2Count = count || 0;
     }
 
-    const { data: commissions } = await supabase.from('referral_commissions').select('amount, level').eq('user_id', userId);
-    const l1Earned = commissions?.filter(c => c.level === 1).reduce((s, c) => s + Number(c.amount), 0) || 0;
-    const l2Earned = commissions?.filter(c => c.level === 2).reduce((s, c) => s + Number(c.amount), 0) || 0;
+    const { data: commissions } = await supabase.from('referral_commissions').select('commission_amount, level').eq('user_id', userId);
+    const l1Earned = commissions?.filter(c => c.level === 1).reduce((s, c) => s + Number(c.commission_amount), 0) || 0;
+    const l2Earned = commissions?.filter(c => c.level === 2).reduce((s, c) => s + Number(c.commission_amount), 0) || 0;
 
     return res.status(200).json({
       success: true,
