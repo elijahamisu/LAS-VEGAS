@@ -1,13 +1,14 @@
 import { createClient } from '@supabase/supabase-js';
 import { createGloPaymentCollectionOrder } from '../lib/glopayment.js';
+import { GLOPAYMENT_NGN_BANKS, isValidGloPaymentNgnBankCode } from '../lib/glopayment-ngn-banks.js';
 
 const supabase = createClient(
   process.env.VITE_SUPABASE_URL,
   process.env.SUPABASE_SERVICE_ROLE_KEY
 );
 
-// Was: investments.js + rewards.js + payments.js
-// Route with ?resource=investments|rewards|payments&action=...
+// Was: investments.js + rewards.js + payments.js + withdrawals.js
+// Route with ?resource=investments|rewards|payments|withdrawals&action=...
 export default async function handler(req, res) {
   const { method, query, body } = req;
   const resource = query.resource;
@@ -30,6 +31,8 @@ export default async function handler(req, res) {
         return await handleRewards({ method, action, query, body, userId, res });
       case 'payments':
         return await handlePayments({ method, action, body, userId, res });
+      case 'withdrawals':
+        return await handleWithdrawals({ method, action, query, body, userId, res });
       default:
         return res.status(400).json({ success: false, message: 'Invalid or missing resource' });
     }
@@ -339,3 +342,92 @@ async function handlePayments({ method, action, body, userId, res }) {
   return res.status(200).json({ success: true, payInfo: orderResult.checkoutUrl, reference });
 }
 
+
+// ---------------------------------------------------------------------------
+// WITHDRAWALS  (restored — user-initiated withdrawal request + payout accounts)
+// Bank codes come from GloPayment's Nigeria list (800...), NOT the old NekPay
+// list (NGR...) — those are not interchangeable. Admin approval/payout still
+// lives in admin.js (resource=admin) as a manual mark-paid step, not an
+// automated provider call, per GLOPAYMENT/WITHDRAWAL.js.
+// ---------------------------------------------------------------------------
+async function handleWithdrawals({ method, action, query, body, userId, res }) {
+  if (method === 'GET' && action === 'accounts') {
+    const { data, error } = await supabase
+      .from('withdrawal_accounts')
+      .select('id, bank_code, bank_name, provider_name, account_number, account_name, is_default')
+      .eq('user_id', userId)
+      .order('is_default', { ascending: false });
+    if (error) throw error;
+    return res.status(200).json({ success: true, data });
+  }
+
+  if (method === 'GET' && action === 'bank-list') {
+    return res.status(200).json({ success: true, data: GLOPAYMENT_NGN_BANKS });
+  }
+
+  if (method !== 'POST') return res.status(405).json({ success: false, message: 'Method Not Allowed' });
+
+  if (action === 'add-account') {
+    const { bank_code, account_number, account_name, is_default } = body;
+
+    if (!isValidGloPaymentNgnBankCode(bank_code)) {
+      throw new Error('Select a valid bank from the list');
+    }
+    if (!account_number || !account_name) throw new Error('Account number and account name are required');
+
+    if (is_default) {
+      await supabase.from('withdrawal_accounts').update({ is_default: false }).eq('user_id', userId);
+    }
+
+    const bankMeta = GLOPAYMENT_NGN_BANKS.find(b => b.code === bank_code);
+    const { data, error } = await supabase.from('withdrawal_accounts').insert({
+      user_id: userId,
+      bank_code,
+      bank_name: bankMeta.name,
+      provider_name: bankMeta.name,
+      account_number,
+      account_name,
+      is_default: !!is_default
+    }).select().single();
+
+    if (error) throw error;
+    return res.status(200).json({ success: true, data });
+  }
+
+  if (action === 'withdraw') {
+    const { amount, payout_account_id } = body;
+
+    if (!amount || isNaN(amount) || amount <= 0) throw new Error('Invalid withdrawal amount');
+    if (!payout_account_id) throw new Error('Payout account is required');
+
+    const { data: account, error: acctErr } = await supabase
+      .from('withdrawal_accounts')
+      .select('bank_code')
+      .eq('id', payout_account_id)
+      .eq('user_id', userId)
+      .single();
+
+    if (acctErr || !account) throw new Error('Payout account not found');
+    if (!isValidGloPaymentNgnBankCode(account.bank_code)) {
+      throw new Error('This payout account has an outdated bank code — please re-add it');
+    }
+
+    const { data, error } = await supabase.rpc('request_withdrawal_v2', {
+      p_user_id: userId,
+      p_amount: parseFloat(amount),
+      p_account_id: payout_account_id
+    });
+    if (error || !data.success) throw new Error(error?.message || data?.message || 'Withdrawal failed');
+
+    await supabase.from('notifications').insert({
+      user_id: userId,
+      title: "Withdrawal Pending",
+      message: `Your request for \u20a6${amount} is pending admin review.`,
+      type: "WITHDRAWAL"
+    });
+
+    return res.status(200).json({ success: true, message: 'Request submitted' });
+  }
+
+  return res.status(400).json({ success: false, message: 'Invalid action' });
+}
