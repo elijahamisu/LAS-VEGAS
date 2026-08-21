@@ -216,10 +216,29 @@
             }
         };
 
+        async function checkWithdrawalLock() {
+            try {
+                const res = await fetch('/api/admin?resource=settings&action=public');
+                const json = await res.json();
+                const row = (json.data || []).find(s => s.key === 'withdrawals_locked');
+                if (row?.value === 'true') {
+                    withdrawBtn.disabled = true;
+                    withdrawBtn.innerText = 'WITHDRAWALS TEMPORARILY PAUSED';
+                    showError('Withdrawals are temporarily paused. Please check back later.');
+                    return true;
+                }
+            } catch (e) {
+                console.error('Could not check withdrawal lock state:', e);
+            }
+            return false;
+        }
+
         (async function init() {
             const { data: { session: s } } = await supabase.auth.getSession();
             if (!s) return showError('Your session has expired. Please log in again.');
             session = s;
+            const locked = await checkWithdrawalLock();
+            if (locked) return;
             await loadAccounts();
         })();
     </script>
