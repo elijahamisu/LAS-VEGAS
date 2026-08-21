@@ -139,6 +139,32 @@ async function handleAdmin({ method, action, query, body, adminId, res }) {
       return res.status(200).json({ success: true, message: data.message || 'Withdrawal marked as paid.' });
     }
 
+    if (action === 'lock-withdrawal') {
+      const { id, reason } = body;
+      if (!id) throw new Error('Withdrawal ID is required');
+      if (!reason || !String(reason).trim()) throw new Error('A reason is required to lock a withdrawal');
+
+      const { data, error } = await supabase.rpc('admin_lock_withdrawal', {
+        p_admin_id: adminId,
+        p_withdrawal_id: id,
+        p_reason: String(reason).trim()
+      });
+      if (error || !data?.success) throw new Error(error?.message || data?.message || 'Could not lock withdrawal');
+      return res.status(200).json({ success: true, message: data.message || 'Withdrawal locked.' });
+    }
+
+    if (action === 'unlock-withdrawal') {
+      const { id } = body;
+      if (!id) throw new Error('Withdrawal ID is required');
+
+      const { data, error } = await supabase.rpc('admin_unlock_withdrawal', {
+        p_admin_id: adminId,
+        p_withdrawal_id: id
+      });
+      if (error || !data?.success) throw new Error(error?.message || data?.message || 'Could not unlock withdrawal');
+      return res.status(200).json({ success: true, message: data.message || 'Withdrawal unlocked.' });
+    }
+
     if (action === 'update-settings') {
       const { updates } = body;
       const { error } = await supabase.from('settings').upsert(updates);
