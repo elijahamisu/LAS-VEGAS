@@ -138,7 +138,10 @@
                     <button class="mobile-toggle" id="menuBtn">☰</button>
                     <h1 style="margin: 0; font-family: 'DM Serif Display', serif;">Withdrawals Audit</h1>
                 </div>
-                <button class="page-btn" onclick="location.reload()">🔄 Refresh</button>
+                <div style="display: flex; gap: 10px;">
+                    <button class="page-btn" id="lockToggleBtn" style="font-weight:800;">Loading…</button>
+                    <button class="page-btn" onclick="location.reload()">🔄 Refresh</button>
+                </div>
             </header>
 
             <div class="stats-grid">
@@ -247,12 +250,71 @@
                 if (!profile || !profile.is_admin) return window.location.href = 'login.html';
 
                 this.setupUI();
+                await this.fetchLockState();
                 await this.fetchStats();
                 await this.fetchWithdrawals();
             },
 
+            // ---------------------------------------------------------------
+            // Platform-wide withdrawal lock — a single toggle stored as the
+            // 'withdrawals_locked' key in public.settings ('true'/'false').
+            // When locked, /api/finance withdraw action rejects every new
+            // withdrawal request platform-wide, regardless of who submits it.
+            // ---------------------------------------------------------------
+            withdrawalsLocked: false,
+
+            async fetchLockState() {
+                try {
+                    const { data } = await this.callAdminApi('admin', null, 'settings', 'GET');
+                    const row = (data || []).find(s => s.key === 'withdrawals_locked');
+                    this.withdrawalsLocked = row?.value === 'true';
+                } catch (e) {
+                    console.error('Could not load withdrawal lock state:', e);
+                }
+                this.renderLockButton();
+            },
+
+            renderLockButton() {
+                const btn = document.getElementById('lockToggleBtn');
+                if (this.withdrawalsLocked) {
+                    btn.innerText = '🔒 WITHDRAWALS LOCKED — Tap to Unlock';
+                    btn.style.background = '#FFF0F0';
+                    btn.style.color = '#D00000';
+                    btn.style.borderColor = '#D00000';
+                } else {
+                    btn.innerText = '🔓 Withdrawals Open — Tap to Lock';
+                    btn.style.background = '#F0FFF4';
+                    btn.style.color = 'var(--secondary-green)';
+                    btn.style.borderColor = 'var(--secondary-green)';
+                }
+            },
+
+            async toggleWithdrawalLock() {
+                const next = !this.withdrawalsLocked;
+                const label = next ? 'LOCK' : 'UNLOCK';
+                if (!confirm(`${label} withdrawals platform-wide? ${next ? 'Users will be unable to submit new withdrawal requests until you unlock this again.' : 'Users will be able to submit new withdrawal requests again.'}`)) return;
+
+                const btn = document.getElementById('lockToggleBtn');
+                btn.disabled = true;
+                btn.innerText = 'Saving…';
+
+                try {
+                    await this.callAdminApi('update', {
+                        updates: [{ key: 'withdrawals_locked', value: next ? 'true' : 'false' }]
+                    }, 'settings');
+                    this.withdrawalsLocked = next;
+                    this.renderLockButton();
+                } catch (e) {
+                    alert(`Could not update withdrawal lock: ${e.message}`);
+                    this.renderLockButton();
+                } finally {
+                    btn.disabled = false;
+                }
+            },
+
             setupUI() {
                 document.getElementById('menuBtn').onclick = () => document.getElementById('adminSidebar').classList.toggle('active');
+                document.getElementById('lockToggleBtn').onclick = () => this.toggleWithdrawalLock();
                 document.getElementById('logoutBtn').onclick = () => supabase.auth.signOut().then(() => window.location.href = 'login.html');
                 document.getElementById('modal-close').onclick = () => document.getElementById('review-modal').style.display = 'none';
 
@@ -330,7 +392,7 @@
                         <td class="neg">${this.formatCurrency(w.fee)}</td>
                         <td class="green" style="font-weight:700;">${this.formatCurrency(w.net_amount)}</td>
                         <td style="font-size:11px;">${w.withdrawal_accounts?.provider_name || 'N/A'}</td>
-                        <td><span class="status-badge status-${w.status}">${w.status}</span>${w.is_locked ? ' 🔒' : ''}</td>
+                        <td><span class="status-badge status-${w.status}">${w.status}</span></td>
                         <td><button class="page-btn" style="padding:5px 12px; font-size:10px;" onclick="window.WithManager.showReview('${w.id}')">REVIEW</button></td>
                     </tr>
                 `).join('');
@@ -340,7 +402,7 @@
                         <div class="card-row"><span>User</span> <b class="user-link">${w.profiles?.full_name}</b></div>
                         <div class="card-row"><span>Ref</span> <b>WD-${w.id.substring(0,6).toUpperCase()}</b></div>
                         <div class="card-row"><span>Net Payout</span> <b class="green">${this.formatCurrency(w.net_amount)}</b></div>
-                        <div class="card-row"><span>Status</span> <span class="status-badge status-${w.status}">${w.status}</span>${w.is_locked ? ' 🔒' : ''}</div>
+                        <div class="card-row"><span>Status</span> <span class="status-badge status-${w.status}">${w.status}</span></div>
                         <button class="page-btn" style="width:100%; margin-top:10px;" onclick="window.WithManager.showReview('${w.id}')">AUDIT & ACTION</button>
                     </div>
                 `).join('');
@@ -354,15 +416,8 @@
 
                 const content = document.getElementById('modal-content');
                 const actions = document.getElementById('action-area');
-                const isLocked = !!w.is_locked;
-                const isPaid = String(w.status).toUpperCase() === 'PAID';
 
                 content.innerHTML = `
-                    ${isLocked ? `
-                        <div style="background:#FFF0F0; border:1px solid #ffc9c9; color:#D00000; padding:12px 14px; border-radius:12px; margin-bottom:16px; font-size:12.5px; line-height:1.5;">
-                            🔒 <strong>LOCKED</strong> — ${w.lock_reason ? w.lock_reason : 'No reason given'}
-                        </div>
-                    ` : ''}
                     <div class="detail-row"><span class="detail-label">Withdrawal Ref</span><span class="detail-value">WD-${w.id.toUpperCase()}</span></div>
                     <div class="detail-row"><span class="detail-label">Requested Amount</span><span class="detail-value">${this.formatCurrency(w.amount)}</span></div>
                     <div class="detail-row"><span class="detail-label">Transaction Fee (15%)</span><span class="detail-value neg">${this.formatCurrency(w.fee)}</span></div>
@@ -377,34 +432,22 @@
                     <div class="detail-row"><span class="detail-label">Request Date</span><span class="detail-value">${new Date(w.created_at).toLocaleString()}</span></div>
                 `;
 
-                let lifecycleButtons = '';
-                if (isLocked) {
-                    lifecycleButtons = `<p style="text-align:center; color:#D00000; margin-top:10px; font-size:12px;">Unlock this withdrawal before it can be approved, rejected, or paid.</p>`;
-                } else if (String(w.status).toUpperCase() === 'PENDING_APPROVAL' || String(w.status).toUpperCase() === 'PENDING') {
-                    lifecycleButtons = `
+                if (String(w.status).toUpperCase() === 'PENDING_APPROVAL' || String(w.status).toUpperCase() === 'PENDING') {
+                    actions.innerHTML = `
                         <div class="btn-group">
                             <button class="btn btn-reject" onclick="window.WithManager.handleReject('${w.id}')">REJECT</button>
                             <button class="btn btn-approve" onclick="window.WithManager.handleApprove('${w.id}')">APPROVE</button>
                         </div>
                     `;
                 } else if (String(w.status).toUpperCase() === 'APPROVED') {
-                    lifecycleButtons = `
+                    actions.innerHTML = `
                         <div class="btn-group">
                             <button class="btn btn-payout" onclick="window.WithManager.handlePayout('${w.id}')">MARK AS PAID</button>
                         </div>
                     `;
-                } else if (!isPaid) {
-                    lifecycleButtons = `<p style="text-align:center; color:#999; margin-top:20px; font-size:12px;">Lifecycle completed. No further actions available.</p>`;
+                } else {
+                    actions.innerHTML = `<p style="text-align:center; color:#999; margin-top:20px; font-size:12px;">Lifecycle completed. No further actions available.</p>`;
                 }
-
-                const lockButton = isPaid ? '' : `
-                    <button class="btn" style="width:100%; margin-top:10px; background:${isLocked ? '#0056D2' : '#555'}; color:white;"
-                        onclick="window.WithManager.${isLocked ? 'handleUnlock' : 'handleLock'}('${w.id}')">
-                        ${isLocked ? '🔓 UNLOCK WITHDRAWAL' : '🔒 LOCK WITHDRAWAL'}
-                    </button>
-                `;
-
-                actions.innerHTML = lifecycleButtons + lockButton;
 
                 document.getElementById('review-modal').style.display = 'flex';
             },
@@ -419,13 +462,11 @@
                 return { 'Authorization': `Bearer ${session.access_token}`, 'Content-Type': 'application/json' };
             },
 
-            async callAdminApi(action, body) {
+            async callAdminApi(action, body, resource = 'admin', method = 'POST') {
                 const headers = await this.getAuthHeader();
-                const res = await fetch(`/api/admin?resource=admin&action=${action}`, {
-                    method: 'POST',
-                    headers,
-                    body: JSON.stringify(body)
-                });
+                const opts = { method, headers };
+                if (method !== 'GET') opts.body = JSON.stringify(body);
+                const res = await fetch(`/api/admin?resource=${resource}&action=${action}`, opts);
                 const result = await res.json();
                 if (!res.ok || !result.success) {
                     throw new Error(result.message || 'Request failed');
@@ -492,46 +533,6 @@
                     console.error('Mark withdrawal paid failed:', e);
                     btn.disabled = false;
                     btn.innerText = 'MARK AS PAID';
-                }
-            },
-
-            async handleLock(id) {
-                const reason = prompt('Why are you locking this withdrawal? (e.g. "bank name not confirmed", "suspicious activity")');
-                if (reason === null) return;
-                if (!reason.trim()) return alert('A reason is required to lock a withdrawal.');
-
-                const btn = event.target;
-                btn.disabled = true;
-                btn.innerText = 'LOCKING...';
-
-                try {
-                    const result = await this.callAdminApi('lock-withdrawal', { id, reason: reason.trim() });
-                    alert(result.message || 'Withdrawal locked.');
-                    location.reload();
-                } catch (e) {
-                    alert(`Could not lock withdrawal: ${e.message}`);
-                    console.error('Lock withdrawal failed:', e);
-                    btn.disabled = false;
-                    btn.innerText = '🔒 LOCK WITHDRAWAL';
-                }
-            },
-
-            async handleUnlock(id) {
-                if (!confirm('Unlock this withdrawal? It can then be approved, rejected, or paid again.')) return;
-
-                const btn = event.target;
-                btn.disabled = true;
-                btn.innerText = 'UNLOCKING...';
-
-                try {
-                    const result = await this.callAdminApi('unlock-withdrawal', { id });
-                    alert(result.message || 'Withdrawal unlocked.');
-                    location.reload();
-                } catch (e) {
-                    alert(`Could not unlock withdrawal: ${e.message}`);
-                    console.error('Unlock withdrawal failed:', e);
-                    btn.disabled = false;
-                    btn.innerText = '🔓 UNLOCK WITHDRAWAL';
                 }
             },
 
