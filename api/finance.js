@@ -397,6 +397,20 @@ async function handleWithdrawals({ method, action, query, body, userId, res }) {
   if (action === 'withdraw') {
     const { amount, payout_account_id } = body;
 
+    // Platform-wide withdrawal lock — a single admin toggle stored as the
+    // 'withdrawals_locked' key in public.settings. This is the actual
+    // enforcement point; the admin UI toggle is just a convenient front end
+    // for setting this value.
+    const { data: lockSetting } = await supabase
+      .from('settings')
+      .select('value')
+      .eq('key', 'withdrawals_locked')
+      .maybeSingle();
+
+    if (lockSetting?.value === 'true') {
+      throw new Error('Withdrawals are temporarily paused platform-wide. Please try again later.');
+    }
+
     if (!amount || isNaN(amount) || amount <= 0) throw new Error('Invalid withdrawal amount');
     if (!payout_account_id) throw new Error('Payout account is required');
 
