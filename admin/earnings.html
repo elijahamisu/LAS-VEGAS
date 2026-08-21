@@ -101,7 +101,7 @@
         }
 
         .skeleton { height: 20px; background: #eee; border-radius: 5px; animation: pulse 1.5s infinite; }
-        @keyframes pulse { 0.6 { opacity: 0.6; } 1 { opacity: 1; } }
+        @keyframes pulse { 0% { opacity: 0.6; } 50% { opacity: 1; } 100% { opacity: 0.6; } }
     </style>
 </head>
 <body>
@@ -137,6 +137,10 @@
                 <div class="stat-card">
                     <span class="stat-label">Total Earnings</span>
                     <span class="stat-value green" id="stat-total">₦0.00</span>
+                </div>
+                <div class="stat-card">
+                    <span class="stat-label">Today's Earnings</span>
+                    <span class="stat-value green" id="stat-today">₦0.00</span>
                 </div>
                 <div class="stat-card">
                     <span class="stat-label">Investment Profits</span>
@@ -239,6 +243,7 @@
 
                 this.setupUI();
                 await this.fetchStats();
+                await this.fetchTodayStat();
                 await this.fetchEarnings();
             },
 
@@ -258,7 +263,10 @@
             },
 
             async fetchStats() {
-                const { data: sums } = await supabase.from('earnings').select('amount, type');
+                // Only count CREDITED earnings — a REVERSED row shouldn't
+                // still count toward totals, otherwise every stat card here
+                // silently over-reports the moment anything gets reversed.
+                const { data: sums } = await supabase.from('earnings').select('amount, type').eq('status', 'CREDITED');
                 if (!sums) return;
 
                 const totals = { total: 0, invest: 0, ref: 0, checkin: 0 };
@@ -274,6 +282,24 @@
                 document.getElementById('stat-invest').innerText = this.formatCurrency(totals.invest);
                 document.getElementById('stat-ref').innerText = this.formatCurrency(totals.ref);
                 document.getElementById('stat-checkin').innerText = this.formatCurrency(totals.checkin);
+            },
+
+            async fetchTodayStat() {
+                // earning_date is a plain 'date' column (not a timestamp), so
+                // this matches it directly against today's local date — the
+                // same field the date filter above already uses, kept
+                // consistent rather than comparing against created_at.
+                const today = new Date();
+                const todayIso = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`;
+
+                const { data: sums } = await supabase
+                    .from('earnings')
+                    .select('amount')
+                    .eq('status', 'CREDITED')
+                    .eq('earning_date', todayIso);
+
+                const total = (sums || []).reduce((sum, e) => sum + Number(e.amount), 0);
+                document.getElementById('stat-today').innerText = this.formatCurrency(total);
             },
 
             async fetchEarnings() {
